@@ -35,7 +35,6 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
        }
 }
 
-
 class IdentityAPI {
     let baseUrl = "https://finix.sandbox-payments-api.com/identities"
     

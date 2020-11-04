@@ -7,13 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD51AFB9204008FA782 /* AppDelegate.swift */; };
-		607FACD81AFB9204008FA782 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACD71AFB9204008FA782 /* ViewController.swift */; };
-		607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 607FACD91AFB9204008FA782 /* Main.storyboard */; };
-		607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDC1AFB9204008FA782 /* Images.xcassets */; };
-		607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 607FACDE1AFB9204008FA782 /* LaunchScreen.xib */; };
 		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
-		90488E3C48187DEB75393E7E /* Pods_PayTheory_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43F0DA42429681E09C812D82 /* Pods_PayTheory_Example.framework */; };
+		73D983F65CBD5B1350D39F8B /* Pods_PayTheory_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 662216D0F4A82C6F2C164E3D /* Pods_PayTheory_Example.framework */; };
+		9386AE342552ED63009DEE33 /* PayTheory_ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */; };
+		9386AE362552ED63009DEE33 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9386AE352552ED63009DEE33 /* ContentView.swift */; };
+		9386AE382552ED68009DEE33 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9386AE372552ED68009DEE33 /* Assets.xcassets */; };
+		9386AE3B2552ED68009DEE33 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9386AE3A2552ED68009DEE33 /* Preview Assets.xcassets */; };
 		F214BDAB6FA08472F13EAA18 /* Pods_PayTheory_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E3096C4C08782731BA16C18 /* Pods_PayTheory_Tests.framework */; };
 /* End PBXBuildFile section */
 
@@ -31,22 +30,22 @@
 		0E2B80AC6DD70F09BE605CFC /* Pods-PayTheory_Tests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PayTheory_Tests.release.xcconfig"; path = "Target Support Files/Pods-PayTheory_Tests/Pods-PayTheory_Tests.release.xcconfig"; sourceTree = "<group>"; };
 		2346F69CE2A2F650709B18CE /* Pods-PayTheory_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PayTheory_Tests.debug.xcconfig"; path = "Target Support Files/Pods-PayTheory_Tests/Pods-PayTheory_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		3A8F519FFB7222CFDEBA0CE6 /* PayTheory.podspec */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = PayTheory.podspec; path = ../PayTheory.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		43F0DA42429681E09C812D82 /* Pods_PayTheory_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PayTheory_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		50805897EFEA62C2C6584DF1 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		607FACD01AFB9204008FA782 /* PayTheory_Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PayTheory_Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		607FACD71AFB9204008FA782 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		607FACDA1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		607FACDC1AFB9204008FA782 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		607FACDF1AFB9204008FA782 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* PayTheory_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PayTheory_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tests.swift; sourceTree = "<group>"; };
+		662216D0F4A82C6F2C164E3D /* Pods_PayTheory_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PayTheory_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9386AE312552ED63009DEE33 /* PayTheory Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PayTheory Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayTheory_ExampleApp.swift; sourceTree = "<group>"; };
+		9386AE352552ED63009DEE33 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		9386AE372552ED68009DEE33 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		9386AE3A2552ED68009DEE33 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		9386AE3C2552ED68009DEE33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		93E7AFBA785C86AA4B763044 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
-		9BDDE5B75F283F8406281A73 /* Pods-PayTheory_Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PayTheory_Example.release.xcconfig"; path = "Target Support Files/Pods-PayTheory_Example/Pods-PayTheory_Example.release.xcconfig"; sourceTree = "<group>"; };
 		9E3096C4C08782731BA16C18 /* Pods_PayTheory_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PayTheory_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F910AA9BD7E8B420B7F689F5 /* Pods-PayTheory_Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PayTheory_Example.debug.xcconfig"; path = "Target Support Files/Pods-PayTheory_Example/Pods-PayTheory_Example.debug.xcconfig"; sourceTree = "<group>"; };
+		B51D9BAC699F6146139F713C /* Pods-PayTheory Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PayTheory Example.debug.xcconfig"; path = "Target Support Files/Pods-PayTheory Example/Pods-PayTheory Example.debug.xcconfig"; sourceTree = "<group>"; };
+		B93CFF44EA1609795E10B128 /* Pods-PayTheory Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PayTheory Example.release.xcconfig"; path = "Target Support Files/Pods-PayTheory Example/Pods-PayTheory Example.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,7 +53,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				90488E3C48187DEB75393E7E /* Pods_PayTheory_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -66,14 +64,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9386AE2E2552ED63009DEE33 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				73D983F65CBD5B1350D39F8B /* Pods_PayTheory_Example.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		06F5FC1A578DF8E1B0CDC900 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				43F0DA42429681E09C812D82 /* Pods_PayTheory_Example.framework */,
 				9E3096C4C08782731BA16C18 /* Pods_PayTheory_Tests.framework */,
+				662216D0F4A82C6F2C164E3D /* Pods_PayTheory_Example.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -82,8 +88,8 @@
 			isa = PBXGroup;
 			children = (
 				607FACF51AFB993E008FA782 /* Podspec Metadata */,
-				607FACD21AFB9204008FA782 /* Example for PayTheory */,
 				607FACE81AFB9204008FA782 /* Tests */,
+				9386AE322552ED63009DEE33 /* PayTheory Example */,
 				607FACD11AFB9204008FA782 /* Products */,
 				B4F54B025DAB63F48B36571B /* Pods */,
 				06F5FC1A578DF8E1B0CDC900 /* Frameworks */,
@@ -95,30 +101,9 @@
 			children = (
 				607FACD01AFB9204008FA782 /* PayTheory_Example.app */,
 				607FACE51AFB9204008FA782 /* PayTheory_Tests.xctest */,
+				9386AE312552ED63009DEE33 /* PayTheory Example.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		607FACD21AFB9204008FA782 /* Example for PayTheory */ = {
-			isa = PBXGroup;
-			children = (
-				607FACD51AFB9204008FA782 /* AppDelegate.swift */,
-				607FACD71AFB9204008FA782 /* ViewController.swift */,
-				607FACD91AFB9204008FA782 /* Main.storyboard */,
-				607FACDC1AFB9204008FA782 /* Images.xcassets */,
-				607FACDE1AFB9204008FA782 /* LaunchScreen.xib */,
-				607FACD31AFB9204008FA782 /* Supporting Files */,
-			);
-			name = "Example for PayTheory";
-			path = PayTheory;
-			sourceTree = "<group>";
-		};
-		607FACD31AFB9204008FA782 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				607FACD41AFB9204008FA782 /* Info.plist */,
-			);
-			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		607FACE81AFB9204008FA782 /* Tests */ = {
@@ -148,13 +133,33 @@
 			name = "Podspec Metadata";
 			sourceTree = "<group>";
 		};
+		9386AE322552ED63009DEE33 /* PayTheory Example */ = {
+			isa = PBXGroup;
+			children = (
+				9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */,
+				9386AE352552ED63009DEE33 /* ContentView.swift */,
+				9386AE372552ED68009DEE33 /* Assets.xcassets */,
+				9386AE3C2552ED68009DEE33 /* Info.plist */,
+				9386AE392552ED68009DEE33 /* Preview Content */,
+			);
+			path = "PayTheory Example";
+			sourceTree = "<group>";
+		};
+		9386AE392552ED68009DEE33 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				9386AE3A2552ED68009DEE33 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
 		B4F54B025DAB63F48B36571B /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				F910AA9BD7E8B420B7F689F5 /* Pods-PayTheory_Example.debug.xcconfig */,
-				9BDDE5B75F283F8406281A73 /* Pods-PayTheory_Example.release.xcconfig */,
 				2346F69CE2A2F650709B18CE /* Pods-PayTheory_Tests.debug.xcconfig */,
 				0E2B80AC6DD70F09BE605CFC /* Pods-PayTheory_Tests.release.xcconfig */,
+				B51D9BAC699F6146139F713C /* Pods-PayTheory Example.debug.xcconfig */,
+				B93CFF44EA1609795E10B128 /* Pods-PayTheory Example.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -166,11 +171,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 607FACEF1AFB9204008FA782 /* Build configuration list for PBXNativeTarget "PayTheory_Example" */;
 			buildPhases = (
-				46DB68D7F26E011907DB94B4 /* [CP] Check Pods Manifest.lock */,
 				607FACCC1AFB9204008FA782 /* Sources */,
 				607FACCD1AFB9204008FA782 /* Frameworks */,
 				607FACCE1AFB9204008FA782 /* Resources */,
-				AD0B456F1C6363FFC3260916 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -200,13 +203,32 @@
 			productReference = 607FACE51AFB9204008FA782 /* PayTheory_Tests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		9386AE302552ED63009DEE33 /* PayTheory Example */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9386AE3F2552ED68009DEE33 /* Build configuration list for PBXNativeTarget "PayTheory Example" */;
+			buildPhases = (
+				4A52FFC0D93208D8D4D4EA0A /* [CP] Check Pods Manifest.lock */,
+				9386AE2D2552ED63009DEE33 /* Sources */,
+				9386AE2E2552ED63009DEE33 /* Frameworks */,
+				9386AE2F2552ED63009DEE33 /* Resources */,
+				56854A9E19F1147B6874FF26 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "PayTheory Example";
+			productName = "PayTheory Example";
+			productReference = 9386AE312552ED63009DEE33 /* PayTheory Example.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		607FACC81AFB9204008FA782 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0830;
+				LastSwiftUpdateCheck = 1210;
 				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = CocoaPods;
 				TargetAttributes = {
@@ -218,6 +240,11 @@
 						CreatedOnToolsVersion = 6.3.1;
 						LastSwiftMigration = 1210;
 						TestTargetID = 607FACCF1AFB9204008FA782;
+					};
+					9386AE302552ED63009DEE33 = {
+						CreatedOnToolsVersion = 12.1;
+						DevelopmentTeam = SFM8A4Z9K3;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -237,6 +264,7 @@
 			targets = (
 				607FACCF1AFB9204008FA782 /* PayTheory_Example */,
 				607FACE41AFB9204008FA782 /* PayTheory_Tests */,
+				9386AE302552ED63009DEE33 /* PayTheory Example */,
 			);
 		};
 /* End PBXProject section */
@@ -246,9 +274,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				607FACDB1AFB9204008FA782 /* Main.storyboard in Resources */,
-				607FACE01AFB9204008FA782 /* LaunchScreen.xib in Resources */,
-				607FACDD1AFB9204008FA782 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -259,10 +284,19 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		9386AE2F2552ED63009DEE33 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9386AE3B2552ED68009DEE33 /* Preview Assets.xcassets in Resources */,
+				9386AE382552ED68009DEE33 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		46DB68D7F26E011907DB94B4 /* [CP] Check Pods Manifest.lock */ = {
+		4A52FFC0D93208D8D4D4EA0A /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -277,11 +311,35 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-PayTheory_Example-checkManifestLockResult.txt",
+				"$(DERIVED_FILE_DIR)/Pods-PayTheory Example-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		56854A9E19F1147B6874FF26 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PayTheory Example/Pods-PayTheory Example-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/AWSCore/AWSCore.framework",
+				"${BUILT_PRODUCTS_DIR}/AWSKMS/AWSKMS.framework",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/PayTheory/PayTheory.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AWSCore.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AWSKMS.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PayTheory.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PayTheory Example/Pods-PayTheory Example-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		603CD6790F1F5835F1CB2658 /* [CP] Check Pods Manifest.lock */ = {
@@ -306,30 +364,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AD0B456F1C6363FFC3260916 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-PayTheory_Example/Pods-PayTheory_Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/AWSCore/AWSCore.framework",
-				"${BUILT_PRODUCTS_DIR}/AWSKMS/AWSKMS.framework",
-				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
-				"${BUILT_PRODUCTS_DIR}/PayTheory/PayTheory.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AWSCore.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AWSKMS.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PayTheory.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PayTheory_Example/Pods-PayTheory_Example-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -337,8 +371,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				607FACD81AFB9204008FA782 /* ViewController.swift in Sources */,
-				607FACD61AFB9204008FA782 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -347,6 +379,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				607FACEC1AFB9204008FA782 /* Tests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9386AE2D2552ED63009DEE33 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9386AE362552ED63009DEE33 /* ContentView.swift in Sources */,
+				9386AE342552ED63009DEE33 /* PayTheory_ExampleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,25 +400,6 @@
 			targetProxy = 607FACE61AFB9204008FA782 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		607FACD91AFB9204008FA782 /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				607FACDA1AFB9204008FA782 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		607FACDE1AFB9204008FA782 /* LaunchScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				607FACDF1AFB9204008FA782 /* Base */,
-			);
-			name = LaunchScreen.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		607FACED1AFB9204008FA782 /* Debug */ = {
@@ -489,7 +511,6 @@
 		};
 		607FACF01AFB9204008FA782 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F910AA9BD7E8B420B7F689F5 /* Pods-PayTheory_Example.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = PayTheory/Info.plist;
@@ -505,7 +526,6 @@
 		};
 		607FACF11AFB9204008FA782 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9BDDE5B75F283F8406281A73 /* Pods-PayTheory_Example.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = PayTheory/Info.plist;
@@ -559,6 +579,65 @@
 			};
 			name = Release;
 		};
+		9386AE3D2552ED68009DEE33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B51D9BAC699F6146139F713C /* Pods-PayTheory Example.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_ASSET_PATHS = "\"PayTheory Example/Preview Content\"";
+				DEVELOPMENT_TEAM = SFM8A4Z9K3;
+				ENABLE_PREVIEWS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = "PayTheory Example/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.austinzani.PayTheory-Example";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		9386AE3E2552ED68009DEE33 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = B93CFF44EA1609795E10B128 /* Pods-PayTheory Example.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"PayTheory Example/Preview Content\"";
+				DEVELOPMENT_TEAM = SFM8A4Z9K3;
+				ENABLE_PREVIEWS = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = "PayTheory Example/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.austinzani.PayTheory-Example";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -585,6 +664,15 @@
 			buildConfigurations = (
 				607FACF31AFB9204008FA782 /* Debug */,
 				607FACF41AFB9204008FA782 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9386AE3F2552ED68009DEE33 /* Build configuration list for PBXNativeTarget "PayTheory Example" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9386AE3D2552ED68009DEE33 /* Debug */,
+				9386AE3E2552ED68009DEE33 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -1,6 +1,6 @@
 use_frameworks!
 
-target 'PayTheory_Example' do
+target 'PayTheory Example' do
   pod 'PayTheory', :path => '../'
 
   target 'PayTheory_Tests' do
