@@ -7,15 +7,28 @@
 
 import Foundation
 
-class Authorization: ObservableObject, Codable {
+class Authorization: ObservableObject, Codable, Equatable {
+    static func == (lhs: Authorization, rhs: Authorization) -> Bool {
+        if lhs.source == rhs.source &&
+        lhs.merchant_identity == rhs.merchant_identity &&
+        lhs.currency == rhs.currency &&
+        lhs.amount == rhs.amount &&
+        lhs.processor == rhs.processor {
+            return true
+        }
+        
+        return false
+    }
+    
     var source = ""
     var merchant_identity = ""
     var currency = "USD"
-    var amount = ""
+    @Published var amount = ""
     var processor: String?
+    var idempotency_id: String
     
     enum CodingKeys: CodingKey {
-        case source, merchant_identity, currency, amount, processor, tags
+        case source, merchant_identity, currency, amount, processor, tags, idempotency_id
     }
     
     func encode(to encoder: Encoder) throws {
@@ -25,6 +38,7 @@ class Authorization: ObservableObject, Codable {
         try container.encode(currency, forKey: .currency)
         try container.encode(amount, forKey: .amount)
         try container.encode(processor, forKey: .processor)
+        try container.encode(idempotency_id, forKey: .idempotency_id)
     }
     
     required init(from decoder: Decoder) throws {
@@ -35,46 +49,29 @@ class Authorization: ObservableObject, Codable {
         currency = try container.decode(String.self, forKey: .currency)
         amount = try container.decode(String.self, forKey: .amount)
         processor = try container.decodeIfPresent(String.self, forKey: .processor) ?? nil
+        idempotency_id = try container.decode(String.self, forKey: .idempotency_id)
     }
     
-    var hasRequiredFields: Bool {
-        if source.isEmpty || merchant_identity.isEmpty || amount.isEmpty || currency.isEmpty {
-            return false
-        }
-        return true
-    }
     
-    init(merchant_identity: String, source: String) {
-        self.merchant_identity = merchant_identity
-        self.source = source
-    }
-    
-    init(merchant_identity: String, amount: String, source: String) {
+    init(merchant_identity: String, amount: String, source: String, idempotency_id: String) {
         self.merchant_identity = merchant_identity
         self.amount = amount
         self.source = source
+        self.idempotency_id = idempotency_id
     }
 }
 
-class CaptureAuth: ObservableObject, Codable {
+class CaptureAuth: Codable, Equatable {
+    static func == (lhs: CaptureAuth, rhs: CaptureAuth) -> Bool {
+        if lhs.capture_amount == rhs.capture_amount &&
+            lhs.fee == rhs.fee {
+            return true
+        }
+        return false
+    }
+    
     var fee: Int
     var capture_amount: Int
-    
-    enum CodingKeys: CodingKey {
-        case fee, capture_amount
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(capture_amount, forKey: .capture_amount)
-        try container.encode(fee, forKey: .fee)
-    }
-    
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        fee = try container.decode(Int.self, forKey: .fee)
-        capture_amount = try container.decode(Int.self, forKey: .capture_amount)
-    }
     
     init(fee: Int, capture_amount: Int) {
         self.fee = fee
@@ -82,23 +79,62 @@ class CaptureAuth: ObservableObject, Codable {
     }
 }
 
-public class AuthorizationResponse: Codable {
-    var id: String
-    var application: String
-    var amount: Double
-    var state: String
-    var currency: String
+public class AuthorizationResponse: Codable, Equatable {
+    public static func == (lhs: AuthorizationResponse, rhs: AuthorizationResponse) -> Bool {
+        if lhs.id == rhs.id &&
+        lhs.application == rhs.application &&
+        lhs.amount == rhs.amount &&
+        lhs.state == rhs.state &&
+        lhs.currency == rhs.currency &&
+        lhs.transfer == rhs.transfer &&
+        lhs.updated_at == rhs.updated_at &&
+        lhs.source == rhs.source &&
+        lhs.merchant_identity == rhs.merchant_identity &&
+        lhs.is_void == rhs.is_void &&
+        lhs.void_state == rhs.void_state &&
+        lhs.expires_at == rhs.expires_at &&
+            lhs.created_at == rhs.created_at  {
+            return true
+        }
+        
+        return false
+    }
+    
+    var id = ""
+    var application = ""
+    var amount: Double = 0
+    var state = ""
+    var currency = ""
     var transfer: String?
-    var updated_at: String
-    var source: String
-    var merchant_identity: String
-    var is_void: Bool
-    var void_state: String
-    var expires_at: String
-    var created_at: String
+    var updated_at = ""
+    var source = ""
+    var merchant_identity = ""
+    var is_void: Bool = false
+    var void_state = ""
+    var expires_at = ""
+    var created_at = ""
+    
+    init() {
+        
+    }
 }
 
-public class CompletionResponse: Codable {
+public class CompletionResponse: Equatable {
+    public static func == (lhs: CompletionResponse, rhs: CompletionResponse) -> Bool {
+        if lhs.receipt_number == rhs.receipt_number &&
+        lhs.last_four == rhs.last_four &&
+        lhs.brand == rhs.brand &&
+        lhs.created_at == rhs.created_at &&
+        lhs.amount == rhs.amount &&
+        lhs.convenience_fee == rhs.convenience_fee &&
+            lhs.state == rhs.state {
+            return true
+        }
+        
+        return false
+    }
+    
+    
     public var receipt_number: String
     public var last_four: String
     public var brand: String
@@ -118,7 +154,19 @@ public class CompletionResponse: Codable {
     }
 }
 
-public class TokenizationResponse: Codable {
+public class TokenizationResponse: Equatable {
+    public static func == (lhs: TokenizationResponse, rhs: TokenizationResponse) -> Bool {
+        if lhs.receipt_number == rhs.receipt_number &&
+        lhs.first_six == rhs.first_six &&
+        lhs.brand == rhs.brand &&
+        lhs.amount == rhs.amount &&
+        lhs.convenience_fee == rhs.convenience_fee {
+            return true
+        }
+        
+        return false
+    }
+    
     public var first_six: String
     public var brand: String
     public var receipt_number: String
@@ -134,7 +182,19 @@ public class TokenizationResponse: Codable {
     }
 }
 
-public class FailureResponse: Codable, Error {
+public class FailureResponse: Error, Equatable {
+    public static func == (lhs: FailureResponse, rhs: FailureResponse) -> Bool {
+        if lhs.receipt_number == rhs.receipt_number &&
+        lhs.last_four == rhs.last_four &&
+        lhs.brand == rhs.brand &&
+        lhs.state == rhs.state &&
+        lhs.type == rhs.type {
+            return true
+        }
+        
+        return false
+    }
+    
     public var receipt_number = ""
     public var last_four = ""
     public var brand = ""
@@ -151,4 +211,105 @@ public class FailureResponse: Codable, Error {
         self.last_four = last_four
         self.brand = brand
     }
+}
+
+class Challenge: Codable, Equatable {
+    static func == (lhs: Challenge, rhs: Challenge) -> Bool {
+        if lhs.challenge == rhs.challenge { return true }
+        return false
+    }
+    
+    var challenge = ""
+    
+    init() {
+        
+    }
+}
+
+class Attestation: Codable, Equatable {
+    static func == (lhs: Attestation, rhs: Attestation) -> Bool {
+        if lhs.attestation == rhs.attestation &&
+            lhs.type == rhs.type &&
+            lhs.nonce == rhs.nonce { return true }
+        return false
+    }
+    
+    var attestation: String
+    var type = "ios"
+    var nonce: String
+    var key: String
+    var currency: String
+    var amount: Int
+    
+    init(attestation: String, nonce: String, key: String, currency: String, amount: Int) {
+        self.attestation = attestation
+        self.nonce = nonce
+        self.key = key
+        self.amount = amount
+        self.currency = currency
+    }
+}
+
+class Idempotency: Codable, Equatable {
+    static func == (lhs: Idempotency, rhs: Idempotency) -> Bool {
+        if lhs.token == rhs.token &&
+            lhs.idempotency == rhs.idempotency &&
+            lhs.payment == rhs.payment {
+            return true
+        }
+        return false
+    }
+    
+    var idempotency: String
+    var payment: Payment
+    var token: String
+    
+    init(idempotency: String, payment: Payment, token: String) {
+        self.idempotency = idempotency
+        self.payment = payment
+        self.token = token
+    }
+    
+}
+
+class Payment: Codable, Equatable {
+    static func == (lhs: Payment, rhs: Payment) -> Bool {
+        if lhs.amount == rhs.amount &&
+            lhs.convenience_fee == rhs.convenience_fee &&
+            lhs.currency == rhs.currency &&
+            lhs.merchant == rhs.merchant {
+            return true
+        }
+        return false
+    }
+    
+    var currency: String
+    var amount: Int
+    var merchant: String
+    var convenience_fee: Int
+    
+    init(currency: String, amount: Int, convenience_fee: Int, merchant: String) {
+        self.amount = amount
+        self.currency = currency
+        self.convenience_fee = convenience_fee
+        self.merchant = merchant
+    }
+}
+
+class AWSResponse: Codable, Equatable {
+    static func == (lhs: AWSResponse, rhs: AWSResponse) -> Bool {
+        if lhs.response == rhs.response && lhs.signature == rhs.signature && lhs.credId == rhs.credId {return true}
+        return false
+    }
+    
+    var response: String
+    var signature: String
+    var credId: String
+    
+    init(response: String, signature: String, credId: String) {
+        self.signature = signature
+        self.response = response
+        self.credId = credId
+    }
+        
 }

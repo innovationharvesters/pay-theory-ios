@@ -7,7 +7,6 @@
 
 import Foundation
 import Alamofire
-import AWSKMS
 
 enum ResponseError: Error {
     case NoData
@@ -15,6 +14,7 @@ enum ResponseError: Error {
 }
 
 func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escaping (Result<T, Error>) -> Void) {
+    debugPrint(response)
     guard response.error == nil else {
             print("Call failed")
         completion(.failure(response.error!))
@@ -38,11 +38,11 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
 class IdentityAPI {
     let baseUrl = "https://finix.sandbox-payments-api.com/identities"
     
-    func create(auth: String, identity: Identity, completion: @escaping (Result<IdentityResponse, Error>) -> Void) {
+    func create(auth: String, identity: Buyer, completion: @escaping (Result<IdentityResponse, Error>) -> Void) {
     let body = IdentityBody(entity: identity)
     
     let headers: HTTPHeaders = [
-        "Authorization": auth,
+        "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
@@ -56,7 +56,7 @@ class IdentityAPI {
         
         let url = "\(baseUrl)/\(id)"
         let headers: HTTPHeaders = [
-            "Authorization": auth,
+            "Authorization": "Basic \(auth)",
             "Content-Type": "application/vnd.json+api"
         ]
         
@@ -65,12 +65,12 @@ class IdentityAPI {
         }
     }
     
-    func update(auth: String, id: String, identity: Identity, completion: @escaping (Result<IdentityResponse, Error>) -> Void) {
+    func update(auth: String, id: String, identity: Buyer, completion: @escaping (Result<IdentityResponse, Error>) -> Void) {
         let body = IdentityBody(entity: identity)
         
         let url = "\(baseUrl)/\(id)"
         let headers: HTTPHeaders = [
-            "Authorization": auth,
+            "Authorization": "Basic \(auth)",
             "Content-Type": "application/vnd.json+api"
         ]
         
@@ -89,12 +89,11 @@ class PaymentCardAPI {
     func create(auth: String, card: PaymentCard, completion: @escaping (Result<PaymentCardResponse, Error>) -> Void) {
     
     let headers: HTTPHeaders = [
-        "Authorization": auth,
+        "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
     AF.request(baseUrl, method: .post, parameters: card, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
-        debugPrint(response)
         handleResponse(response: response, completion: completion)
     }
     
@@ -106,7 +105,7 @@ class PaymentCardAPI {
         let url = "\(baseUrl)/\(cardId)"
         let headers: HTTPHeaders = [
             .contentType("application/vnd.json+api"),
-            .authorization(auth)
+            .authorization("Basic \(auth)")
         ]
         
         AF.request(url, headers: headers).validate().responseJSON { response in
@@ -124,12 +123,11 @@ class BankAccountAPI {
     func create(auth: String, bankAccount: BankAccount, completion: @escaping (Result<BankAccountResponse, Error>) -> Void) {
     
     let headers: HTTPHeaders = [
-        "Authorization": auth,
+        "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
     AF.request(baseUrl, method: .post, parameters: bankAccount, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
-        debugPrint(response)
         handleResponse(response: response, completion: completion)
     }
     
@@ -141,11 +139,10 @@ class BankAccountAPI {
         let url = "\(baseUrl)/\(bankId)"
         let headers: HTTPHeaders = [
             .contentType("application/vnd.json+api"),
-            .authorization(auth)
+            .authorization("Basic \(auth)")
         ]
         
         AF.request(url, headers: headers).validate().responseJSON { response in
-            debugPrint(response)
             handleResponse(response: response, completion: completion)
         }
     }
@@ -158,12 +155,11 @@ class AuthorizationAPI {
     func create(auth: String, authorization: Authorization, completion: @escaping (Result<AuthorizationResponse, Error>) -> Void) {
     
     let headers: HTTPHeaders = [
-        "Authorization": auth,
+        "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
     AF.request(baseUrl, method: .post, parameters: authorization, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
-        debugPrint(response)
         handleResponse(response: response, completion: completion)
     }
     }
@@ -171,12 +167,11 @@ class AuthorizationAPI {
     func capture(auth: String, authorization: CaptureAuth, id: String, completion: @escaping (Result<AuthorizationResponse, Error>) -> Void) {
     
     let headers: HTTPHeaders = [
-        "Authorization": auth,
+        "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
     AF.request("\(baseUrl)/\(id)", method: .put, parameters: authorization, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
-        debugPrint(response)
         handleResponse(response: response, completion: completion)
     }
     
@@ -190,15 +185,40 @@ class AuthorizationAPI {
         }
     
     let headers: HTTPHeaders = [
-        "Authorization": auth,
+        "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
     AF.request("\(baseUrl)/\(id)", method: .put, parameters: voidBody(), encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
-        debugPrint(response)
         handleResponse(response: response, completion: completion)
     }
     
 
     }
+}
+
+func getChallenge(apiKey: String, completion: @escaping (Result<Challenge, Error>) -> Void) {
+    
+    let url = "https://dev.tags.api.paytheorystudy.com/challenge"
+    let headers: HTTPHeaders = [
+        "X-API-Key": apiKey,
+        "Content-Type": "application/json"
+    ]
+    
+    AF.request(url, headers: headers).validate().responseJSON { response in
+        handleResponse(response: response, completion: completion)
+    }
+}
+
+func postAttestation(attestation: Attestation, apiKey: String, completion: @escaping (Result<AWSResponse, Error>) -> Void) {
+    
+    let url = "https://dev.tags.api.paytheorystudy.com/idempotency"
+    let headers: HTTPHeaders = [
+        "X-API-Key": apiKey,
+        "Content-Type": "application/json"
+    ]
+    
+    AF.request(url, method: .post, parameters: attestation, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
+        handleResponse(response: response, completion: completion)
+}
 }

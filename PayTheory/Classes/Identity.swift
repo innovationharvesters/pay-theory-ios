@@ -7,7 +7,18 @@
 
 import Foundation
 
-public class Identity: ObservableObject, Codable {
+public class Buyer: ObservableObject, Codable, Equatable {
+    public static func == (lhs: Buyer, rhs: Buyer) -> Bool {
+        if lhs.phone == rhs.phone &&
+        lhs.first_name == rhs.first_name &&
+        lhs.last_name == rhs.last_name &&
+        lhs.email == rhs.email &&
+            lhs.personal_address == rhs.personal_address {
+            return true
+        }
+        return false
+    }
+    
     @Published var phone: String?
     @Published var first_name: String?
     @Published var last_name: String?
@@ -43,44 +54,33 @@ public class Identity: ObservableObject, Codable {
 }
 
 class IdentityBody: Codable {
-    var entity: Identity
+    var entity: Buyer
     
-    init(entity: Identity) {
+    init(entity: Buyer) {
         self.entity = entity
     }
 }
 
-class IdentityResponse: Codable {
-    var id: String
-    var application: String
-    var entity: Identity
-    var tags: Tags?
-    var created_at: String
-    var updated_at: String
-    var links: ResponseLinks
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case application
-        case entity
-        case tags
-        case created_at
-        case updated_at
-        case links = "_links"
+class IdentityResponse: Codable, Equatable {
+    static func == (lhs: IdentityResponse, rhs: IdentityResponse) -> Bool {
+        if lhs.id == rhs.id &&
+        lhs.application == rhs.application &&
+        lhs.entity == rhs.entity &&
+        lhs.created_at == rhs.created_at &&
+            lhs.updated_at == rhs.updated_at {
+            return true
+        }
+        
+        return false
     }
     
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        id = try container.decode(String.self, forKey: .id)
-        application = try container.decode(String.self, forKey: .application)
-        entity = try container.decode(Identity.self, forKey: .entity)
-        created_at = try container.decode(String.self, forKey: .created_at)
-        updated_at = try container.decode(String.self, forKey: .updated_at)
-        links = try container.decode(ResponseLinks.self, forKey: .links)
-        if let t = try? container.decode(Tags.self, forKey: .tags) {
-            tags = t
-        } else {
-            tags = nil
-        }
+    var id = ""
+    var application = ""
+    var entity = Buyer()
+    var created_at = ""
+    var updated_at = ""
+    
+    init() {
+        
     }
 }

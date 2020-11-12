@@ -1,18 +1,18 @@
 {
   "name": "PayTheory",
   "version": "0.1.0",
-  "summary": "A short description of PayTheory.",
+  "summary": "Framework to include PayTheory transactions in iOS apps.",
   "description": "TODO: Add long description of the pod here.",
-  "homepage": "https://github.com/60404116/PayTheory",
+  "homepage": "https://github.com/pay-theory/pay-theory-ios",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
   },
   "authors": {
-    "60404116": "austinzani@gmail.com"
+    "Austin Zani": "austin@paytheory.com"
   },
   "source": {
-    "git": "https://github.com/60404116/PayTheory.git",
+    "git": "https://github.com/pay-theory/pay-theory-ios",
     "tag": "0.1.0"
   },
   "platforms": {
