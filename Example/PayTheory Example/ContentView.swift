@@ -8,34 +8,12 @@
 
 import SwiftUI
 import PayTheory
-import DeviceCheck
-import CryptoKit
-
-extension String {
-//: ### Base64 encoding a string
-    func base64Encoded() -> String? {
-        if let data = self.data(using: .utf8) {
-            return data.base64EncodedString()
-        }
-        return nil
-    }
-
-//: ### Base64 decoding a string
-    func base64Decoded() -> String? {
-        if let data = Data(base64Encoded: self, options: .ignoreUnknownCharacters) {
-            return String(data: data, encoding: .utf8)
-        }
-        return nil
-    }
-}
 
 struct ContentView: View {
     
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    
-    let service = DCAppAttestService.shared
     
     func completion(result: Result<TokenizationResponse, FailureResponse>){
         switch result {
