@@ -19,11 +19,11 @@ public class Buyer: ObservableObject, Codable, Equatable {
         return false
     }
     
-    @Published var phone: String?
-    @Published var first_name: String?
-    @Published var last_name: String?
-    @Published var email: String?
-    @Published var personal_address = Address()
+    @Published public var phone: String?
+    @Published public var first_name: String?
+    @Published public var last_name: String?
+    @Published public var email: String?
+    @Published public var personal_address = Address()
     
     enum CodingKeys: CodingKey {
         case phone, first_name, last_name, email, personal_address
