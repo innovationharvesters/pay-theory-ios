@@ -150,8 +150,7 @@ public class PaymentCard: ObservableObject, Codable, Equatable {
         return true
     }
     
-    public init(identity: String) {
-        self.identity = identity
+    public init() {
     }
     
     public init(number: String, expiration_year: String, expiration_month: String, cvv: String) {

@@ -48,7 +48,7 @@ public class Buyer: ObservableObject, Codable, Equatable {
         personal_address = try container.decode(Address.self, forKey: .personal_address)
     }
     
-    init() {}
+    public init() {}
     
     
 }
