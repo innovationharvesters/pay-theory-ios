@@ -9,6 +9,7 @@
 import SwiftUI
 import PayTheory
 
+
 struct ContentView: View {
     
     @State private var confirmationMessage = ""
@@ -37,7 +38,7 @@ struct ContentView: View {
         }
     }
     
-    func cancelCompletion(result: Result<AuthorizationResponse, FailureResponse>){
+    func cancelCompletion(result: Result<Bool, FailureResponse>){
         switch result {
         case .success(_):
             self.confirmationMessage = "You cancelled the transaciton!"
@@ -51,15 +52,17 @@ struct ContentView: View {
 
     let pt = PayTheory(apiKey: "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
 
-    let card = PaymentCard(number: "4242424242424242", expiration_year: "2022", expiration_month: "12", cvv: "222")
+//    let card = PaymentCard(number: "4242424242424242", expiration_year: "2022", expiration_month: "12", cvv: "222")
     
     var body: some View {
-        Button("Tokenize") {
-            pt.tokenize(card: card, amount: 1000, buyerOptions: nil, completion: completion)
-        }
-        .padding(15)
-        .border(Color.blue, width: 1)
-        .disabled(card.isValid == false)
+            Form{
+                PTCardName()
+                PTCardNumber()
+                PTExpYear()
+                PTExpMonth()
+                PTCvv()
+                PTCardButton(amount: 1000, PT: pt, completion: completion)
+            }
         .alert(isPresented: $showingConfirmation) {
             Alert(title: Text("Confirm:"), message: Text(confirmationMessage), primaryButton: .default(Text("Confirm"), action: {
                 pt.confirm(completion: confirmCompletion)
@@ -67,40 +70,12 @@ struct ContentView: View {
                 pt.cancel(completion: cancelCompletion)
             }))
         }
-        
-//        Button("Transact") {
-//            pt.transact(card: card, amount: 1000, buyerOptions: nil, merchant: "ID6VwLEBUieGoFJ5v6Vhrmdx", completion: confirmCompletion)
-//        }
-//        .padding(15)
-//        .border(Color.blue, width: 1)
         HStack{
             
         }
         .alert(isPresented: $showingMessage) {
             Alert(title: Text("Success!"), message: Text(confirmationMessage), dismissButton: .default(Text("Ok!")))
         }
-//        
-//        Button("Attestation") {
-//            service.generateKey { (keyIdentifier, error) in
-//                guard error == nil else {
-//                    debugPrint(error ?? "")
-//                    return
-//                }
-//                let challenge = "4uMA76Bl+L+ecspHfr8gox0BKyJws52530FzLBMzejbN2UF5pAm2rz/JLT9QbQHDgb9GfGG53L0A8SaoEmy6HxaC3Pb8kpYaY8vrC/CTDjXbzeZNsYbX6nBGzkMSK7EZDcXEEHW9q6dVbzbdtLlUm/J5c5U7XOEmibAZoU2IU0o=".data(using: .utf8)!
-//                let hash = Data(SHA256.hash(data: challenge))
-//                service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
-//                    guard error == nil else {
-//                        debugPrint(error ?? "")
-//                        return
-//                    }
-//
-//                    debugPrint(attestation!.base64EncodedString())
-//                }
-//            }
-//        }
-//        .padding(15)
-//        .border(Color.blue, width: 1)
-
     }
     
 }

@@ -7,12 +7,15 @@
 //
 
 import SwiftUI
+import PayTheory
 
 @main
 struct PayTheory_ExampleApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            PTForm{
+                ContentView()
+            }
         }
     }
 }

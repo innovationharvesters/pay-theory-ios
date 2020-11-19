@@ -4,11 +4,20 @@
 //
 //  Created by Austin Zani on 11/3/20.
 //
+import SwiftUI
+import Foundation
 
 import DeviceCheck
 import CryptoKit
 
 import AWSKMS
+
+public func ??<T>(lhs: Binding<Optional<T>>, rhs: T) -> Binding<T> {
+    Binding(
+        get: { lhs.wrappedValue ?? rhs },
+        set: { lhs.wrappedValue = $0 }
+    )
+}
 
 public class PayTheory {
     
@@ -21,6 +30,8 @@ public class PayTheory {
     private var authResponse: AuthorizationResponse?
     private var tokenResponse: TokenizationResponse?
     private var idempotencyResponse: Idempotency?
+    
+    private var card = PaymentCard()
     
     
     public init(apiKey: String){
@@ -67,9 +78,8 @@ public class PayTheory {
         IdentityAPI().create(auth: idempotencyResponse!.token, identity: identity, completion: identityCompletion)
     }
     
-    
     //Function that decrypts the idempotency response from the server
-    private func decryptKMS(response: AWSResponse, completion: @escaping (Idempotency) -> Void) {
+    func decryptKMS(response: AWSResponse, completion: @escaping (Idempotency) -> Void) {
         let decodedCredId = Data(base64Encoded: response.credId)!
         let credIdString = String(data: decodedCredId, encoding: .utf8)!
         let keys = credIdString.components(separatedBy: ":")
@@ -117,7 +127,7 @@ public class PayTheory {
     
     //Public function that will  tokenize all the information and create an authorization but needs to either be cancelled or confirmed before the payment goes through. Allows for there to be a confirmation step in the transaction process
     
-    public func tokenize(card: PaymentCard, amount: Int,  buyerOptions: Buyer?, completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void ) {
+    func tokenize(card: PaymentCard, amount: Int,  buyerOptions: Buyer? = nil, completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void ) {
         
         //Closure to run once the challenge has been retrieved from the PT Server
         func challengeClosure(response: Result<Challenge, Error>) {
@@ -180,11 +190,11 @@ public class PayTheory {
     
     //Public function that will void the authorization and relase any funds that may be held.
     
-    public func cancel(completion: @escaping (Result<AuthorizationResponse, FailureResponse>) -> Void) {
+    public func cancel(completion: @escaping (Result<Bool, FailureResponse>) -> Void) {
         func cancelCompletion(response: Result<AuthorizationResponse, Error>) {
             switch response {
-                case .success(let responseIdentity):
-                    completion(.success(responseIdentity))
+                case .success(_):
+                    completion(.success(true))
                     authResponse = nil
                     tokenResponse = nil
                 case .failure(let error):
@@ -228,29 +238,146 @@ public class PayTheory {
             completion(.failure(error))
         }
     }
+}
+
+//These fields are for capturing the card info required to create a payment card associated with an identity to run a transaction
+
+public struct PTCardName: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+    }
+
+    public var body: some View {
+        TextField("Name on Card", text: $card.name ?? "")
+    }
+}
+
+public struct PTCardNumber: View {
+    @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
+    public var body: some View {
+        TextField("Card Number", text: $card.number)
+            .keyboardType(.decimalPad)
+    }
+}
+
+public struct PTExpYear: View {
+    @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
+    public var body: some View {
+        TextField("Expiration Year", text: $card.expiration_year)
+            .keyboardType(.decimalPad)
+    }
+}
+
+public struct PTExpMonth: View {
+    @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
+    public var body: some View {
+        TextField("Expiration Month", text: $card.expiration_month)
+            .keyboardType(.decimalPad)
+    }
+}
+
+public struct PTCvv: View {
+    @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
+    public var body: some View {
+        TextField("CVV", text: $card.security_code)
+            .keyboardType(.decimalPad)
+    }
+}
+
+public struct cardLineOne: View {
+    @EnvironmentObject var card: PaymentCard
     
-    //Public function that will take the card info, amount, and buyerOptions and complete the transaction fully without the confirmation step
+    public var body: some View {
+        TextField("Address Line 1", text: $card.address.line1 ?? "")
+    }
+}
+
+public struct cardLineTwo: View {
+    @EnvironmentObject var card: PaymentCard
     
-//    public func transact(card: PaymentCard, amount: Int,  buyerOptions: Buyer?, merchant: String, completion: @escaping (Result<CompletionResponse, FailureResponse>) -> Void){
-//
-//        func tokenCompletion(response: Result<TokenizationResponse, FailureResponse>) {
-//            switch response {
-//                case .success(_):
-//                    confirm(completion: completion)
-//                case .failure(let error):
-//                    completion(.failure(error))
-//                }
-//        }
-//        
-//        if let identity = buyerOptions {
-//            tokenizeCard(apiAuth: apiKey, identity: identity, paymentCard: card, amount: amount, merchant: merchant, completion: tokenCompletion)
-//        } else {
-//            tokenizeCard(apiAuth: apiKey, identity: Buyer(), paymentCard: card, amount: amount, merchant: merchant, completion: tokenCompletion)
-//        }
-//    }
+    public var body: some View {
+        TextField("Address Line 2", text: $card.address.line2 ?? "")
+    }
+}
+
+public struct cardCity: View {
+    @EnvironmentObject var card: PaymentCard
     
+    public var body: some View {
+        TextField("City", text: $card.address.city ?? "")
+    }
+}
+
+public struct cardState: View {
+    @EnvironmentObject var card: PaymentCard
     
+    public var body: some View {
+        TextField("State", text: $card.address.region ?? "")
+    }
+}
+
+public struct cardZip: View {
+    @EnvironmentObject var card: PaymentCard
     
+    public var body: some View {
+        TextField("Zip", text: $card.address.postal_code ?? "")
+    }
+}
+
+public struct cardCountry: View {
+    @EnvironmentObject var card: PaymentCard
     
+    public var body: some View {
+        TextField("Country", text: $card.address.country ?? "")
+    }
+}
+
+public struct PTCardButton: View {
+    @EnvironmentObject var card: PaymentCard
     
+    var completion: (Result<TokenizationResponse, FailureResponse>) -> Void
+    var amount: Int
+    var PT: PayTheory
+    var buyer: Buyer?
+    
+    public init(amount: Int, PT: PayTheory, buyer: Buyer? = nil, completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
+        self.completion = completion
+        self.amount = amount
+        self.PT = PT
+    }
+        
+    public var body: some View {
+        Button("Create Card") {
+            PT.tokenize(card: card, amount: amount, buyerOptions: buyer, completion: completion)
+        }
+        .disabled(card.isValid == false)
+    }
+}
+
+public struct PTForm<Content>: View where Content: View {
+
+    let content: () -> Content
+
+    public init(@ViewBuilder content: @escaping () -> Content) {
+        self.content = content
+    }
+
+    public var body: some View {
+        Group{
+            content()
+        }.environmentObject(PaymentCard())
+    }
+
 }

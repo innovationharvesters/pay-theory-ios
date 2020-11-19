@@ -7,6 +7,8 @@
 
 import Foundation
 
+import AWSKMS
+
 public class Address: ObservableObject, Codable, Equatable {
     public static func == (lhs: Address, rhs: Address) -> Bool {
         if lhs.city == rhs.city &&
@@ -56,6 +58,10 @@ public class Address: ObservableObject, Codable, Equatable {
     public init() {}
 }
 
-class Tags: Codable {
-    var tag: String
+open class Tags: Codable {
+    var test = "Test"
+    init() {
+    }
 }
+
+

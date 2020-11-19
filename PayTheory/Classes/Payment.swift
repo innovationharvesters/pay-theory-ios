@@ -17,14 +17,6 @@ extension String {
         return self[i ..< i + 1]
     }
 
-//    func substring(fromIndex: Int) -> String {
-//        return self[min(fromIndex, length) ..< length]
-//    }
-//
-//    func substring(toIndex: Int) -> String {
-//        return self[0 ..< max(0, toIndex)]
-//    }
-
     subscript (r: Range<Int>) -> String {
         let range = Range(uncheckedBounds: (lower: max(0, min(length, r.lowerBound)),
                                             upper: min(length, max(0, r.upperBound))))
@@ -34,8 +26,8 @@ extension String {
     }
 }
 
-public class PaymentCard: ObservableObject, Codable, Equatable {
-    public static func == (lhs: PaymentCard, rhs: PaymentCard) -> Bool {
+class PaymentCard: ObservableObject, Codable, Equatable {
+    static func == (lhs: PaymentCard, rhs: PaymentCard) -> Bool {
         if lhs.name == rhs.name &&
         lhs.expiration_month == rhs.expiration_month &&
         lhs.expiration_year == rhs.expiration_year &&
@@ -50,20 +42,52 @@ public class PaymentCard: ObservableObject, Codable, Equatable {
         return false
     }
     
-    @Published public var name: String?
-    @Published public var expiration_month = ""
-    @Published public var expiration_year = ""
-    @Published public var identity = ""
-    @Published public var address = Address()
-    @Published public var number = ""
+    @Published var name: String?
+    @Published var expiration_month = ""{
+        didSet {
+            let filtered = expiration_month.filter { $0.isNumber }
+            
+            if expiration_month != filtered {
+                expiration_month = filtered
+            }
+        }
+    }
+    @Published var expiration_year = ""{
+        didSet {
+            let filtered = expiration_year.filter { $0.isNumber }
+            
+            if expiration_year != filtered {
+                expiration_year = filtered
+            }
+        }
+    }
+    @Published var identity = ""
+    @Published var address = Address()
+    @Published var number = ""{
+        didSet {
+            let filtered = number.filter { $0.isNumber }
+            
+            if number != filtered {
+                number = filtered
+            }
+        }
+    }
     private var type = "PAYMENT_CARD"
-    @Published public var security_code: String?
+    @Published var security_code = ""{
+        didSet {
+            let filtered = security_code.filter { $0.isNumber }
+            
+            if security_code != filtered {
+                security_code = filtered
+            }
+        }
+    }
     
     enum CodingKeys: CodingKey {
         case name, expiration_month, expiration_year, identity, address, number, type, security_code
     }
     
-    public func encode(to encoder: Encoder) throws {
+    func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(expiration_year, forKey: .expiration_year)
@@ -75,12 +99,12 @@ public class PaymentCard: ObservableObject, Codable, Equatable {
         try container.encode(security_code, forKey: .security_code)
     }
     
-    public required init(from decoder: Decoder) throws {
+    required init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
 
             name = try container.decodeIfPresent(String.self, forKey: .name) ?? nil
             address = try container.decode(Address.self, forKey: .address)
-            security_code = try container.decodeIfPresent(String.self, forKey: .security_code) ?? nil
+            security_code = try container.decode(String.self, forKey: .security_code)
             expiration_month = try container.decode(String.self, forKey: .expiration_month)
             expiration_year = try container.decode(String.self, forKey: .expiration_year)
             identity = try container.decode(String.self, forKey: .identity)
@@ -143,17 +167,17 @@ public class PaymentCard: ObservableObject, Codable, Equatable {
         return true
     }
     
-    public var isValid: Bool {
-        if validExpirationDate == false || validCardNumber == false {
+    var isValid: Bool {
+        if validExpirationDate == false || validCardNumber == false || security_code.isEmpty {
             return false
         }
         return true
     }
     
-    public init() {
+    init() {
     }
     
-    public init(number: String, expiration_year: String, expiration_month: String, cvv: String) {
+    init(number: String, expiration_year: String, expiration_month: String, cvv: String) {
         self.number = number
         self.expiration_year = expiration_year
         self.expiration_month = expiration_month
@@ -180,8 +204,8 @@ class PaymentCardResponse: Codable {
     var brand: String
 }
 
-public class BankAccount: ObservableObject, Codable, Equatable {
-    public static func == (lhs: BankAccount, rhs: BankAccount) -> Bool {
+class BankAccount: ObservableObject, Codable, Equatable {
+    static func == (lhs: BankAccount, rhs: BankAccount) -> Bool {
         if lhs.name == rhs.name &&
         lhs.account_number == rhs.account_number &&
         lhs.account_type == rhs.account_type &&
@@ -195,19 +219,19 @@ public class BankAccount: ObservableObject, Codable, Equatable {
         return false
     }
     
-    @Published public var name = ""
-    @Published public var account_number = ""
-    @Published public var account_type = "CHECKING"
-    @Published public var bank_code = ""
-    @Published public var country: String?
-    @Published public var identity = ""
+    @Published var name = ""
+    @Published var account_number = ""
+    @Published var account_type = "CHECKING"
+    @Published var bank_code = ""
+    @Published var country: String?
+    @Published var identity = ""
     private var type = "BANK_ACCOUNT"
     
     enum CodingKeys: CodingKey {
         case name, account_number, account_type, bank_code, country, identity, type
     }
     
-    public func encode(to encoder: Encoder) throws {
+    func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(account_number, forKey: .account_number)
@@ -218,7 +242,7 @@ public class BankAccount: ObservableObject, Codable, Equatable {
         try container.encode(type, forKey: .type)
     }
     
-    public required init(from decoder: Decoder) throws {
+    required init(from decoder: Decoder) throws {
            let container = try decoder.container(keyedBy: CodingKeys.self)
 
            name = try container.decode(String.self, forKey: .name)
@@ -231,7 +255,7 @@ public class BankAccount: ObservableObject, Codable, Equatable {
     }
     
     
-    public var validAccountType: Bool {
+    var validAccountType: Bool {
         if account_type == "CHECKING" || account_type == "SAVINGS" {
             return true
         }
@@ -239,7 +263,7 @@ public class BankAccount: ObservableObject, Codable, Equatable {
         return false
     }
     
-    public var validBankCode: Bool {
+    var validBankCode: Bool {
         if bank_code.count != 9 {
             return false
         }
@@ -268,7 +292,7 @@ public class BankAccount: ObservableObject, Codable, Equatable {
         return n > 0 && n % 10 == 0
     }
     
-    public var isValid: Bool {
+    var isValid: Bool {
         if account_number.isEmpty || validBankCode == false || identity.isEmpty || name.isEmpty || validAccountType == false {
             return false
         }
@@ -276,11 +300,11 @@ public class BankAccount: ObservableObject, Codable, Equatable {
     }
     
     
-    public init(identity: String) {
+    init(identity: String) {
         self.identity = identity
     }
     
-    public init(name: String, account_number: String, account_type: String, bank_code: String ) {
+    init(name: String, account_number: String, account_type: String, bank_code: String ) {
         self.name = name
         self.account_type = account_type
         self.account_number = account_number

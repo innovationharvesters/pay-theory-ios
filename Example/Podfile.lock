@@ -1,9 +1,9 @@
 PODS:
   - Alamofire (5.4.0)
-  - AWSCore (2.19.0)
-  - AWSKMS (2.19.0):
-    - AWSCore (= 2.19.0)
-  - PayTheory (0.1.2):
+  - AWSCore (2.19.1)
+  - AWSKMS (2.19.1):
+    - AWSCore (= 2.19.1)
+  - PayTheory (0.1.5):
     - Alamofire (~> 5.2)
     - AWSCore (~> 2.19.0)
     - AWSKMS (~> 2.19.0)
@@ -23,9 +23,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 3b6a534a3df22db367e4dedeeca73d1ddfcf0e2f
-  AWSCore: 4fad0a27851e761099cfc59382c6d4d6e0347150
-  AWSKMS: 3321d84818956ed64792649857a293894f26929e
-  PayTheory: 59e7ff2968c8345b5a9f978d4579861b2a2c2ea7
+  AWSCore: 55c154ae27efc5c98bdc30a0eeea5a35d10a2ab5
+  AWSKMS: f289e4187dc2a526fc62b9db3555492b9bde6534
+  PayTheory: 0ffd5e43f636b314e9700af3f40d0a752ac626e2
 
 PODFILE CHECKSUM: b37b00df4bc4d13d21741b924c6a9ad104ad1605
 

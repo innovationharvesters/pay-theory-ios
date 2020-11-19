@@ -32,6 +32,7 @@ class Authorization: ObservableObject, Codable, Equatable {
     }
     
     func encode(to encoder: Encoder) throws {
+        
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(source, forKey: .source)
         try container.encode(merchant_identity, forKey: .merchant_identity)
@@ -79,8 +80,8 @@ class CaptureAuth: Codable, Equatable {
     }
 }
 
-public class AuthorizationResponse: Codable, Equatable {
-    public static func == (lhs: AuthorizationResponse, rhs: AuthorizationResponse) -> Bool {
+class AuthorizationResponse: Codable, Equatable {
+    static func == (lhs: AuthorizationResponse, rhs: AuthorizationResponse) -> Bool {
         if lhs.id == rhs.id &&
         lhs.application == rhs.application &&
         lhs.amount == rhs.amount &&
