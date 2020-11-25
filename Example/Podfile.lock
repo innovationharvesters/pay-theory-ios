@@ -3,12 +3,14 @@ PODS:
   - AWSCore (2.19.1)
   - AWSKMS (2.19.1):
     - AWSCore (= 2.19.1)
+  - Mocker (2.2.0)
   - PayTheory (0.1.5):
     - Alamofire (~> 5.2)
     - AWSCore (~> 2.19.0)
     - AWSKMS (~> 2.19.0)
 
 DEPENDENCIES:
+  - Mocker (~> 2.2)
   - PayTheory (from `../`)
 
 SPEC REPOS:
@@ -16,6 +18,7 @@ SPEC REPOS:
     - Alamofire
     - AWSCore
     - AWSKMS
+    - Mocker
 
 EXTERNAL SOURCES:
   PayTheory:
@@ -25,8 +28,9 @@ SPEC CHECKSUMS:
   Alamofire: 3b6a534a3df22db367e4dedeeca73d1ddfcf0e2f
   AWSCore: 55c154ae27efc5c98bdc30a0eeea5a35d10a2ab5
   AWSKMS: f289e4187dc2a526fc62b9db3555492b9bde6534
+  Mocker: d0ceb340eddd5c28539a691ce67d068674cef9a0
   PayTheory: 0ffd5e43f636b314e9700af3f40d0a752ac626e2
 
-PODFILE CHECKSUM: b37b00df4bc4d13d21741b924c6a9ad104ad1605
+PODFILE CHECKSUM: 44f0ff4676e1664ada578f54a7549cc41fe5d0b0
 
 COCOAPODS: 1.10.0

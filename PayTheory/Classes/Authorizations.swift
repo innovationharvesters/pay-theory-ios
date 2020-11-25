@@ -28,7 +28,7 @@ class Authorization: ObservableObject, Codable, Equatable {
     var idempotency_id: String
     
     enum CodingKeys: CodingKey {
-        case source, merchant_identity, currency, amount, processor, tags, idempotency_id
+        case source, merchant_identity, currency, amount, processor, idempotency_id
     }
     
     func encode(to encoder: Encoder) throws {
@@ -120,6 +120,8 @@ class AuthorizationResponse: Codable, Equatable {
     }
 }
 
+
+/// This class contains the data you will get when you have sucessfully completed a transaction. It contains the receipt_number, last_four, brand, created_at, amount, convenience_fee, and state of the transaction.
 public class CompletionResponse: Equatable {
     public static func == (lhs: CompletionResponse, rhs: CompletionResponse) -> Bool {
         if lhs.receipt_number == rhs.receipt_number &&
@@ -155,6 +157,8 @@ public class CompletionResponse: Equatable {
     }
 }
 
+
+/// This class is the response you will get when you initialize a transaction including 
 public class TokenizationResponse: Equatable {
     public static func == (lhs: TokenizationResponse, rhs: TokenizationResponse) -> Bool {
         if lhs.receipt_number == rhs.receipt_number &&
@@ -227,6 +231,11 @@ class Challenge: Codable, Equatable {
     }
 }
 
+public enum FEE_MODE: String, Codable {
+    case SURCHARGE = "surcharge"
+    case SERVICE_FEE = "service_fee"
+}
+
 class Attestation: Codable, Equatable {
     static func == (lhs: Attestation, rhs: Attestation) -> Bool {
         if lhs.attestation == rhs.attestation &&
@@ -241,13 +250,15 @@ class Attestation: Codable, Equatable {
     var key: String
     var currency: String
     var amount: Int
+    var fee_mode: FEE_MODE
     
-    init(attestation: String, nonce: String, key: String, currency: String, amount: Int) {
+    init(attestation: String, nonce: String, key: String, currency: String, amount: Int, fee_mode: FEE_MODE = .SURCHARGE) {
         self.attestation = attestation
         self.nonce = nonce
         self.key = key
         self.amount = amount
         self.currency = currency
+        self.fee_mode = fee_mode
     }
 }
 
@@ -276,7 +287,7 @@ class Idempotency: Codable, Equatable {
 class Payment: Codable, Equatable {
     static func == (lhs: Payment, rhs: Payment) -> Bool {
         if lhs.amount == rhs.amount &&
-            lhs.convenience_fee == rhs.convenience_fee &&
+            lhs.service_fee == rhs.service_fee &&
             lhs.currency == rhs.currency &&
             lhs.merchant == rhs.merchant {
             return true
@@ -287,12 +298,12 @@ class Payment: Codable, Equatable {
     var currency: String
     var amount: Int
     var merchant: String
-    var convenience_fee: Int
+    var service_fee: Int
     
-    init(currency: String, amount: Int, convenience_fee: Int, merchant: String) {
+    init(currency: String, amount: Int, service_fee: Int, merchant: String) {
         self.amount = amount
         self.currency = currency
-        self.convenience_fee = convenience_fee
+        self.service_fee = service_fee
         self.merchant = merchant
     }
 }

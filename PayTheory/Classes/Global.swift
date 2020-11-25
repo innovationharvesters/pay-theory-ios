@@ -58,10 +58,27 @@ public class Address: ObservableObject, Codable, Equatable {
     public init() {}
 }
 
-open class Tags: Codable {
-    var test = "Test"
-    init() {
+func addressToDictionary(address: Address) -> [String: String] {
+    var result: [String: String] = [:]
+    
+    if let city = address.city {
+        result["city"] = city
     }
+    if let country = address.country {
+        result["country"] = country
+    }
+    if let region = address.region {
+        result["region"] = region
+    }
+    if let line1 = address.line1 {
+        result["line1"] = line1
+    }
+    if let line2 = address.line2 {
+        result["line2"] = line2
+    }
+    if let postal_code = address.postal_code {
+        result["postal_code"] = postal_code
+    }
+    
+    return result
 }
-
-

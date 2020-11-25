@@ -186,6 +186,23 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     
 }
 
+func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
+    var result: [String: Any] = [:]
+    
+    if let name = card.name {
+        result["name"] = name
+    }
+    result["address"] = addressToDictionary(address: card.address)
+    result["security_code"] = card.security_code
+    result["expiration_month"] = card.expiration_month
+    result["expiration_year"] = card.expiration_year
+    result["identity"] = card.identity
+    result["number"] = card.number
+    result["type"] = "PAYMENT_CARD"
+    
+    return result
+}
+
 class PaymentCardResponse: Codable {
     var id: String
     var application: String

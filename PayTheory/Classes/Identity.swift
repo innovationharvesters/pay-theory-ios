@@ -53,6 +53,27 @@ public class Buyer: ObservableObject, Codable, Equatable {
     
 }
 
+func buyerToDictionary(buyer: Buyer) -> [String: Any] {
+    var result: [String: Any] = [:]
+    
+    if let phone = buyer.phone {
+        result["phone"] = phone
+    }
+    if let first_name = buyer.first_name {
+        result["first_name"] = first_name
+    }
+    if let last_name = buyer.last_name {
+        result["last_name"] = last_name
+    }
+    if let email = buyer.email {
+        result["email"] = email
+    }
+    
+    result["personal_address"] = addressToDictionary(address: buyer.personal_address)
+    
+    return result
+}
+
 class IdentityBody: Codable {
     var entity: Buyer
     

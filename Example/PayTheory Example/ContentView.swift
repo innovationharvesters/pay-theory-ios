@@ -9,6 +9,21 @@
 import SwiftUI
 import PayTheory
 
+struct TextField: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(15)
+            .font(Font.system(size: 15, weight: .medium, design: .serif))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.blue, lineWidth: 2))
+    }
+}
+
+extension View {
+    func textFieldStyle() -> some View {
+        self.modifier(TextField())
+    }
+}
+
 
 struct ContentView: View {
     
@@ -51,17 +66,15 @@ struct ContentView: View {
     
 
     let pt = PayTheory(apiKey: "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
-
-//    let card = PaymentCard(number: "4242424242424242", expiration_year: "2022", expiration_month: "12", cvv: "222")
     
     var body: some View {
-            Form{
-                PTCardName()
-                PTCardNumber()
-                PTExpYear()
-                PTExpMonth()
-                PTCvv()
-                PTCardButton(amount: 1000, PT: pt, completion: completion)
+            VStack{
+                PTCardName().textFieldStyle()
+                PTCardNumber().textFieldStyle()
+                PTExpYear().textFieldStyle()
+                PTExpMonth().textFieldStyle()
+                PTCvv().textFieldStyle()
+                PTCardButton(amount: 5000, PT: pt, tags: ["test": 1234, "Test Again": "This is a test"], completion: completion).textFieldStyle()
             }
         .alert(isPresented: $showingConfirmation) {
             Alert(title: Text("Confirm:"), message: Text(confirmationMessage), primaryButton: .default(Text("Confirm"), action: {

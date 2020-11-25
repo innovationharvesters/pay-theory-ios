@@ -14,7 +14,11 @@ enum ResponseError: Error {
 }
 
 func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escaping (Result<T, Error>) -> Void) {
-    debugPrint(response)
+//    debugPrint(response)
+    if let value = response.value as? [String: AnyObject] {
+              print(value)
+           }
+    
     guard response.error == nil else {
             print("Call failed")
         completion(.failure(response.error!))
@@ -36,18 +40,19 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
 }
 
 class IdentityAPI {
+    
+    
 
     let baseUrl = "https://finix.sandbox-payments-api.com/identities"
     
-    func create(auth: String, identity: Buyer, completion: @escaping (Result<IdentityResponse, Error>) -> Void) {
-    let body = IdentityBody(entity: identity)
+    func create(auth: String, identity: [String: Any], completion: @escaping (Result<IdentityResponse, Error>) -> Void) {
     
     let headers: HTTPHeaders = [
         "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
-        AF.request(baseUrl, method: .post, parameters: body, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
+        AF.request(baseUrl, method: .post, parameters: identity, encoding: JSONEncoding.default, headers: headers).validate().responseJSON { response in
             handleResponse(response: response, completion: completion)
     }
     
@@ -87,14 +92,14 @@ class PaymentCardAPI {
     let baseUrl = "https://finix.sandbox-payments-api.com/payment_instruments"
     
     
-    func create(auth: String, card: PaymentCard, completion: @escaping (Result<PaymentCardResponse, Error>) -> Void) {
+    func create(auth: String, card: [String: Any], completion: @escaping (Result<PaymentCardResponse, Error>) -> Void) {
     
     let headers: HTTPHeaders = [
         "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
-    AF.request(baseUrl, method: .post, parameters: card, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
+    AF.request(baseUrl, method: .post, parameters: card, encoding: JSONEncoding.default, headers: headers).validate().responseJSON { response in
         handleResponse(response: response, completion: completion)
     }
     
@@ -153,14 +158,14 @@ class AuthorizationAPI {
     let baseUrl = "https://finix.sandbox-payments-api.com/authorizations"
     
     
-    func create(auth: String, authorization: Authorization, completion: @escaping (Result<AuthorizationResponse, Error>) -> Void) {
+    func create(auth: String, authorization: Parameters, completion: @escaping (Result<AuthorizationResponse, Error>) -> Void) {
     
     let headers: HTTPHeaders = [
         "Authorization": "Basic \(auth)",
         "Content-Type": "application/vnd.json+api"
     ]
     
-    AF.request(baseUrl, method: .post, parameters: authorization, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
+        AF.request(baseUrl, method: .post, parameters: authorization, encoding: JSONEncoding.default, headers: headers).validate().responseJSON { response in
         handleResponse(response: response, completion: completion)
     }
     }

@@ -40,13 +40,14 @@ public class PayTheory {
     
     
     //Function that sends the BuyerOptions, PaymentCard/BankAccount, and Authorization to the server and returns a Result<TokenizationResponse, FailureResponse> to the completion handler.
-    private func tokenizeCard(identity: Buyer, paymentCard: PaymentCard, amount: Int, merchant: String, completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
+    private func tokenizeCard(identity: Buyer, paymentCard: PaymentCard, amount: Int, merchant: String, tags: [String: Any], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
         
         func paymentCardCompletion(response: Result<PaymentCardResponse, Error>) {
             switch response {
                 case .success(let card):
                      cardResponse = card
-                    let authorization = Authorization(merchant_identity: merchant, amount: "\(amount)", source: card.id, idempotency_id: idempotencyResponse!.idempotency)
+                    let authorization: [String: Any] = ["merchant_identity": merchant, "amount": amount, "source": card.id, "currency": "USD", "tags": tags, "idempotency_id":  idempotencyResponse!.idempotency]
+//                    let authorization = Authorization(merchant_identity: merchant, amount: "\(amount)", source: card.id, idempotency_id: idempotencyResponse!.idempotency)
                     AuthorizationAPI().create(auth: idempotencyResponse!.token, authorization: authorization, completion: authCompletion)
                 case .failure(let error):
                     debugPrint("Your transaction failed! \(error.localizedDescription)")
@@ -57,7 +58,7 @@ public class PayTheory {
             switch response {
                 case .success(let auth):
                     authResponse = auth
-                    tokenResponse = TokenizationResponse(receipt_number: idempotencyResponse!.idempotency, first_six: cardResponse!.bin, brand: cardResponse!.bin, amount: idempotencyResponse!.payment.amount, convenience_fee: idempotencyResponse!.payment.convenience_fee)
+                    tokenResponse = TokenizationResponse(receipt_number: idempotencyResponse!.idempotency, first_six: cardResponse!.bin, brand: cardResponse!.bin, amount: idempotencyResponse!.payment.amount, convenience_fee: idempotencyResponse!.payment.service_fee)
                     completion(.success(tokenResponse!))
                 case .failure(let error):
                     debugPrint("Your transaction failed! \(error.localizedDescription)")
@@ -69,13 +70,16 @@ public class PayTheory {
                 case .success(let responseIdentity):
                     identityResponse = responseIdentity
                     paymentCard.identity = responseIdentity.id
-                    PaymentCardAPI().create(auth: idempotencyResponse!.token, card: paymentCard, completion: paymentCardCompletion)
+                    PaymentCardAPI().create(auth: idempotencyResponse!.token, card: paymentCardToDictionary(card: paymentCard), completion: paymentCardCompletion)
                 case .failure(let error):
                     debugPrint("Your transaction failed! \(error.localizedDescription)")
                 }
         }
         
-        IdentityAPI().create(auth: idempotencyResponse!.token, identity: identity, completion: identityCompletion)
+        let buyer = buyerToDictionary(buyer: identity)
+        let identityParameter: [String: Any] = ["tags": tags, "entity": buyer]
+        
+        IdentityAPI().create(auth: idempotencyResponse!.token, identity: identityParameter , completion: identityCompletion)
     }
     
     //Function that decrypts the idempotency response from the server
@@ -127,7 +131,7 @@ public class PayTheory {
     
     //Public function that will  tokenize all the information and create an authorization but needs to either be cancelled or confirmed before the payment goes through. Allows for there to be a confirmation step in the transaction process
     
-    func tokenize(card: PaymentCard, amount: Int,  buyerOptions: Buyer? = nil, completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void ) {
+    func tokenize(card: PaymentCard, amount: Int,  buyerOptions: Buyer, fee_mode: FEE_MODE, tags: [String: Any], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void ) {
         
         //Closure to run once the challenge has been retrieved from the PT Server
         func challengeClosure(response: Result<Challenge, Error>) {
@@ -145,7 +149,7 @@ public class PayTheory {
                             debugPrint(error ?? "")
                             return
                         }
-                        let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallenge.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount)
+                        let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallenge.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount, fee_mode: fee_mode)
                         postAttestation(attestation: attest, apiKey: self.apiKey, completion: attestationClosure)
                     }
                 }
@@ -162,11 +166,7 @@ public class PayTheory {
                 
                 decryptKMS(response: response) { idempotency in
                     self.idempotencyResponse = idempotency
-                    if let identity = buyerOptions {
-                        self.tokenizeCard(identity: identity, paymentCard: card, amount: amount, merchant: idempotency.payment.merchant, completion: completion)
-                    } else {
-                        self.tokenizeCard(identity: Buyer(), paymentCard: card, amount: amount, merchant: idempotency.payment.merchant, completion: completion)
-                    }
+                    self.tokenizeCard(identity: buyerOptions, paymentCard: card, amount: amount, merchant: idempotency.payment.merchant, tags: tags, completion: completion)
                 }
                 
             case .failure(let error):
@@ -185,7 +185,6 @@ public class PayTheory {
             return false
         }
     }
-    
     
     
     //Public function that will void the authorization and relase any funds that may be held.
@@ -217,7 +216,7 @@ public class PayTheory {
         func confirmCompletion(response: Result<AuthorizationResponse, Error>) {
             switch response {
                 case .success(let responseAuth):
-                    let complete = CompletionResponse(receipt_number: idempotencyResponse!.idempotency, last_four: cardResponse!.last_four, brand: cardResponse!.brand, created_at: authResponse!.created_at, amount: idempotencyResponse!.payment.amount, convenience_fee: idempotencyResponse!.payment.convenience_fee, state: responseAuth.state)
+                    let complete = CompletionResponse(receipt_number: idempotencyResponse!.idempotency, last_four: cardResponse!.last_four, brand: cardResponse!.brand, created_at: authResponse!.created_at, amount: idempotencyResponse!.payment.amount, convenience_fee: idempotencyResponse!.payment.service_fee, state: responseAuth.state)
                     completion(.success(complete))
                     identityResponse = nil
                     cardResponse = nil
@@ -344,23 +343,41 @@ public struct cardCountry: View {
     }
 }
 
+
 public struct PTCardButton: View {
     @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var envBuyer: Buyer
     
     var completion: (Result<TokenizationResponse, FailureResponse>) -> Void
     var amount: Int
     var PT: PayTheory
     var buyer: Buyer?
+    var fee_mode: FEE_MODE
+    var tags: [String: Any]
     
-    public init(amount: Int, PT: PayTheory, buyer: Buyer? = nil, completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
+    /// Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)
+    /// - Parameters:
+    ///   - amount: Payment amount that should be charged to the card in cents.
+    ///   - PT: PayTheory object that was initiated in your project that allows this to make calls with the API key.
+    ///   - buyer: Optional buyer information that allows name, email, phone number, and address of the buyer to be associated with the payment.
+    ///   - completion: Function that will handle the result of the tokenization response once it has been returned from the server.
+    ///   - fee_mode: optional param that defaults to .SURCHARGE if you don't declare it. Can also pass .SERVICE_FEE as a prop
+    public init(amount: Int, PT: PayTheory, buyer: Buyer? = nil, fee_mode: FEE_MODE = .SURCHARGE, tags: [String:Any] = [:], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
         self.completion = completion
         self.amount = amount
         self.PT = PT
+        self.fee_mode = fee_mode
+        self.tags = tags
     }
-        
+    
+    
     public var body: some View {
         Button("Create Card") {
-            PT.tokenize(card: card, amount: amount, buyerOptions: buyer, completion: completion)
+            if let identity = buyer {
+                PT.tokenize(card: card, amount: amount, buyerOptions: identity, fee_mode: fee_mode, tags: tags, completion: completion)
+            } else {
+                PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, fee_mode: fee_mode, tags: tags, completion: completion)
+            }
         }
         .disabled(card.isValid == false)
     }
@@ -378,6 +395,86 @@ public struct PTForm<Content>: View where Content: View {
         Group{
             content()
         }.environmentObject(PaymentCard())
+        .environmentObject(Buyer())
     }
 
+}
+
+//These fields are for creating an identity to associate with a purchase if you want to capture customer information
+
+public struct PTBuyerFirstName: View {
+    @EnvironmentObject var identity: Buyer
+    
+   public var body: some View {
+        TextField("First Name", text: $identity.first_name ?? "")
+    }
+}
+public struct PTBuyerLastName: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("Last Name", text: $identity.last_name ?? "")
+    }
+}
+public struct PTBuyerPhone: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("Phone", text: $identity.phone ?? "")
+    }
+}
+public struct PTBuyerEmail: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("Email", text: $identity.email ?? "")
+    }
+}
+
+public struct PTBuyerLineOne: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("Address Line 1", text: $identity.personal_address.line1 ?? "")
+    }
+}
+
+public struct PTBuyerLineTwo: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("Address Line 2", text: $identity.personal_address.line2 ?? "")
+    }
+}
+
+public struct PTBuyerCity: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("City", text: $identity.personal_address.city ?? "")
+    }
+}
+
+public struct PTBuyerState: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("State", text: $identity.personal_address.region ?? "")
+    }
+}
+
+public struct PTBuyerZip: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("Zip", text: $identity.personal_address.postal_code ?? "")
+    }
+}
+
+public struct PTBuyerCountry: View {
+    @EnvironmentObject var identity: Buyer
+    
+    public var body: some View {
+        TextField("Country", text: $identity.personal_address.country ?? "")
+    }
 }

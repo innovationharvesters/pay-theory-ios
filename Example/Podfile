@@ -5,6 +5,8 @@ target 'PayTheory Example' do
 
   target 'PayTheory_Tests' do
     inherit! :search_paths
+    pod 'Mocker', '~> 2.2'
+
 
     
   end
