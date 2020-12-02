@@ -23,7 +23,7 @@ public class Buyer: ObservableObject, Codable, Equatable {
     @Published public var first_name: String?
     @Published public var last_name: String?
     @Published public var email: String?
-    @Published public var personal_address = Address()
+    @Published public var personal_address: Address
     
     enum CodingKeys: CodingKey {
         case phone, first_name, last_name, email, personal_address
@@ -48,9 +48,21 @@ public class Buyer: ObservableObject, Codable, Equatable {
         personal_address = try container.decode(Address.self, forKey: .personal_address)
     }
     
-    public init() {}
+    public init(first_name: String? = nil, last_name: String? = nil, email: String? = nil, phone: String? = nil, personal_address: Address = Address()) {
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.phone = phone
+        self.personal_address = personal_address
+    }
     
-    
+    func clear() {
+        self.email = nil
+        self.first_name = nil
+        self.last_name = nil
+        self.phone = nil
+        self.personal_address = Address()
+    }
 }
 
 func buyerToDictionary(buyer: Buyer) -> [String: Any] {

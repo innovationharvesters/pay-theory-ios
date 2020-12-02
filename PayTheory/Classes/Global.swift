@@ -55,7 +55,14 @@ public class Address: ObservableObject, Codable, Equatable {
         postal_code = try container.decodeIfPresent(String.self, forKey: .postal_code) ?? nil
     }
     
-    public init() {}
+    public init(line1: String? = nil, line2: String? = nil, city: String? = nil, country: String? = nil, state: String? = nil, zip: String? = nil) {
+        self.city = city
+        self.country = country
+        self.line1 = line1
+        self.line2 = line2
+        self.postal_code = zip
+        self.region = state
+    }
 }
 
 func addressToDictionary(address: Address) -> [String: String] {

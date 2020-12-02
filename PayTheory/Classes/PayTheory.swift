@@ -18,12 +18,17 @@ public func ??<T>(lhs: Binding<Optional<T>>, rhs: T) -> Binding<T> {
         set: { lhs.wrappedValue = $0 }
     )
 }
+public enum Environment: String {
+    case DEV = "development"
+    case PROD = "production"
+}
 
 public class PayTheory {
     
     let service = DCAppAttestService.shared
     
     var apiKey: String
+    var environment: Environment
     
     private var identityResponse: IdentityResponse?
     private var cardResponse: PaymentCardResponse?
@@ -34,8 +39,11 @@ public class PayTheory {
     private var card = PaymentCard()
     
     
-    public init(apiKey: String){
+    public init(apiKey: String, environment: Environment = .DEV){
         self.apiKey = apiKey
+        self.environment = environment
+        envCard.clear()
+        envBuyer.clear()
     }
     
     
@@ -129,7 +137,7 @@ public class PayTheory {
     }
     
     
-    //Public function that will  tokenize all the information and create an authorization but needs to either be cancelled or confirmed before the payment goes through. Allows for there to be a confirmation step in the transaction process
+    //Public function that will  tokenize all the information and create an authorization but needs to either be cancelled or captured before the payment goes through. Allows for there to be a confirmation step in the transaction process
     
     func tokenize(card: PaymentCard, amount: Int,  buyerOptions: Buyer, fee_mode: FEE_MODE, tags: [String: Any], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void ) {
         
@@ -212,8 +220,9 @@ public class PayTheory {
     
     //Public function that will complete the authorization and send a Completion Response with all the transaction details to the completion handler provided
     
-    public func confirm(completion: @escaping (Result<CompletionResponse, FailureResponse>) -> Void) {
-        func confirmCompletion(response: Result<AuthorizationResponse, Error>) {
+    public func capture(completion: @escaping (Result<CompletionResponse, FailureResponse>) -> Void) {
+        
+        func captureCompletion(response: Result<AuthorizationResponse, Error>) {
             switch response {
                 case .success(let responseAuth):
                     let complete = CompletionResponse(receipt_number: idempotencyResponse!.idempotency, last_four: cardResponse!.last_four, brand: cardResponse!.brand, created_at: authResponse!.created_at, amount: idempotencyResponse!.payment.amount, convenience_fee: idempotencyResponse!.payment.service_fee, state: responseAuth.state)
@@ -223,15 +232,17 @@ public class PayTheory {
                     authResponse = nil
                     tokenResponse = nil
                     idempotencyResponse = nil
+                    envCard.clear()
+                    envBuyer.clear()
 
                 case .failure(let error):
-                    debugPrint("Your void failed! \(error.localizedDescription)")
+                    debugPrint("Your capture failed! \(error.localizedDescription)")
                 }
         }
         
         if let token = tokenResponse {
             let captureAuth = CaptureAuth(fee: token.convenience_fee, capture_amount: Int(authResponse!.amount))
-            AuthorizationAPI().capture(auth: idempotencyResponse!.token, authorization: captureAuth, id: authResponse!.id ,completion: confirmCompletion)
+            AuthorizationAPI().capture(auth: idempotencyResponse!.token, authorization: captureAuth, id: authResponse!.id ,completion: captureCompletion)
         } else {
             let error = FailureResponse(type: "There is no auth to capture")
             completion(.failure(error))
@@ -295,7 +306,7 @@ public struct PTCvv: View {
     }
 }
 
-public struct cardLineOne: View {
+public struct PTCardLineOne: View {
     @EnvironmentObject var card: PaymentCard
     
     public var body: some View {
@@ -303,7 +314,7 @@ public struct cardLineOne: View {
     }
 }
 
-public struct cardLineTwo: View {
+public struct PTCardLineTwo: View {
     @EnvironmentObject var card: PaymentCard
     
     public var body: some View {
@@ -311,7 +322,7 @@ public struct cardLineTwo: View {
     }
 }
 
-public struct cardCity: View {
+public struct PTCardCity: View {
     @EnvironmentObject var card: PaymentCard
     
     public var body: some View {
@@ -319,7 +330,7 @@ public struct cardCity: View {
     }
 }
 
-public struct cardState: View {
+public struct PYCardState: View {
     @EnvironmentObject var card: PaymentCard
     
     public var body: some View {
@@ -327,7 +338,7 @@ public struct cardState: View {
     }
 }
 
-public struct cardZip: View {
+public struct PTCardZip: View {
     @EnvironmentObject var card: PaymentCard
     
     public var body: some View {
@@ -335,7 +346,7 @@ public struct cardZip: View {
     }
 }
 
-public struct cardCountry: View {
+public struct PTCardCountry: View {
     @EnvironmentObject var card: PaymentCard
     
     public var body: some View {
@@ -344,7 +355,7 @@ public struct cardCountry: View {
 }
 
 
-public struct PTCardButton: View {
+public struct PTTokenizeButton: View {
     @EnvironmentObject var card: PaymentCard
     @EnvironmentObject var envBuyer: Buyer
     
@@ -383,6 +394,10 @@ public struct PTCardButton: View {
     }
 }
 
+
+private let envCard = PaymentCard()
+private let envBuyer = Buyer()
+
 public struct PTForm<Content>: View where Content: View {
 
     let content: () -> Content
@@ -394,8 +409,8 @@ public struct PTForm<Content>: View where Content: View {
     public var body: some View {
         Group{
             content()
-        }.environmentObject(PaymentCard())
-        .environmentObject(Buyer())
+        }.environmentObject(envCard)
+        .environmentObject(envBuyer)
     }
 
 }

@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'PayTheory'
-  s.version          = '0.1.6'
+  s.version          = '0.2.0'
   s.summary          = 'Framework to include PayTheory transactions in your App.'
   s.swift_version    = '5.3'
 
@@ -19,13 +19,13 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-This pod allows you to incoporate PayTheory payments into your app. Includes a PayTheory class you initialize with your API Key and includes a tokenize transaction func, and then cancel or confirm func to act upon the authorization. It returns either a Completion Response or a Failure Response.
+This pod allows you to incoporate PayTheory payments into your app. Includes a PayTheory class you initialize with your API Key, text fields for capturing card and buyer information, and a button to initalize the transacion. The PayTheory object includes a function to confirm or cancel the transaction once it has been initialized.
                        DESC
 
   s.homepage         = 'https://github.com/pay-theory/pay-theory-ios'
   # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
-  s.author           = { 'Austin Zani' => 'austin@paytheory.com' }
+  s.author           = { 'Pay Theory' => 'support@paytheory.com' }
   s.source           = { :git => 'https://github.com/pay-theory/pay-theory-ios.git', :tag => s.version.to_s }
   # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 

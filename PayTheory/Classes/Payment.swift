@@ -184,6 +184,16 @@ class PaymentCard: ObservableObject, Codable, Equatable {
         self.security_code = cvv
     }
     
+    func clear() {
+        self.number = ""
+        self.expiration_year = ""
+        self.expiration_month = ""
+        self.security_code = ""
+        self.address = Address()
+        self.identity = ""
+        self.name = nil
+    }
+    
 }
 
 func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {

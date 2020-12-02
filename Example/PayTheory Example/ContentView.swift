@@ -31,6 +31,8 @@ struct ContentView: View {
     @State private var showingConfirmation = false
     @State private var showingMessage = false
     
+    let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "513-658-8121")
+    
     func completion(result: Result<TokenizationResponse, FailureResponse>){
         switch result {
         case .success(let token):
@@ -74,11 +76,11 @@ struct ContentView: View {
                 PTExpYear().textFieldStyle()
                 PTExpMonth().textFieldStyle()
                 PTCvv().textFieldStyle()
-                PTCardButton(amount: 5000, PT: pt, tags: ["test": 1234, "Test Again": "This is a test"], completion: completion).textFieldStyle()
+                PTTokenizeButton(amount: 5000, PT: pt, buyer: buyer, tags: ["test": 1234, "Test Again": "This is a test"], completion: completion).textFieldStyle()
             }
         .alert(isPresented: $showingConfirmation) {
             Alert(title: Text("Confirm:"), message: Text(confirmationMessage), primaryButton: .default(Text("Confirm"), action: {
-                pt.confirm(completion: confirmCompletion)
+                pt.capture(completion: confirmCompletion)
             }), secondaryButton: .cancel(Text("Cancel"), action: {
                 pt.cancel(completion: cancelCompletion)
             }))
