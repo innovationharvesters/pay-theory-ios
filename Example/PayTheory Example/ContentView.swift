@@ -30,6 +30,7 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
+    @EnvironmentObject var pt: PayTheory
     
     let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "513-658-8121")
     
@@ -39,7 +40,7 @@ struct ContentView: View {
                 self.confirmationMessage = "Are you sure you want to charge $\(String(format:"%.2f", (Double(token.amount) / 100))) to the card starting in \(token.first_six)?"
                 self.showingConfirmation = true
             case .failure(let error):
-                self.confirmationMessage = "Your tokenization failed! \(error.localizedDescription)"
+                self.confirmationMessage = "Your tokenization failed! \(error.type)"
                 self.showingConfirmation = true
             }
     }
@@ -66,9 +67,6 @@ struct ContentView: View {
         }
     }
     
-
-    let pt = PayTheory(apiKey: "pt-sandbox-dev-d9de9154964990737db2f80499029dd6")
-    
     var body: some View {
             VStack{
                 PTCardName().textFieldStyle()
@@ -76,7 +74,7 @@ struct ContentView: View {
                 PTExpYear().textFieldStyle()
                 PTExpMonth().textFieldStyle()
                 PTCvv().textFieldStyle()
-                PTTokenizeButton(amount: 5000, PT: pt, buyer: buyer, tags: ["test": 1234, "Test Again": "This is a test"], completion: completion).textFieldStyle()
+                PTCardButton(amount: 5000, buyer: buyer, tags: ["test": 1234, "Test Again": "This is a test"], completion: completion).textFieldStyle()
             }
         .alert(isPresented: $showingConfirmation) {
             Alert(title: Text("Confirm:"), message: Text(confirmationMessage), primaryButton: .default(Text("Confirm"), action: {

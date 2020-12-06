@@ -23,7 +23,7 @@ public enum Environment: String {
     case PROD = "production"
 }
 
-public class PayTheory {
+public class PayTheory: ObservableObject {
     
     let service = DCAppAttestService.shared
     
@@ -42,9 +42,10 @@ public class PayTheory {
     public init(apiKey: String, environment: Environment = .DEV){
         self.apiKey = apiKey
         self.environment = environment
-        envCard.clear()
-        envBuyer.clear()
     }
+    
+    let envCard = PaymentCard()
+    let envBuyer = Buyer()
     
     
     //Function that sends the BuyerOptions, PaymentCard/BankAccount, and Authorization to the server and returns a Result<TokenizationResponse, FailureResponse> to the completion handler.
@@ -59,6 +60,11 @@ public class PayTheory {
                     AuthorizationAPI().create(auth: idempotencyResponse!.token, authorization: authorization, completion: authCompletion)
                 case .failure(let error):
                     debugPrint("Your transaction failed! \(error.localizedDescription)")
+                    if let type = error as? FinixError {
+                        completion(.failure(FailureResponse(type: type.errors[0]["message"]!)))
+                    } else {
+                        completion(.failure(FailureResponse(type: error.localizedDescription)))
+                    }
                 }
         }
         
@@ -70,6 +76,13 @@ public class PayTheory {
                     completion(.success(tokenResponse!))
                 case .failure(let error):
                     debugPrint("Your transaction failed! \(error.localizedDescription)")
+                    if let type = error as? FinixError {
+                        debugPrint("We passed a FinixError")
+                        completion(.failure(FailureResponse(type: type.errors[0]["message"]!)))
+                    } else {
+                        debugPrint("We didnt pass a FinixError")
+                        completion(.failure(FailureResponse(type: error.localizedDescription)))
+                    }
                 }
         }
         
@@ -81,6 +94,11 @@ public class PayTheory {
                     PaymentCardAPI().create(auth: idempotencyResponse!.token, card: paymentCardToDictionary(card: paymentCard), completion: paymentCardCompletion)
                 case .failure(let error):
                     debugPrint("Your transaction failed! \(error.localizedDescription)")
+                    if let type = error as? FinixError {
+                        completion(.failure(FailureResponse(type: type.errors[0]["message"]!)))
+                    } else {
+                        completion(.failure(FailureResponse(type: error.localizedDescription)))
+                    }
                 }
         }
         
@@ -164,6 +182,7 @@ public class PayTheory {
             
             case .failure(let error):
                 debugPrint(error.localizedDescription)
+                completion(.failure(FailureResponse(type: error.localizedDescription)))
             }
         }
         
@@ -179,6 +198,7 @@ public class PayTheory {
                 
             case .failure(let error):
                 debugPrint(error.localizedDescription)
+                completion(.failure(FailureResponse(type: error.localizedDescription)))
             }
         }
         
@@ -355,13 +375,13 @@ public struct PTCardCountry: View {
 }
 
 
-public struct PTTokenizeButton: View {
+public struct PTCardButton: View {
     @EnvironmentObject var card: PaymentCard
     @EnvironmentObject var envBuyer: Buyer
+    @EnvironmentObject var PT: PayTheory
     
     var completion: (Result<TokenizationResponse, FailureResponse>) -> Void
     var amount: Int
-    var PT: PayTheory
     var buyer: Buyer?
     var fee_mode: FEE_MODE
     var tags: [String: Any]
@@ -373,10 +393,9 @@ public struct PTTokenizeButton: View {
     ///   - buyer: Optional buyer information that allows name, email, phone number, and address of the buyer to be associated with the payment.
     ///   - completion: Function that will handle the result of the tokenization response once it has been returned from the server.
     ///   - fee_mode: optional param that defaults to .SURCHARGE if you don't declare it. Can also pass .SERVICE_FEE as a prop
-    public init(amount: Int, PT: PayTheory, buyer: Buyer? = nil, fee_mode: FEE_MODE = .SURCHARGE, tags: [String:Any] = [:], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
+    public init(amount: Int, buyer: Buyer? = nil, fee_mode: FEE_MODE = .SURCHARGE, tags: [String:Any] = [:], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
         self.completion = completion
         self.amount = amount
-        self.PT = PT
         self.fee_mode = fee_mode
         self.tags = tags
     }
@@ -394,13 +413,10 @@ public struct PTTokenizeButton: View {
     }
 }
 
-
-private let envCard = PaymentCard()
-private let envBuyer = Buyer()
-
 public struct PTForm<Content>: View where Content: View {
 
     let content: () -> Content
+    @EnvironmentObject var PT: PayTheory
 
     public init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
@@ -409,8 +425,8 @@ public struct PTForm<Content>: View where Content: View {
     public var body: some View {
         Group{
             content()
-        }.environmentObject(envCard)
-        .environmentObject(envBuyer)
+        }.environmentObject(PT.envCard)
+        .environmentObject(PT.envBuyer)
     }
 
 }

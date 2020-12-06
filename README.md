@@ -34,12 +34,12 @@ let apiKey = 'your-api-key'
 let pt = PayTheory(apiKey: apiKey, environment: .DEV)
 ```
 
-An ancestor view to the views in which buyer and card info are captured need to be wrapped with the PTForm component. This supplies the Envoronment Objects required by the Pay Theory Text Fields.
+An ancestor view to the views in which the PayTheory object will be used needs to be wrapped with the PTForm component. You should then pass it the PayTheory object as an EnvironmentObject. This makes sure the Envoronment Objects required by the Pay Theory Text Fields are available.
 
 ```swift
 PTForm{
     AncestorView()
-}
+}.EnvironmentObject(pt)
 ```
 ### Credit Card Text Fields
 
@@ -110,7 +110,7 @@ PTBuyerZip()
 PTBuyerCountry()
 ```
 
-If you prefer to just pass the info yourself instead of having it put in by the user you can use the buyer class and pass in the object when initializing the payment.
+Another option is to pass the info in as a Buyer object when initializing the payment.
 
 ```swift
 let address = Address(line1: "123 Street St", line2: "Apt 12", city: "Somewhere", country: "USA", state: "OH", zip: "12345")

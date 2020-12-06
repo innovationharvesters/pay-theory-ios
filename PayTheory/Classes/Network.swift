@@ -8,19 +8,57 @@
 import Foundation
 import Alamofire
 
-enum ResponseError: Error {
-    case NoData
-    case CanNotDecode
+enum ResponseError: String, Error {
+    case NoData = "There was no data in the repsonse"
+    case CanNotDecode = "Unable to decode the response"
+}
+
+class FinixError: Error {
+    var errors: [[String: String]]
+    
+    init(errors: [[String: String]]) {
+        self.errors = errors
+    }
+}
+
+func convertStringToDictionary(text: String) -> [String:AnyObject]? {
+    if let data = text.data(using: .utf8) {
+        do {
+            let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+            return json
+        } catch {
+            print("Something went wrong")
+        }
+    }
+    return nil
 }
 
 func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escaping (Result<T, Error>) -> Void) {
-//    debugPrint(response)
-    if let value = response.value as? [String: AnyObject] {
-              print(value)
-           }
-    
     guard response.error == nil else {
             print("Call failed")
+            if let value = response.value as? [String: AnyObject] {
+                      print(value)
+                   }
+        if let data = response.data {
+            let json = String(data: data, encoding: String.Encoding.utf8)
+            let errorArray = convertStringToDictionary(text: json!)?["_embedded"]?["errors"] as? [[String: Any]]
+            if let errors = errorArray {
+               var response :[[String: String]] = []
+                for err in errors {
+                    var x: [String: String] = [:]
+                    x["code"] = err["code"] as? String
+                    if err["code"] as? String == "INVALID_FIELD" {
+                        x["message"] = "\(err["field"] as? String ?? ""): \(err["message"] as? String ?? "")"
+                    } else {
+                        x["message"] = err["message"] as? String ?? "Unable to read error message"
+                    }
+                    
+                    response.append(x)
+                }
+                completion(.failure(FinixError(errors: response)))
+                return
+            }
+        }
         completion(.failure(response.error!))
             return
             }
