@@ -1,20 +1,20 @@
 {
   "name": "PayTheory",
-  "version": "0.1.5",
+  "version": "0.2.1",
   "summary": "Framework to include PayTheory transactions in your App.",
   "swift_versions": "5.3",
-  "description": "This pod allows you to incoporate PayTheory payments into your app. Includes a PayTheory class you initialize with your API Key and includes a tokenize transaction func, and then cancel or confirm func to act upon the authorization. It returns either a Completion Response or a Failure Response.",
+  "description": "This pod allows you to incoporate PayTheory payments into your app. Includes a PayTheory class you initialize with your API Key, text fields for capturing card and buyer information, and a button to initalize the transacion. The PayTheory object includes a function to confirm or cancel the transaction once it has been initialized.",
   "homepage": "https://github.com/pay-theory/pay-theory-ios",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
   },
   "authors": {
-    "Austin Zani": "austin@paytheory.com"
+    "Pay Theory": "support@paytheory.com"
   },
   "source": {
     "git": "https://github.com/pay-theory/pay-theory-ios.git",
-    "tag": "0.1.5"
+    "tag": "0.2.1"
   },
   "platforms": {
     "ios": "14.0"

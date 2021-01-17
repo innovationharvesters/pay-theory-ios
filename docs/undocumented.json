@@ -1,0 +1,390 @@
+{
+  "warnings": [
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 141,
+      "symbol": "CompletionResponse.receipt_number",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 142,
+      "symbol": "CompletionResponse.last_four",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 143,
+      "symbol": "CompletionResponse.brand",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 144,
+      "symbol": "CompletionResponse.created_at",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 145,
+      "symbol": "CompletionResponse.amount",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 146,
+      "symbol": "CompletionResponse.convenience_fee",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 147,
+      "symbol": "CompletionResponse.state",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 149,
+      "symbol": "CompletionResponse.init(receipt_number:last_four:brand:created_at:amount:convenience_fee:state:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 175,
+      "symbol": "TokenizationResponse.first_six",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 176,
+      "symbol": "TokenizationResponse.brand",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 177,
+      "symbol": "TokenizationResponse.receipt_number",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 178,
+      "symbol": "TokenizationResponse.amount",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 179,
+      "symbol": "TokenizationResponse.convenience_fee",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 181,
+      "symbol": "TokenizationResponse.init(receipt_number:first_six:brand:amount:convenience_fee:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 190,
+      "symbol": "FailureResponse",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 203,
+      "symbol": "FailureResponse.receipt_number",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 204,
+      "symbol": "FailureResponse.last_four",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 205,
+      "symbol": "FailureResponse.brand",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 206,
+      "symbol": "FailureResponse.state",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 207,
+      "symbol": "FailureResponse.type",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 209,
+      "symbol": "FailureResponse.init(type:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 213,
+      "symbol": "FailureResponse.init(type:receipt_number:last_four:brand:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 234,
+      "symbol": "FEE_MODE",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 235,
+      "symbol": "FEE_MODE.SURCHARGE",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Authorizations.swift",
+      "line": 236,
+      "symbol": "FEE_MODE.SERVICE_FEE",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Global.swift",
+      "line": 12,
+      "symbol": "Address",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Global.swift",
+      "line": 26,
+      "symbol": "Address.city",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Global.swift",
+      "line": 27,
+      "symbol": "Address.country",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Global.swift",
+      "line": 28,
+      "symbol": "Address.region",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Global.swift",
+      "line": 29,
+      "symbol": "Address.line1",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Global.swift",
+      "line": 30,
+      "symbol": "Address.line2",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Global.swift",
+      "line": 31,
+      "symbol": "Address.postal_code",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Global.swift",
+      "line": 58,
+      "symbol": "Address.init(line1:line2:city:country:state:zip:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Identity.swift",
+      "line": 10,
+      "symbol": "Buyer",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Identity.swift",
+      "line": 22,
+      "symbol": "Buyer.phone",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Identity.swift",
+      "line": 23,
+      "symbol": "Buyer.first_name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Identity.swift",
+      "line": 24,
+      "symbol": "Buyer.last_name",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Identity.swift",
+      "line": 25,
+      "symbol": "Buyer.email",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Identity.swift",
+      "line": 26,
+      "symbol": "Buyer.personal_address",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/Identity.swift",
+      "line": 51,
+      "symbol": "Buyer.init(first_name:last_name:email:phone:personal_address:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 15,
+      "symbol": "??(_:_:)",
+      "symbol_kind": "source.lang.swift.decl.function.free",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 21,
+      "symbol": "Environment",
+      "symbol_kind": "source.lang.swift.decl.enum",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 22,
+      "symbol": "Environment.DEV",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 23,
+      "symbol": "Environment.PROD",
+      "symbol_kind": "source.lang.swift.decl.enumelement",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 26,
+      "symbol": "PayTheory",
+      "symbol_kind": "source.lang.swift.decl.class",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 42,
+      "symbol": "PayTheory.init(apiKey:environment:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 209,
+      "symbol": "PayTheory.isTokenized",
+      "symbol_kind": "source.lang.swift.decl.var.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 220,
+      "symbol": "PayTheory.cancel(completion:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 243,
+      "symbol": "PayTheory.capture(completion:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 281,
+      "symbol": "PTCardName.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 297,
+      "symbol": "PTCardNumber.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 314,
+      "symbol": "PTExpYear.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 331,
+      "symbol": "PTExpMonth.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 348,
+      "symbol": "PTCvv.init()",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    },
+    {
+      "file": "/Users/austinzani/Documents/GitHub/PayTheory/PayTheory/Classes/PayTheory.swift",
+      "line": 489,
+      "symbol": "PTForm.init(content:)",
+      "symbol_kind": "source.lang.swift.decl.function.method.instance",
+      "warning": "undocumented"
+    }
+  ],
+  "source_directory": "/Users/austinzani/Documents/GitHub/PayTheory"
+}

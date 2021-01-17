@@ -139,6 +139,14 @@ class PaymentCard: ObservableObject, Codable, Equatable {
         return sum % 10 == 0
     }
     
+    var first_six: String {
+        return String(number.prefix(6))
+    }
+    
+    var last_four: String {
+        return String(number.suffix(4))
+    }
+    
     var validExpirationDate: Bool {
         if expiration_year.count != 4 {
             return false
@@ -213,24 +221,6 @@ func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
     return result
 }
 
-class PaymentCardResponse: Codable {
-    var id: String
-    var application: String
-    var expiration_month: Int
-    var expiration_year: Int
-    var bin: String
-    var address: Address
-    var card_type: String
-    var last_four: String
-    var currency: String
-    var identity: String
-    var instrument_type: String
-    var type: String
-    var updated_at: String
-    var name: String?
-    var brand: String
-}
-
 class BankAccount: ObservableObject, Codable, Equatable {
     static func == (lhs: BankAccount, rhs: BankAccount) -> Bool {
         if lhs.name == rhs.name &&
@@ -248,7 +238,7 @@ class BankAccount: ObservableObject, Codable, Equatable {
     
     @Published var name = ""
     @Published var account_number = ""
-    @Published var account_type = "CHECKING"
+    @Published var account_type = 0
     @Published var bank_code = ""
     @Published var country: String?
     @Published var identity = ""
@@ -274,7 +264,7 @@ class BankAccount: ObservableObject, Codable, Equatable {
 
            name = try container.decode(String.self, forKey: .name)
            account_number = try container.decode(String.self, forKey: .account_number)
-           account_type = try container.decode(String.self, forKey: .account_type)
+           account_type = try container.decode(Int.self, forKey: .account_type)
            bank_code = try container.decode(String.self, forKey: .bank_code)
            country = try container.decodeIfPresent(String.self, forKey: .country) ?? nil
            identity = try container.decode(String.self, forKey: .identity)
@@ -283,11 +273,7 @@ class BankAccount: ObservableObject, Codable, Equatable {
     
     
     var validAccountType: Bool {
-        if account_type == "CHECKING" || account_type == "SAVINGS" {
-            return true
-        }
-        
-        return false
+        return account_type < 2
     }
     
     var validBankCode: Bool {
@@ -331,26 +317,31 @@ class BankAccount: ObservableObject, Codable, Equatable {
         self.identity = identity
     }
     
-    init(name: String, account_number: String, account_type: String, bank_code: String ) {
+    init(name: String, account_number: String, account_type: Int, bank_code: String ) {
         self.name = name
         self.account_type = account_type
         self.account_number = account_number
         self.bank_code = bank_code
     }
     
+    init() {
+    }
+    
 }
 
-class BankAccountResponse: Codable {
-    var id: String
-    var application: String
-    var bank_code: String
-    var country: String?
-    var masked_account_number: String
-    var account_type: String
-    var instrument_type: String
-    var type: String
-    var updated_at: String
-    var name: String
-    var currency: String
-    var identity: String
+func bankAccountToDictionary(account: BankAccount) -> [String: Any] {
+    var result: [String: Any] = [:]
+    let types = ["CHECKING", "SAVINGS"]
+    
+    
+    result["name"] = account.name
+    result["account_number"] = account.account_number
+    result["account_type"] = types[account.account_type]
+    result["bank_code"] = account.bank_code
+    result["identity"] = account.identity
+    result["type"] = "BANK_ACCOUNT"
+    
+    return result
 }
+
+

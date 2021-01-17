@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Structures  Reference</title>
+    <link rel="stylesheet" type="text/css" href="css/jazzy.css" />
+    <link rel="stylesheet" type="text/css" href="css/highlight.css" />
+    <meta charset='utf-8'>
+    <script src="js/jquery.min.js" defer></script>
+    <script src="js/jazzy.js" defer></script>
+    
+    <script src="js/lunr.min.js" defer></script>
+    <script src="js/typeahead.jquery.js" defer></script>
+    <script src="js/jazzy.search.js" defer></script>
+  </head>
+  <body>
+    <a name="//apple_ref/swift/Section/Structures" class="dashAnchor"></a>
+    <a title="Structures  Reference"></a>
+    <header>
+      <div class="content-wrapper">
+        <p><a href="index.html">PayTheory 0.2.1 Docs</a> (51% documented)</p>
+        <p class="header-right">
+          <form role="search" action="search.json">
+            <input type="text" placeholder="Search documentation" data-typeahead>
+          </form>
+        </p>
+      </div>
+    </header>
+    <div class="content-wrapper">
+      <p id="breadcrumbs">
+        <a href="index.html">PayTheory Reference</a>
+        <img id="carat" src="img/carat.png" />
+        Structures  Reference
+      </p>
+    </div>
+    <div class="content-wrapper">
+      <nav class="sidebar">
+        <ul class="nav-groups">
+          <li class="nav-group-name">
+            <a href="Classes.html">Classes</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Classes/Address.html">Address</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/Buyer.html">Buyer</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/CompletionResponse.html">CompletionResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/FailureResponse.html">FailureResponse</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/PayTheory.html">PayTheory</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Classes/TokenizationResponse.html">TokenizationResponse</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Enums.html">Enumerations</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Enums/Environment.html">Environment</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Enums/FEE_MODE.html">FEE_MODE</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Functions.html">Functions</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Functions.html#/s:9PayTheory2qqoiy7SwiftUI7BindingVyxGAEyxSgG_xtlF">??(_:_:)</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-group-name">
+            <a href="Structs.html">Structures</a>
+            <ul class="nav-group-tasks">
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerCity.html">PTBuyerCity</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerCountry.html">PTBuyerCountry</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerEmail.html">PTBuyerEmail</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerFirstName.html">PTBuyerFirstName</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerLastName.html">PTBuyerLastName</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerLineOne.html">PTBuyerLineOne</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerLineTwo.html">PTBuyerLineTwo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerPhone.html">PTBuyerPhone</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerState.html">PTBuyerState</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTBuyerZip.html">PTBuyerZip</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCardButton.html">PTCardButton</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCardCity.html">PTCardCity</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCardCountry.html">PTCardCountry</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCardLineOne.html">PTCardLineOne</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCardLineTwo.html">PTCardLineTwo</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCardName.html">PTCardName</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCardNumber.html">PTCardNumber</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCardZip.html">PTCardZip</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTCvv.html">PTCvv</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTExpMonth.html">PTExpMonth</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTExpYear.html">PTExpYear</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PTForm.html">PTForm</a>
+              </li>
+              <li class="nav-group-task">
+                <a href="Structs/PYCardState.html">PYCardState</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </nav>
+      <article class="main-content">
+        <section>
+          <section class="section">
+            <h1>Structures</h1>
+            <p>The following structures are available globally.</p>
+
+          </section>
+          <section class="section task-group-section">
+            <div class="task-group">
+              <ul>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory10PTCardNameV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCardName" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory10PTCardNameV">PTCardName</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Name for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTCardName.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCardName</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory12PTCardNumberV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCardNumber" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory12PTCardNumberV">PTCardNumber</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Card Number for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    <p>Ancestor view must be wrapped in a PTForm</p>
+
+</div><div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    <p>This is required to be able to run a transaction.</p>
+
+</div>
+
+                        <a href="Structs/PTCardNumber.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCardNumber</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory9PTExpYearV"></a>
+                    <a name="//apple_ref/swift/Struct/PTExpYear" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory9PTExpYearV">PTExpYear</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Expiration Year for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    <p>Ancestor view must be wrapped in a PTForm</p>
+
+</div><div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    <p>This is required to be able to run a transaction.</p>
+
+</div>
+
+                        <a href="Structs/PTExpYear.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTExpYear</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory10PTExpMonthV"></a>
+                    <a name="//apple_ref/swift/Struct/PTExpMonth" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory10PTExpMonthV">PTExpMonth</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Expiration Month for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    <p>Ancestor view must be wrapped in a PTForm</p>
+
+</div><div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    <p>This is required to be able to run a transaction.</p>
+
+</div>
+
+                        <a href="Structs/PTExpMonth.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTExpMonth</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory5PTCvvV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCvv" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory5PTCvvV">PTCvv</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the CVV for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    <p>Ancestor view must be wrapped in a PTForm</p>
+
+</div><div class="aside aside-important">
+    <p class="aside-title">Important</p>
+    <p>This is required to be able to run a transaction.</p>
+
+</div>
+
+                        <a href="Structs/PTCvv.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCvv</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory13PTCardLineOneV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCardLineOne" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory13PTCardLineOneV">PTCardLineOne</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Address Line 1 for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTCardLineOne.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCardLineOne</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory13PTCardLineTwoV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCardLineTwo" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory13PTCardLineTwoV">PTCardLineTwo</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Address Line 2 for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTCardLineTwo.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCardLineTwo</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory10PTCardCityV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCardCity" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory10PTCardCityV">PTCardCity</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the City for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTCardCity.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCardCity</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory11PYCardStateV"></a>
+                    <a name="//apple_ref/swift/Struct/PYCardState" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory11PYCardStateV">PYCardState</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the State for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PYCardState.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PYCardState</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory9PTCardZipV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCardZip" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory9PTCardZipV">PTCardZip</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Zip for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTCardZip.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCardZip</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory13PTCardCountryV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCardCountry" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory13PTCardCountryV">PTCardCountry</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Country for a card object to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTCardCountry.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCardCountry</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory12PTCardButtonV"></a>
+                    <a name="//apple_ref/swift/Struct/PTCardButton" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory12PTCardButtonV">PTCardButton</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTCardButton.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTCardButton</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory6PTFormV"></a>
+                    <a name="//apple_ref/swift/Struct/PTForm" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory6PTFormV">PTForm</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <pre class="highlight swift"><code><span class="k">let</span> <span class="nv">pt</span> <span class="o">=</span> <span class="kt">PayTheory</span><span class="p">(</span><span class="nv">apiKey</span><span class="p">:</span> <span class="err">'</span><span class="n">your</span><span class="o">-</span><span class="n">api</span><span class="o">-</span><span class="n">key</span><span class="err">'</span><span class="p">)</span>
+
+<span class="kt">PTForm</span><span class="p">{</span>
+    <span class="kt">AncestorView</span><span class="p">()</span>
+<span class="p">}</span><span class="o">.</span><span class="kt">EnvironmentObject</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span>
+</code></pre>
+
+                        <a href="Structs/PTForm.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTForm</span><span class="o">&lt;</span><span class="kt">Content</span><span class="o">&gt;</span> <span class="p">:</span> <span class="kt">View</span> <span class="k">where</span> <span class="kt">Content</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory16PTBuyerFirstNameV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerFirstName" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory16PTBuyerFirstNameV">PTBuyerFirstName</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the First Name for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerFirstName.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerFirstName</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory15PTBuyerLastNameV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerLastName" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory15PTBuyerLastNameV">PTBuyerLastName</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Last Name for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerLastName.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerLastName</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory12PTBuyerPhoneV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerPhone" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory12PTBuyerPhoneV">PTBuyerPhone</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Phone for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerPhone.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerPhone</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory12PTBuyerEmailV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerEmail" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory12PTBuyerEmailV">PTBuyerEmail</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Email for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerEmail.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerEmail</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory14PTBuyerLineOneV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerLineOne" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory14PTBuyerLineOneV">PTBuyerLineOne</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Address Line 1 for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerLineOne.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerLineOne</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory14PTBuyerLineTwoV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerLineTwo" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory14PTBuyerLineTwoV">PTBuyerLineTwo</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Address Line 2 for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerLineTwo.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerLineTwo</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory11PTBuyerCityV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerCity" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory11PTBuyerCityV">PTBuyerCity</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the City for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerCity.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerCity</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory12PTBuyerStateV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerState" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory12PTBuyerStateV">PTBuyerState</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the State for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerState.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerState</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory10PTBuyerZipV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerZip" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory10PTBuyerZipV">PTBuyerZip</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Zip for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerZip.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerZip</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+                <li class="item">
+                  <div>
+                    <code>
+                    <a name="/s:9PayTheory14PTBuyerCountryV"></a>
+                    <a name="//apple_ref/swift/Struct/PTBuyerCountry" class="dashAnchor"></a>
+                    <a class="token" href="#/s:9PayTheory14PTBuyerCountryV">PTBuyerCountry</a>
+                    </code>
+                  </div>
+                  <div class="height-container">
+                    <div class="pointer-container"></div>
+                    <section class="section">
+                      <div class="pointer"></div>
+                      <div class="abstract">
+                        <p>TextField that can be used to capture the Country for Buyer Options to be used in a Pay Theory payment</p>
+<div class="aside aside-requires">
+    <p class="aside-title">Requires</p>
+    Ancestor view must be wrapped in a PTForm
+
+</div>
+
+                        <a href="Structs/PTBuyerCountry.html" class="slightly-smaller">See more</a>
+                      </div>
+                      <div class="declaration">
+                        <h4>Declaration</h4>
+                        <div class="language">
+                          <p class="aside-title">Swift</p>
+                          <pre class="highlight swift"><code><span class="kd">public</span> <span class="kd">struct</span> <span class="kt">PTBuyerCountry</span> <span class="p">:</span> <span class="kt">View</span></code></pre>
+
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </section>
+        </section>
+        <section id="footer">
+          <p>&copy; 2020 <a class="link" href="https://github.com/pay-theory/pay-theory-ios" target="_blank" rel="external">Pay Theory</a>. All rights reserved. (Last updated: 2020-12-16)</p>
+          <p>Generated by <a class="link" href="https://github.com/realm/jazzy" target="_blank" rel="external">jazzy ♪♫ v0.13.6</a>, a <a class="link" href="https://realm.io" target="_blank" rel="external">Realm</a> project.</p>
+        </section>
+      </article>
+    </div>
+  </body>
+</div>
+</html>

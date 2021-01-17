@@ -74,13 +74,13 @@ struct ContentView: View {
                 PTExpYear().textFieldStyle()
                 PTExpMonth().textFieldStyle()
                 PTCvv().textFieldStyle()
-                PTCardButton(amount: 5000, buyer: buyer, tags: ["test": 1234, "Test Again": "This is a test"], completion: completion).textFieldStyle()
+                PTButton(amount: 5000, buyer: buyer, tags: ["test": 1234, "Test Again": "This is a test"], completion: completion).textFieldStyle()
             }
         .alert(isPresented: $showingConfirmation) {
             Alert(title: Text("Confirm:"), message: Text(confirmationMessage), primaryButton: .default(Text("Confirm"), action: {
                 pt.capture(completion: confirmCompletion)
             }), secondaryButton: .cancel(Text("Cancel"), action: {
-                pt.cancel(completion: cancelCompletion)
+                pt.cancel()
             }))
         }
         HStack{

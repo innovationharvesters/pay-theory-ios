@@ -168,16 +168,16 @@ public class TokenizationResponse: Equatable {
         lhs.convenience_fee == rhs.convenience_fee {
             return true
         }
-        
+
         return false
     }
-    
+
     public var first_six: String
     public var brand: String
     public var receipt_number: String
     public var amount: Int
     public var convenience_fee: Int
-    
+
     public init(receipt_number: String, first_six: String, brand: String, amount: Int, convenience_fee: Int){
         self.receipt_number = receipt_number
         self.first_six = first_six
@@ -299,17 +299,19 @@ class Payment: Codable, Equatable {
     var amount: Int
     var merchant: String
     var service_fee: Int
+    var fee_mode: String
     
-    init(currency: String, amount: Int, service_fee: Int, merchant: String) {
+    init(currency: String, amount: Int, service_fee: Int, merchant: String, fee_mode: String) {
         self.amount = amount
         self.currency = currency
         self.service_fee = service_fee
         self.merchant = merchant
+        self.fee_mode = fee_mode
     }
 }
 
-class AWSResponse: Codable, Equatable {
-    static func == (lhs: AWSResponse, rhs: AWSResponse) -> Bool {
+class IdempotencyResponse: Codable, Equatable {
+    static func == (lhs: IdempotencyResponse, rhs: IdempotencyResponse) -> Bool {
         if lhs.response == rhs.response && lhs.signature == rhs.signature && lhs.credId == rhs.credId {return true}
         return false
     }
@@ -317,11 +319,16 @@ class AWSResponse: Codable, Equatable {
     var response: String
     var signature: String
     var credId: String
+    var idempotency: String
+    var payment: Payment
     
-    init(response: String, signature: String, credId: String) {
+    init(response: String, signature: String, credId: String, idempotency: String, payment: Payment) {
         self.signature = signature
         self.response = response
         self.credId = credId
+        self.idempotency = idempotency
+        self.payment = payment
     }
         
 }
+

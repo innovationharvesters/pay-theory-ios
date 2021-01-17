@@ -18,9 +18,10 @@ public func ??<T>(lhs: Binding<Optional<T>>, rhs: T) -> Binding<T> {
         set: { lhs.wrappedValue = $0 }
     )
 }
-public enum Environment: String {
-    case DEV = "development"
-    case PROD = "production"
+public enum Environment: Int {
+    case DEV = 0
+    case DEMO = 1
+    case PROD = 2
 }
 
 public class PayTheory: ObservableObject {
@@ -30,132 +31,23 @@ public class PayTheory: ObservableObject {
     var apiKey: String
     var environment: Environment
     
-    private var identityResponse: IdentityResponse?
-    private var cardResponse: PaymentCardResponse?
-    private var authResponse: AuthorizationResponse?
     private var tokenResponse: TokenizationResponse?
-    private var idempotencyResponse: Idempotency?
+    private var idempotencyResponse: IdempotencyResponse?
+    private var passedBuyer: Buyer?
     
     private var card = PaymentCard()
     
     
-    public init(apiKey: String, environment: Environment = .DEV){
+    public init(apiKey: String, environment: Environment = .DEMO){
         self.apiKey = apiKey
         self.environment = environment
     }
     
     let envCard = PaymentCard()
     let envBuyer = Buyer()
+    let envAch = BankAccount()
     
-    
-    //Function that sends the BuyerOptions, PaymentCard/BankAccount, and Authorization to the server and returns a Result<TokenizationResponse, FailureResponse> to the completion handler.
-    private func tokenizeCard(identity: Buyer, paymentCard: PaymentCard, amount: Int, merchant: String, tags: [String: Any], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
-        
-        func paymentCardCompletion(response: Result<PaymentCardResponse, Error>) {
-            switch response {
-                case .success(let card):
-                     cardResponse = card
-                    let authorization: [String: Any] = ["merchant_identity": merchant, "amount": amount, "source": card.id, "currency": "USD", "tags": tags, "idempotency_id":  idempotencyResponse!.idempotency]
-//                    let authorization = Authorization(merchant_identity: merchant, amount: "\(amount)", source: card.id, idempotency_id: idempotencyResponse!.idempotency)
-                    AuthorizationAPI().create(auth: idempotencyResponse!.token, authorization: authorization, completion: authCompletion)
-                case .failure(let error):
-                    debugPrint("Your transaction failed! \(error.localizedDescription)")
-                    if let type = error as? FinixError {
-                        completion(.failure(FailureResponse(type: type.errors[0]["message"]!)))
-                    } else {
-                        completion(.failure(FailureResponse(type: error.localizedDescription)))
-                    }
-                }
-        }
-        
-        func authCompletion(response: Result<AuthorizationResponse, Error>) {
-            switch response {
-                case .success(let auth):
-                    authResponse = auth
-                    tokenResponse = TokenizationResponse(receipt_number: idempotencyResponse!.idempotency, first_six: cardResponse!.bin, brand: cardResponse!.bin, amount: idempotencyResponse!.payment.amount, convenience_fee: idempotencyResponse!.payment.service_fee)
-                    completion(.success(tokenResponse!))
-                case .failure(let error):
-                    debugPrint("Your transaction failed! \(error.localizedDescription)")
-                    if let type = error as? FinixError {
-                        debugPrint("We passed a FinixError")
-                        completion(.failure(FailureResponse(type: type.errors[0]["message"]!)))
-                    } else {
-                        debugPrint("We didnt pass a FinixError")
-                        completion(.failure(FailureResponse(type: error.localizedDescription)))
-                    }
-                }
-        }
-        
-        func identityCompletion(response: Result<IdentityResponse, Error>) {
-            switch response {
-                case .success(let responseIdentity):
-                    identityResponse = responseIdentity
-                    paymentCard.identity = responseIdentity.id
-                    PaymentCardAPI().create(auth: idempotencyResponse!.token, card: paymentCardToDictionary(card: paymentCard), completion: paymentCardCompletion)
-                case .failure(let error):
-                    debugPrint("Your transaction failed! \(error.localizedDescription)")
-                    if let type = error as? FinixError {
-                        completion(.failure(FailureResponse(type: type.errors[0]["message"]!)))
-                    } else {
-                        completion(.failure(FailureResponse(type: error.localizedDescription)))
-                    }
-                }
-        }
-        
-        let buyer = buyerToDictionary(buyer: identity)
-        let identityParameter: [String: Any] = ["tags": tags, "entity": buyer]
-        
-        IdentityAPI().create(auth: idempotencyResponse!.token, identity: identityParameter , completion: identityCompletion)
-    }
-    
-    //Function that decrypts the idempotency response from the server
-    func decryptKMS(response: AWSResponse, completion: @escaping (Idempotency) -> Void) {
-        let decodedCredId = Data(base64Encoded: response.credId)!
-        let credIdString = String(data: decodedCredId, encoding: .utf8)!
-        let keys = credIdString.components(separatedBy: ":")
-        
-        let credentialsProvider = AWSBasicSessionCredentialsProvider(accessKey: keys[0], secretKey: keys[1], sessionToken: keys[2])
-        let configuration = AWSServiceConfiguration(
-            region: .USEast1,
-            credentialsProvider: credentialsProvider)
-        AWSServiceManager.default().defaultServiceConfiguration = configuration
-        
-        let verifyRequest:AWSKMSVerifyRequest = AWSKMSVerifyRequest()
-        let decodedMessage = Data(base64Encoded: response.response)!
-        let decodedSignature =  Data(base64Encoded: response.signature)!
-        verifyRequest.signature = decodedSignature
-        verifyRequest.keyId = "9c25fd5d-fd5e-4f02-83ce-a981f1824c4f"
-        verifyRequest.signingAlgorithm = .ecdsaSha384
-        verifyRequest.messageType = .RAW
-        verifyRequest.message = decodedMessage
-        AWSKMS.default().verify(verifyRequest) { (response, err) in
-            guard let error = err else {
-                let decryptRequest:AWSKMSDecryptRequest = AWSKMSDecryptRequest();
-                decryptRequest.ciphertextBlob = decodedMessage
-                decryptRequest.encryptionAlgorithm = .rsaesOaepSha256
-                decryptRequest.keyId = "c731e986-c849-4534-9367-a004f6ca272c"
-                
-                AWSKMS.default().decrypt(decryptRequest, completionHandler: { (decryptRes, err) in
-                            guard let error = err else {
-                                
-                                let decoder = JSONDecoder()
-                                let decodedIdempotency = try? decoder.decode(Idempotency.self, from: decryptRes!.plaintext!)
-        
-                                completion(decodedIdempotency!)
-                                
-                                
-                                return
-                            }
-                            debugPrint(error)
-                        })
-                return
-            }
-            debugPrint(error)
-        }
-    }
-    
-    
-    //Public function that will  tokenize all the information and create an authorization but needs to either be cancelled or captured before the payment goes through. Allows for there to be a confirmation step in the transaction process
+    //Function that will tokenize  but needs to either be cancelled or captured before the payment goes through. Allows for there to be a confirmation step in the transaction process
     
     func tokenize(card: PaymentCard, amount: Int,  buyerOptions: Buyer, fee_mode: FEE_MODE, tags: [String: Any], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void ) {
         
@@ -176,7 +68,7 @@ public class PayTheory: ObservableObject {
                             return
                         }
                         let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallenge.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount, fee_mode: fee_mode)
-                        postAttestation(attestation: attest, apiKey: self.apiKey, completion: attestationClosure)
+                        postIdempotency(body: attest, apiKey: self.apiKey, endpoint: self.environment.rawValue, completion: idempotencyClosure)
                     }
                 }
             
@@ -187,13 +79,17 @@ public class PayTheory: ObservableObject {
         }
         
         //Closure to run once the idempotency has been retrieved from the PT Server
-        func attestationClosure(response: Result<AWSResponse, Error>) {
+        func idempotencyClosure(response: Result<IdempotencyResponse, Error>) {
             switch response {
             case .success(let response):
-                
-                decryptKMS(response: response) { idempotency in
-                    self.idempotencyResponse = idempotency
-                    self.tokenizeCard(identity: buyerOptions, paymentCard: card, amount: amount, merchant: idempotency.payment.merchant, tags: tags, completion: completion)
+                if envCard.isValid {
+                    idempotencyResponse = response
+                    tokenResponse = TokenizationResponse(receipt_number: response.idempotency, first_six: envCard.first_six, brand: "visa", amount: response.payment.amount, convenience_fee: response.payment.service_fee)
+                    completion(.success(tokenResponse!))
+                } else if envAch.isValid {
+                    idempotencyResponse = response
+                    tokenResponse = TokenizationResponse(receipt_number: response.idempotency, first_six: envCard.first_six, brand: "visa", amount: response.payment.amount, convenience_fee: response.payment.service_fee)
+                    completion(.success(tokenResponse!))
                 }
                 
             case .failure(let error):
@@ -202,12 +98,12 @@ public class PayTheory: ObservableObject {
             }
         }
         
-        getChallenge(apiKey: apiKey, completion: challengeClosure)
+        getChallenge(apiKey: apiKey, endpoint: environment.rawValue, completion: challengeClosure)
     }
     
     // Calculated value that can allow someone to check if there is an active token
     public var isTokenized: Bool {
-        if tokenResponse != nil {
+        if idempotencyResponse != nil {
             return true
         } else {
             return false
@@ -216,40 +112,22 @@ public class PayTheory: ObservableObject {
     
     
     //Public function that will void the authorization and relase any funds that may be held.
-    
-    public func cancel(completion: @escaping (Result<Bool, FailureResponse>) -> Void) {
-        func cancelCompletion(response: Result<AuthorizationResponse, Error>) {
-            switch response {
-                case .success(_):
-                    completion(.success(true))
-                    authResponse = nil
-                    tokenResponse = nil
-                case .failure(let error):
-                    debugPrint("Your void failed! \(error.localizedDescription)")
-                }
-        }
-        
-        if let auth = authResponse {
-            AuthorizationAPI().void(auth: idempotencyResponse!.token, id: auth.id, completion: cancelCompletion)
-        } else {
-            let error = FailureResponse(type: "There is no auth to void")
-            completion(.failure(error))
-        }
+
+    public func cancel() {
+        tokenResponse = nil
+        idempotencyResponse = nil
     }
-    
-    
+//
+//
     //Public function that will complete the authorization and send a Completion Response with all the transaction details to the completion handler provided
-    
+
     public func capture(completion: @escaping (Result<CompletionResponse, FailureResponse>) -> Void) {
-        
-        func captureCompletion(response: Result<AuthorizationResponse, Error>) {
+
+        func captureCompletion(response: Result<[String: AnyObject], Error>) {
             switch response {
                 case .success(let responseAuth):
-                    let complete = CompletionResponse(receipt_number: idempotencyResponse!.idempotency, last_four: cardResponse!.last_four, brand: cardResponse!.brand, created_at: authResponse!.created_at, amount: idempotencyResponse!.payment.amount, convenience_fee: idempotencyResponse!.payment.service_fee, state: responseAuth.state)
+                    let complete = CompletionResponse(receipt_number: idempotencyResponse!.idempotency, last_four: envCard.last_four, brand: "Visa", created_at: responseAuth["created_at"] as! String, amount: responseAuth["amount"] as! Int, convenience_fee: responseAuth["service_fee"] as! Int, state: responseAuth["state"] as! String)
                     completion(.success(complete))
-                    identityResponse = nil
-                    cardResponse = nil
-                    authResponse = nil
                     tokenResponse = nil
                     idempotencyResponse = nil
                     envCard.clear()
@@ -259,10 +137,16 @@ public class PayTheory: ObservableObject {
                     debugPrint("Your capture failed! \(error.localizedDescription)")
                 }
         }
-        
-        if let token = tokenResponse {
-            let captureAuth = CaptureAuth(fee: token.convenience_fee, capture_amount: Int(authResponse!.amount))
-            AuthorizationAPI().capture(auth: idempotencyResponse!.token, authorization: captureAuth, id: authResponse!.id ,completion: captureCompletion)
+
+        if let idempotency = idempotencyResponse {
+            let body: [String: Any] = [
+                "response" : idempotency.response,
+                "credId" : idempotency.credId,
+                "signature" : idempotency.signature,
+                "buyer-options" : buyerToDictionary(buyer: envBuyer),
+                "payment" : paymentCardToDictionary(card: envCard)
+            ]
+                postPayment(body: body, apiKey: apiKey, endpoint: self.environment.rawValue, completion: captureCompletion)
         } else {
             let error = FailureResponse(type: "There is no auth to capture")
             completion(.failure(error))
@@ -272,6 +156,10 @@ public class PayTheory: ObservableObject {
 
 //These fields are for capturing the card info required to create a payment card associated with an identity to run a transaction
 
+/// TextField that can be used to capture the Name for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTCardName: View {
     @EnvironmentObject var card: PaymentCard
     public init() {
@@ -282,6 +170,12 @@ public struct PTCardName: View {
     }
 }
 
+/// TextField that can be used to capture the Card Number for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+///  - Important: This is required to be able to run a transaction.
+///
 public struct PTCardNumber: View {
     @EnvironmentObject var card: PaymentCard
     public init(){
@@ -293,6 +187,12 @@ public struct PTCardNumber: View {
     }
 }
 
+/// TextField that can be used to capture the Expiration Year for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+///  - Important: This is required to be able to run a transaction.
+///
 public struct PTExpYear: View {
     @EnvironmentObject var card: PaymentCard
     public init(){
@@ -304,6 +204,12 @@ public struct PTExpYear: View {
     }
 }
 
+/// TextField that can be used to capture the Expiration Month for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+///  - Important: This is required to be able to run a transaction.
+///
 public struct PTExpMonth: View {
     @EnvironmentObject var card: PaymentCard
     public init(){
@@ -315,6 +221,12 @@ public struct PTExpMonth: View {
     }
 }
 
+/// TextField that can be used to capture the CVV for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+///  - Important: This is required to be able to run a transaction.
+///
 public struct PTCvv: View {
     @EnvironmentObject var card: PaymentCard
     public init(){
@@ -326,6 +238,10 @@ public struct PTCvv: View {
     }
 }
 
+/// TextField that can be used to capture the Address Line 1 for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTCardLineOne: View {
     @EnvironmentObject var card: PaymentCard
     
@@ -334,6 +250,10 @@ public struct PTCardLineOne: View {
     }
 }
 
+/// TextField that can be used to capture the Address Line 2 for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTCardLineTwo: View {
     @EnvironmentObject var card: PaymentCard
     
@@ -342,6 +262,10 @@ public struct PTCardLineTwo: View {
     }
 }
 
+/// TextField that can be used to capture the City for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTCardCity: View {
     @EnvironmentObject var card: PaymentCard
     
@@ -350,6 +274,10 @@ public struct PTCardCity: View {
     }
 }
 
+/// TextField that can be used to capture the State for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PYCardState: View {
     @EnvironmentObject var card: PaymentCard
     
@@ -358,6 +286,10 @@ public struct PYCardState: View {
     }
 }
 
+/// TextField that can be used to capture the Zip for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTCardZip: View {
     @EnvironmentObject var card: PaymentCard
     
@@ -366,6 +298,10 @@ public struct PTCardZip: View {
     }
 }
 
+/// TextField that can be used to capture the Country for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTCardCountry: View {
     @EnvironmentObject var card: PaymentCard
     
@@ -374,14 +310,18 @@ public struct PTCardCountry: View {
     }
 }
 
-
-public struct PTCardButton: View {
+/// Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTButton: View {
     @EnvironmentObject var card: PaymentCard
     @EnvironmentObject var envBuyer: Buyer
     @EnvironmentObject var PT: PayTheory
     
     var completion: (Result<TokenizationResponse, FailureResponse>) -> Void
     var amount: Int
+    var text: String
     var buyer: Buyer?
     var fee_mode: FEE_MODE
     var tags: [String: Any]
@@ -389,20 +329,20 @@ public struct PTCardButton: View {
     /// Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)
     /// - Parameters:
     ///   - amount: Payment amount that should be charged to the card in cents.
-    ///   - PT: PayTheory object that was initiated in your project that allows this to make calls with the API key.
-    ///   - buyer: Optional buyer information that allows name, email, phone number, and address of the buyer to be associated with the payment.
-    ///   - completion: Function that will handle the result of the tokenization response once it has been returned from the server.
+    ///   - buyer: Optional buyer object that can pass Buyer Options for the transaction.
     ///   - fee_mode: optional param that defaults to .SURCHARGE if you don't declare it. Can also pass .SERVICE_FEE as a prop
-    public init(amount: Int, buyer: Buyer? = nil, fee_mode: FEE_MODE = .SURCHARGE, tags: [String:Any] = [:], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
+    ///   - completion: Function that will handle the result of the tokenization response once it has been returned from the server.
+    public init(amount: Int, buyer: Buyer? = nil, fee_mode: FEE_MODE = .SURCHARGE, text: String = "Confirm", tags: [String:Any] = [:], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
         self.completion = completion
         self.amount = amount
         self.fee_mode = fee_mode
         self.tags = tags
+        self.text = text
     }
     
     
     public var body: some View {
-        Button("Create Card") {
+        Button(text) {
             if let identity = buyer {
                 PT.tokenize(card: card, amount: amount, buyerOptions: identity, fee_mode: fee_mode, tags: tags, completion: completion)
             } else {
@@ -413,6 +353,20 @@ public struct PTCardButton: View {
     }
 }
 
+
+/// This is used to wrap an ancestor view to allow the TextFields and Buttons to access the data needed.
+///
+/// - Requires: Needs to have the PayTheory Object that was initialized with the API Key passed as an EnvironmentObject
+///
+/**
+  ````
+ let pt = PayTheory(apiKey: 'your-api-key')
+
+ PTForm{
+     AncestorView()
+ }.EnvironmentObject(pt)
+  ````
+ */
 public struct PTForm<Content>: View where Content: View {
 
     let content: () -> Content
@@ -427,12 +381,17 @@ public struct PTForm<Content>: View where Content: View {
             content()
         }.environmentObject(PT.envCard)
         .environmentObject(PT.envBuyer)
+        .environmentObject(PT.envAch)
     }
 
 }
 
 //These fields are for creating an identity to associate with a purchase if you want to capture customer information
 
+/// TextField that can be used to capture the First Name for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerFirstName: View {
     @EnvironmentObject var identity: Buyer
     
@@ -440,6 +399,11 @@ public struct PTBuyerFirstName: View {
         TextField("First Name", text: $identity.first_name ?? "")
     }
 }
+
+/// TextField that can be used to capture the Last Name for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerLastName: View {
     @EnvironmentObject var identity: Buyer
     
@@ -447,6 +411,11 @@ public struct PTBuyerLastName: View {
         TextField("Last Name", text: $identity.last_name ?? "")
     }
 }
+
+/// TextField that can be used to capture the Phone for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerPhone: View {
     @EnvironmentObject var identity: Buyer
     
@@ -454,6 +423,11 @@ public struct PTBuyerPhone: View {
         TextField("Phone", text: $identity.phone ?? "")
     }
 }
+
+/// TextField that can be used to capture the Email for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerEmail: View {
     @EnvironmentObject var identity: Buyer
     
@@ -462,6 +436,10 @@ public struct PTBuyerEmail: View {
     }
 }
 
+/// TextField that can be used to capture the Address Line 1 for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerLineOne: View {
     @EnvironmentObject var identity: Buyer
     
@@ -470,6 +448,10 @@ public struct PTBuyerLineOne: View {
     }
 }
 
+/// TextField that can be used to capture the Address Line 2 for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerLineTwo: View {
     @EnvironmentObject var identity: Buyer
     
@@ -478,6 +460,10 @@ public struct PTBuyerLineTwo: View {
     }
 }
 
+/// TextField that can be used to capture the City for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerCity: View {
     @EnvironmentObject var identity: Buyer
     
@@ -486,6 +472,10 @@ public struct PTBuyerCity: View {
     }
 }
 
+/// TextField that can be used to capture the State for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerState: View {
     @EnvironmentObject var identity: Buyer
     
@@ -494,6 +484,10 @@ public struct PTBuyerState: View {
     }
 }
 
+/// TextField that can be used to capture the Zip for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerZip: View {
     @EnvironmentObject var identity: Buyer
     
@@ -502,10 +496,79 @@ public struct PTBuyerZip: View {
     }
 }
 
+/// TextField that can be used to capture the Country for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
 public struct PTBuyerCountry: View {
     @EnvironmentObject var identity: Buyer
     
     public var body: some View {
         TextField("Country", text: $identity.personal_address.country ?? "")
+    }
+}
+
+/// TextField that can be used to capture the Country for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTAchAccountName: View {
+    @EnvironmentObject var account: BankAccount
+    public init(){
+        
+    }
+    
+    public var body: some View {
+        TextField("Name on Account", text: $account.name)
+    }
+}
+
+/// TextField that can be used to capture the Country for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTAchAccountNumber: View {
+    @EnvironmentObject var account: BankAccount
+    public init(){
+        
+    }
+    
+    public var body: some View {
+        TextField("Account Number", text: $account.account_number)
+    }
+}
+
+/// TextField that can be used to capture the Country for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTAchAccountType: View {
+    @EnvironmentObject var account: BankAccount
+    var types = ["Checking", "Savings"]
+    public init(){
+        
+    }
+    
+    public var body: some View {
+        Picker("Account Type", selection: $account.account_type){
+            ForEach(0 ..< types.count){
+                Text(self.types[$0])
+            }
+        }.pickerStyle(SegmentedPickerStyle())
+    }
+}
+
+/// TextField that can be used to capture the Country for Buyer Options to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTAchBankCode: View {
+    @EnvironmentObject var account: BankAccount
+    public init(){
+        
+    }
+    
+    public var body: some View {
+        TextField("Routing Number", text: $account.bank_code)
     }
 }
