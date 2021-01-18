@@ -7,8 +7,6 @@
 
 import Foundation
 
-import AWSKMS
-
 public class Address: ObservableObject, Codable, Equatable {
     public static func == (lhs: Address, rhs: Address) -> Bool {
         if lhs.city == rhs.city &&
