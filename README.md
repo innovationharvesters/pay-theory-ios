@@ -140,10 +140,8 @@ let buyer = Buyer(first_name: "Some", last_name: "Body", email: "somebody@gmail.
 This button component allows a transaction to be initialized. It will be disabled until it has the required data needed to initialize a transaction. It accepts a few arguments needed to initialize the payment.
 
  - amount: Payment amount that should be charged to the card in cents.
- - PT: PayTheory object that was initiated in the project with the API Key.
  - buyer: Buyer that allows name, email, phone number, and address of the buyer to be associated with the payment. If Buyer Info is passed as an argument it will ignore the ones captured by the custom text fields
- - fee_mode: Defaults to .SURCHARGE if you don't declare it. Can also pass .SERVICE_FEE as alternate option if account is set up for Service Fees.
- - tags: 
+ - require_confirmation: Bool that tells the button if it should await the confirmation step or run the transaction on click.
  - completion: Function that will handle the result of the call returning a Tokenization Response or Failure Response
 
 
@@ -189,23 +187,32 @@ func captureCompletion(result: Result<CompletionResponse, FailureResponse>){
 
 ## Tokenization Response
 
-When the necessary card info is collected and the PTButton is clicked the card token details are returned as a dictionary [String: Any] with the following info:
+When the necessary card info is collected and the PTButton is clicked with the required_confirmation set to true the token details are returned as a dictionary [String: Any] with the following info:
 
 *note that the service fee is included in amount*
 
 ```swift 
-class FailureResponse {
-    var receipt_number: String
-    var last_four: String
-    var brand: String? //Will not include the brand if it is an ACH transaction
-    var state = "FAILURE"
-    var type: String
-}
+//Response for a card transaction
+[
+    "receipt_number": "pt-env-XXXXXX",
+    "first_six": "XXXXXX", 
+    "brand": "XXXXXXXXX", 
+    "amount": 1000, 
+    "convenience_fee": 195
+]
+
+//Response for an ACH transaction
+[
+    "receipt_number": "pt-env-XXXXXX",
+    "last_four": "XXXX",
+    "amount": 1000, 
+    "convenience_fee": 195
+]
 ```
 
 ## Completion Response
 
-Upon completion of tokenization and capture, a dictionary [String: Any] will be returned with the following info:
+Once the PTButton is clicked and require_confirmation is set to false or if the capture function is called after tokenization, a dictionary [String: Any] will be returned with the following info:
 
 *note that the service fee is included in amount*
 
@@ -241,23 +248,13 @@ If a failure or decline occurs during the transaction, a dictionary [String: Any
 *note that the service fee is included in amount*
 
 ```swift 
-//Response for a card transaction
-[
-    "receipt_number":"pt-test-XXXXXX",
-    "last_four":"XXXX",
-    "brand":"XXXXXXXX",
-    "state":"FAILURE",
-    "type":"some descriptive reason for the failure / decline"
-]
-
-//Response for an ACH transaction
-[
-    "receipt_number":"pt-test-XXXXXX",
-    "last_four":"XXXX",
-    "brand":"XXXXXXXX",
-    "state":"FAILURE",
-    "type":"some descriptive reason for the failure / decline"
-]
+class FailureResponse {
+    var receipt_number: String
+    var last_four: String
+    var brand: String? //Will not include the brand if it is an ACH transaction
+    var state = "FAILURE"
+    var type: String
+}
 ```
 
 ## Styling the text fields and button
