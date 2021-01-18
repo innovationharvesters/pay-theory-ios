@@ -151,7 +151,7 @@ This button component allows a transaction to be initialized. It will be disable
 let amount = 1000
 let buyer = Buyer(first_name: "Some", last_name: "Body", email: "somebody@gmail.com")
 
-func completion(result: Result<TokenizationResponse, FailureResponse>){
+func completion(result: Result<[String: Any], FailureResponse>){
     switch result {
     case .success(let token):
             ...
@@ -161,7 +161,7 @@ func completion(result: Result<TokenizationResponse, FailureResponse>){
 }
 
 ...
-PTButton(amount: amount, buyer: buyer, PT: pt, fee_mode: .SURCHARGE, tags: tags, completion: completion)
+PTButton(amount: 5000, buyer: buyer, require_confirmation: true, completion: completion)
 ```
 
 ### Caputre or Cancel an Authorization
@@ -194,22 +194,13 @@ When the necessary card info is collected and the PTButton is clicked the card t
 *note that the service fee is included in amount*
 
 ```swift 
-//Response for a card transaction
-[
-    "receipt_number": "pt-env-XXXXXX",
-    "first_six": "XXXXXX", 
-    "brand": "XXXXXXXXX", 
-    "amount": 1000, 
-    "convenience_fee": 195
-]
-
-//Response for an ACH transaction
-[
-    "receipt_number": "pt-env-XXXXXX",
-    "last_four": "XXXX",
-    "amount": 1000, 
-    "convenience_fee": 195
-]
+class FailureResponse {
+    var receipt_number: String
+    var last_four: String
+    var brand: String? //Will not include the brand if it is an ACH transaction
+    var state = "FAILURE"
+    var type: String
+}
 ```
 
 ## Completion Response
