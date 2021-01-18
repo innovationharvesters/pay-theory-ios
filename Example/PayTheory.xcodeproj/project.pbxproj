@@ -36,7 +36,7 @@
 		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Tests.swift; path = ../../Tests.swift; sourceTree = "<group>"; };
 		662216D0F4A82C6F2C164E3D /* Pods_PayTheory_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PayTheory_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		9386AE312552ED63009DEE33 /* PayTheory Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PayTheory Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayTheory_ExampleApp.swift; sourceTree = "<group>"; };
+		9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PayTheory_ExampleApp.swift; path = ../../PayTheory_ExampleApp.swift; sourceTree = "<group>"; };
 		9386AE352552ED63009DEE33 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		9386AE372552ED68009DEE33 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9386AE3A2552ED68009DEE33 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };

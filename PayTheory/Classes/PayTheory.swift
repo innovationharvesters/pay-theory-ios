@@ -30,17 +30,19 @@ public class PayTheory: ObservableObject {
     
     var apiKey: String
     var environment: Environment
+    var fee_mode: FEE_MODE
+    var tags: [String: Any]
     
-    private var tokenResponse: TokenizationResponse?
+    private var tokenResponse: [String: Any]?
     private var idempotencyResponse: IdempotencyResponse?
     private var passedBuyer: Buyer?
     
-    private var card = PaymentCard()
     
-    
-    public init(apiKey: String, environment: Environment = .DEMO){
+    public init(apiKey: String, fee_mode: FEE_MODE = .SURCHARGE, tags: [String:Any] = [:], environment: Environment = .DEMO){
         self.apiKey = apiKey
         self.environment = environment
+        self.fee_mode = fee_mode
+        self.tags = tags
     }
     
     let envCard = PaymentCard()
@@ -49,7 +51,7 @@ public class PayTheory: ObservableObject {
     
     //Function that will tokenize  but needs to either be cancelled or captured before the payment goes through. Allows for there to be a confirmation step in the transaction process
     
-    func tokenize(card: PaymentCard, amount: Int,  buyerOptions: Buyer, fee_mode: FEE_MODE, tags: [String: Any], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void ) {
+    func tokenize(card: PaymentCard? = nil, bank: BankAccount? = nil, amount: Int,  buyerOptions: Buyer, completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
         
         //Closure to run once the challenge has been retrieved from the PT Server
         func challengeClosure(response: Result<Challenge, Error>) {
@@ -64,10 +66,10 @@ public class PayTheory: ObservableObject {
                     let hash = Data(SHA256.hash(data: encodedChallenge))
                     self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
                         guard error == nil else {
-                            debugPrint(error ?? "")
+                            debugPrint(error!)
                             return
                         }
-                        let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallenge.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount, fee_mode: fee_mode)
+                        let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallenge.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount, fee_mode: self.fee_mode)
                         postIdempotency(body: attest, apiKey: self.apiKey, endpoint: self.environment.rawValue, completion: idempotencyClosure)
                     }
                 }
@@ -84,11 +86,12 @@ public class PayTheory: ObservableObject {
             case .success(let response):
                 if envCard.isValid {
                     idempotencyResponse = response
-                    tokenResponse = TokenizationResponse(receipt_number: response.idempotency, first_six: envCard.first_six, brand: "visa", amount: response.payment.amount, convenience_fee: response.payment.service_fee)
+                    tokenResponse = ["receipt_number": response.idempotency, "first_six": envCard.first_six, "brand": envCard.brand, "amount": response.payment.amount, "convenience_fee": response.payment.service_fee ]
+                    
                     completion(.success(tokenResponse!))
                 } else if envAch.isValid {
                     idempotencyResponse = response
-                    tokenResponse = TokenizationResponse(receipt_number: response.idempotency, first_six: envCard.first_six, brand: "visa", amount: response.payment.amount, convenience_fee: response.payment.service_fee)
+                    tokenResponse = ["receipt_number": response.idempotency, "last_four": envAch.last_four, "amount": response.payment.amount, "convenience_fee": response.payment.service_fee ]
                     completion(.success(tokenResponse!))
                 }
                 
@@ -121,30 +124,64 @@ public class PayTheory: ObservableObject {
 //
     //Public function that will complete the authorization and send a Completion Response with all the transaction details to the completion handler provided
 
-    public func capture(completion: @escaping (Result<CompletionResponse, FailureResponse>) -> Void) {
+    public func capture(completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
+        var type: String = ""
 
         func captureCompletion(response: Result<[String: AnyObject], Error>) {
             switch response {
                 case .success(let responseAuth):
-                    let complete = CompletionResponse(receipt_number: idempotencyResponse!.idempotency, last_four: envCard.last_four, brand: "Visa", created_at: responseAuth["created_at"] as! String, amount: responseAuth["amount"] as! Int, convenience_fee: responseAuth["service_fee"] as! Int, state: responseAuth["state"] as! String)
+                    let complete: [String: Any]
+                        
+                    if type == "card" {
+                        complete = ["receipt_number": idempotencyResponse!.idempotency, "last_four": envCard.last_four, "brand": envCard.brand, "created_at": responseAuth["created_at"] as! String, "amount": responseAuth["amount"] as! Int, "service_fee" : responseAuth["service_fee"] as! Int, "state" : responseAuth["state"] as! String, "tags": responseAuth["tags"] as! [String: Any]]
+                    } else {
+                        complete = ["receipt_number": idempotencyResponse!.idempotency, "last_four": envAch.last_four, "created_at": responseAuth["created_at"] as! String, "amount": responseAuth["amount"] as! Int, "service_fee" : responseAuth["service_fee"] as! Int, "state" : responseAuth["state"] as! String, "tags": responseAuth["tags"] as! [String: Any]]
+                    }
                     completion(.success(complete))
                     tokenResponse = nil
                     idempotencyResponse = nil
                     envCard.clear()
                     envBuyer.clear()
+                    envAch.clear()
 
                 case .failure(let error):
-                    debugPrint("Your capture failed! \(error.localizedDescription)")
+                    if let confirmed = error as? FailureResponse {
+                        if type == "card" {
+                            confirmed.brand = envCard.brand
+                            confirmed.receipt_number = idempotencyResponse!.idempotency
+                            confirmed.last_four = envCard.last_four
+                        } else {
+                            confirmed.receipt_number = idempotencyResponse!.idempotency
+                            confirmed.last_four = envAch.last_four
+                        }
+                        completion(.failure(confirmed))
+                        tokenResponse = nil
+                        idempotencyResponse = nil
+                    } else {
+                        completion(.failure(FailureResponse(type: error.localizedDescription)))
+                        tokenResponse = nil
+                        idempotencyResponse = nil
+                    }
                 }
         }
 
         if let idempotency = idempotencyResponse {
+            var payment: [String: Any] = [:]
+            if envCard.isValid {
+                payment = paymentCardToDictionary(card: envCard)
+                type = "card"
+            } else if envAch.isValid {
+                payment = bankAccountToDictionary(account: envAch)
+                type = "ach"
+            }
+            
             let body: [String: Any] = [
                 "response" : idempotency.response,
                 "credId" : idempotency.credId,
                 "signature" : idempotency.signature,
                 "buyer-options" : buyerToDictionary(buyer: envBuyer),
-                "payment" : paymentCardToDictionary(card: envCard)
+                "payment" : payment,
+                "tags": self.tags
             ]
                 postPayment(body: body, apiKey: apiKey, endpoint: self.environment.rawValue, completion: captureCompletion)
         } else {
@@ -318,38 +355,72 @@ public struct PTButton: View {
     @EnvironmentObject var card: PaymentCard
     @EnvironmentObject var envBuyer: Buyer
     @EnvironmentObject var PT: PayTheory
+    @EnvironmentObject var bank: BankAccount
     
-    var completion: (Result<TokenizationResponse, FailureResponse>) -> Void
+    var completion: (Result<[String: Any], FailureResponse>) -> Void
     var amount: Int
     var text: String
     var buyer: Buyer?
-    var fee_mode: FEE_MODE
-    var tags: [String: Any]
+    var require_confirmation: Bool
     
     /// Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)
     /// - Parameters:
     ///   - amount: Payment amount that should be charged to the card in cents.
     ///   - buyer: Optional buyer object that can pass Buyer Options for the transaction.
-    ///   - fee_mode: optional param that defaults to .SURCHARGE if you don't declare it. Can also pass .SERVICE_FEE as a prop
+    ///   - require_confirmation: optional param that defaults to false if you don't declare it. Can also pass .SERVICE_FEE as a prop
     ///   - completion: Function that will handle the result of the tokenization response once it has been returned from the server.
-    public init(amount: Int, buyer: Buyer? = nil, fee_mode: FEE_MODE = .SURCHARGE, text: String = "Confirm", tags: [String:Any] = [:], completion: @escaping (Result<TokenizationResponse, FailureResponse>) -> Void) {
+    public init(amount: Int, buyer: Buyer? = nil, text: String = "Confirm", require_confirmation: Bool = false, completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
         self.completion = completion
         self.amount = amount
-        self.fee_mode = fee_mode
-        self.tags = tags
         self.text = text
+        self.buyer = buyer
+        self.require_confirmation = require_confirmation
+    }
+    
+    func tokenizeCompletion(result: Result<[String: Any], FailureResponse>) {
+        switch result {
+            case .success:
+                PT.capture(completion: completion)
+            case .failure(let error):
+                debugPrint("Your capture failed! \(error.localizedDescription)")
+                completion(.failure(FailureResponse(type: error.localizedDescription)))
+            }
     }
     
     
     public var body: some View {
         Button(text) {
             if let identity = buyer {
-                PT.tokenize(card: card, amount: amount, buyerOptions: identity, fee_mode: fee_mode, tags: tags, completion: completion)
+                if card.isValid {
+                    if require_confirmation {
+                        PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: completion)
+                    } else {
+                        PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
+                    }
+                } else if bank.isValid {
+                    if require_confirmation {
+                        PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: completion)
+                    } else {
+                        PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
+                    }
+                }
             } else {
-                PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, fee_mode: fee_mode, tags: tags, completion: completion)
+                if card.isValid {
+                    if require_confirmation {
+                        PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: completion)
+                    } else {
+                        PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
+                    }
+                } else if bank.isValid {
+                    if require_confirmation {
+                        PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: completion)
+                    } else {
+                        PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
+                    }
+                }
             }
         }
-        .disabled(card.isValid == false)
+        .disabled(card.isValid == false && bank.isValid == false)
     }
 }
 
@@ -535,6 +606,7 @@ public struct PTAchAccountNumber: View {
     
     public var body: some View {
         TextField("Account Number", text: $account.account_number)
+            .keyboardType(.decimalPad)
     }
 }
 
@@ -562,7 +634,7 @@ public struct PTAchAccountType: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTAchBankCode: View {
+public struct PTAchRoutingNumber: View {
     @EnvironmentObject var account: BankAccount
     public init(){
         
@@ -570,5 +642,6 @@ public struct PTAchBankCode: View {
     
     public var body: some View {
         TextField("Routing Number", text: $account.bank_code)
+            .keyboardType(.decimalPad)
     }
 }

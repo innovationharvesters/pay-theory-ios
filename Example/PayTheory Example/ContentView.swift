@@ -34,10 +34,17 @@ struct ContentView: View {
     
     let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "513-658-8121")
     
-    func completion(result: Result<TokenizationResponse, FailureResponse>){
+    @State private var type = 0
+    private var types: [String] = ["Card", "ACH"]
+    
+    func completion(result: Result<[String: Any], FailureResponse>){
         switch result {
         case .success(let token):
-                self.confirmationMessage = "Are you sure you want to charge $\(String(format:"%.2f", (Double(token.amount) / 100))) to the card starting in \(token.first_six)?"
+            if let brand = token["brand"] {
+                self.confirmationMessage = "Are you sure you want to charge $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to the \(brand) card starting in \(token["first_six"] ?? "")?"
+            } else {
+                self.confirmationMessage = "Are you sure you want to charge $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to the Bank Account ending in \(token["last_four"] ?? "")?"
+            }
                 self.showingConfirmation = true
             case .failure(let error):
                 self.confirmationMessage = "Your tokenization failed! \(error.type)"
@@ -45,22 +52,16 @@ struct ContentView: View {
             }
     }
     
-    func confirmCompletion(result: Result<CompletionResponse, FailureResponse>){
+    func confirmCompletion(result: Result<[String: Any], FailureResponse>){
         switch result {
         case .success(let token):
-            self.confirmationMessage = "You charged $\(String(format:"%.2f", (Double(token.amount) / 100))) to card ending in \(token.last_four)"
+            if let brand = token["brand"] {
+                self.confirmationMessage = "You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to \(brand) card ending in \(token["last_four"] ?? "")"
+            } else {
+                self.confirmationMessage = "You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to Bank Account ending in \(token["last_four"] ?? "")"
+            }
             self.showingMessage = true
-        case .failure(let response):
-            self.confirmationMessage = "The transaction failed to confirm \(response.type)"
-            self.showingMessage = true
-        }
-    }
-    
-    func cancelCompletion(result: Result<Bool, FailureResponse>){
-        switch result {
-        case .success(_):
-            self.confirmationMessage = "You cancelled the transaciton!"
-            self.showingMessage = true
+            debugPrint(token["tags"] as! [String: Any])
         case .failure(let response):
             self.confirmationMessage = "The transaction failed to confirm \(response.type)"
             self.showingMessage = true
@@ -69,12 +70,27 @@ struct ContentView: View {
     
     var body: some View {
             VStack{
-                PTCardName().textFieldStyle()
-                PTCardNumber().textFieldStyle()
-                PTExpYear().textFieldStyle()
-                PTExpMonth().textFieldStyle()
-                PTCvv().textFieldStyle()
-                PTButton(amount: 5000, buyer: buyer, tags: ["test": 1234, "Test Again": "This is a test"], completion: completion).textFieldStyle()
+                
+                Picker("Account Type", selection: $type){
+                    ForEach(0 ..< types.count){
+                        Text(self.types[$0])
+                    }
+                }.pickerStyle(SegmentedPickerStyle())
+                
+                if type == 0 {
+                    PTCardName().textFieldStyle()
+                    PTCardNumber().textFieldStyle()
+                    PTExpYear().textFieldStyle()
+                    PTExpMonth().textFieldStyle()
+                    PTCvv().textFieldStyle()
+                } else if type == 1 {
+                    PTAchAccountName().textFieldStyle()
+                    PTAchAccountNumber().textFieldStyle()
+                    PTAchRoutingNumber().textFieldStyle()
+                    PTAchAccountType()
+                }
+                
+                PTButton(amount: 5000, buyer: buyer, require_confirmation: true, completion: completion).textFieldStyle()
             }
         .alert(isPresented: $showingConfirmation) {
             Alert(title: Text("Confirm:"), message: Text(confirmationMessage), primaryButton: .default(Text("Confirm"), action: {

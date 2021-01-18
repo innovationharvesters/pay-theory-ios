@@ -147,6 +147,33 @@ class PaymentCard: ObservableObject, Codable, Equatable {
         return String(number.suffix(4))
     }
     
+    var brand: String {
+        let visa = "^4"
+        let mastercard = "^5[1-5][0-9]{5,}|222[1-9][0-9]{3,}|22[3-9][0-9]{4,}|2[3-6][0-9]{5,}|27[01][0-9]{4,}|2720[0-9]{3,}$/"
+        let amex = "^3[47][0-9]{5,}$"
+        let discover = "^6(?:011|5[0-9]{2})[0-9]{3,}$"
+        let jcb = "^35"
+        let dinersClub = "^3(?:0[0-5]|[68][0-9])[0-9]{4,}$"
+        
+        let first7 = String(number.prefix(7))
+        
+        if first7.range(of: visa, options: .regularExpression, range: nil, locale: nil) != nil {
+            return "Visa"
+        } else if first7.range(of: mastercard, options: .regularExpression, range: nil, locale: nil) != nil {
+            return "MasterCard"
+        } else  if first7.range(of: amex, options: .regularExpression, range: nil, locale: nil) != nil {
+            return "American Express"
+        } else if first7.range(of: discover, options: .regularExpression, range: nil, locale: nil) != nil {
+            return "Discover"
+        } else if first7.range(of: jcb, options: .regularExpression, range: nil, locale: nil) != nil {
+            return "JCB"
+        } else if first7.range(of: dinersClub, options: .regularExpression, range: nil, locale: nil) != nil {
+            return "Diners Club"
+        } else {
+            return ""
+        }
+    }
+    
     var validExpirationDate: Bool {
         if expiration_year.count != 4 {
             return false
@@ -175,8 +202,13 @@ class PaymentCard: ObservableObject, Codable, Equatable {
         return true
     }
     
+    var validSecurityCode: Bool {
+        let num = Int(security_code)
+        return num != nil && security_code.length > 1 && security_code.length < 5
+    }
+    
     var isValid: Bool {
-        if validExpirationDate == false || validCardNumber == false || security_code.isEmpty {
+        if validExpirationDate == false || validCardNumber == false || validSecurityCode == false {
             return false
         }
         return true
@@ -214,7 +246,6 @@ func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
     result["security_code"] = card.security_code
     result["expiration_month"] = card.expiration_month
     result["expiration_year"] = card.expiration_year
-    result["identity"] = card.identity
     result["number"] = card.number
     result["type"] = "PAYMENT_CARD"
     
@@ -305,11 +336,20 @@ class BankAccount: ObservableObject, Codable, Equatable {
         return n > 0 && n % 10 == 0
     }
     
+    var validAccountNumber: Bool {
+        let num = Int(account_number)
+        return num != nil && account_number.isEmpty == false
+    }
+    
     var isValid: Bool {
-        if account_number.isEmpty || validBankCode == false || identity.isEmpty || name.isEmpty || validAccountType == false {
+        if validAccountNumber == false || validBankCode == false || name.isEmpty || validAccountType == false {
             return false
         }
         return true
+    }
+    
+    var last_four: String {
+        return String(account_number.suffix(4))
     }
     
     
@@ -327,6 +367,13 @@ class BankAccount: ObservableObject, Codable, Equatable {
     init() {
     }
     
+    func clear() {
+        self.name = ""
+        self.account_type = 0
+        self.account_number = ""
+        self.bank_code = ""
+    }
+    
 }
 
 func bankAccountToDictionary(account: BankAccount) -> [String: Any] {
@@ -338,7 +385,6 @@ func bankAccountToDictionary(account: BankAccount) -> [String: Any] {
     result["account_number"] = account.account_number
     result["account_type"] = types[account.account_type]
     result["bank_code"] = account.bank_code
-    result["identity"] = account.identity
     result["type"] = "BANK_ACCOUNT"
     
     return result

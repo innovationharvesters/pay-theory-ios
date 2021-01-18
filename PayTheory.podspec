@@ -40,6 +40,4 @@ This pod allows you to incoporate PayTheory payments into your app. Includes a P
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'Alamofire', '~> 5.2'
-  s.dependency 'AWSKMS', '~> 2.19.0'
-  s.dependency 'AWSCore', '~> 2.19.0'
 end

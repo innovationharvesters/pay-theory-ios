@@ -202,7 +202,7 @@ public class FailureResponse: Error, Equatable {
     
     public var receipt_number = ""
     public var last_four = ""
-    public var brand = ""
+    public var brand: String?
     public var state = "FAILURE"
     public var type: String
     
@@ -210,7 +210,7 @@ public class FailureResponse: Error, Equatable {
         self.type = type
     }
     
-    public init(type: String, receipt_number: String, last_four: String, brand: String) {
+    public init(type: String, receipt_number: String, last_four: String, brand: String?) {
         self.type = type
         self.receipt_number = receipt_number
         self.last_four = last_four
