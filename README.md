@@ -29,7 +29,7 @@ import PayTheory
 Initialize a PayTheory element for handling state. It accepts the following arguments.
 - apiKey: Your PayTheory merchant API Key
 - tags: optional custom tags you can include to track purchases
-- environment: tells the SDK if it should be working from a demo or production environemnt (.DEMO or .PROD). Defaults to .DEMO
+- environment: tells the SDK if it should be working from a demo or production environment (.DEMO or .PROD). Defaults to .DEMO
 - fee_mode: optionally set the fee mode.  By default .SURCHARGE mode is used .SERVICE_FEE mode is available only when enabled by Pay Theory .SURCHARGE mode applies a fee of 2.9% + $0.30 to be deducted from original amount .SERVICE FEE mode calculates a fee based on predetermined parameters  and adds it to the original amount
 
 ```swift
@@ -171,7 +171,7 @@ PTButton(amount: 5000, buyer: buyer, require_confirmation: true, completion: com
 
 ### Capture or Cancel an Authorization
 
-If require_confirmation is set to true there are functions available to confirm or cancel the transaction. The capture function accepts a completion handler for the repsonse. To access these pull in the PayTheory object as an environment variable as shown below.
+If require_confirmation is set to true there are functions available to confirm or cancel the transaction. The capture function accepts a completion handler for the response. To access these pull in the PayTheory object as an environment variable as shown below.
 
 ```swift
 @EnvironmentObject var pt: PayTheory
