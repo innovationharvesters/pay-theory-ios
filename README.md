@@ -26,37 +26,44 @@ import PayTheory
 
 ## Usage
 
-Initalize a PayTheory element passing it an API Key and optionally a fee_mode (.SURCHARGE, .SERVICE_FEE) which defaults to .SURCHARGE, tags to be tied to your payment, and an environment (.DEMO or .PROD) which defaults to .DEMO if not included.
+Initialize a PayTheory element for handling state. It accepts the following arguments.
+- apiKey: Your PayTheory merchant API Key
+- tags: optional custom tags you can include to track purchases
+- environment: tells the SDK if it should be working from a demo or production environemnt (.DEMO or .PROD). Defaults to .DEMO
+- fee_mode: optionally set the fee mode.  By default .SURCHARGE mode is used .SERVICE_FEE mode is available only when enabled by Pay Theory .SURCHARGE mode applies a fee of 2.9% + $0.30 to be deducted from original amount .SERVICE FEE mode calculates a fee based on predetermined parameters  and adds it to the original amount
 
 ```swift
 let apiKey = 'your-api-key'
 let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
 
-let pt = PayTheory(apiKey: apiKey, fee_mode: .SURCHARGE, tags: tags, environment: .DEV)
+let pt = PayTheory(apiKey: apiKey, tags: tags, environment: .DEMO, fee_mode: .SURCHARGE)
 ```
 
-An ancestor view to the views in which the PayTheory object will be used needs to be wrapped with the PTForm component. You should then pass it the PayTheory object as an EnvironmentObject. This makes sure the Envoronment Objects required by the Pay Theory Text Fields are available.
+The content view in which the PayTheory object will be used needs to be wrapped with the PTForm component. You should pass the PayTheory object as an EnvironmentObject to the PTForm.
 
 ```swift
+let apiKey = 'your-api-key'
+let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
+
+let pt = PayTheory(apiKey: apiKey, tags: tags, environment: .DEMO, fee_mode: .SURCHARGE)
+
 PTForm{
-    AncestorView()
+    ContentView()
 }.EnvironmentObject(pt)
 ```
 ### Credit Card Text Fields
 
 These custom text fields are what will be used to collect the card information for the transaction.
 
-There are four required text fields to capture the info needed to initiaize a card transaction
+There are three required text fields to capture the info needed to initialize a card transaction
 
 - Credit Card Number
-- Credit Card Expiration Month
-- Credit Card Expiration Year
+- Credit Card Expiration
 - Credit Card CVV
 
 ```swift
 PTCardNumber()
-PTExpYear()
-PTExpMonth()
+PTExp()
 PTCvv()
 ```
 
@@ -84,7 +91,7 @@ PTCardCountry()
 
 These custom text fields are what will be used to collect the ACH information for the transaction.
 
-All four text fields are required to capture the info needed to initiaize an ACH transaction
+All four text fields are required to capture the info needed to initialize an ACH transaction
 
 - ACH Account Number
 - ACH Account Type
@@ -142,7 +149,7 @@ This button component allows a transaction to be initialized. It will be disable
  - amount: Payment amount that should be charged to the card in cents.
  - buyer: Buyer that allows name, email, phone number, and address of the buyer to be associated with the payment. If Buyer Info is passed as an argument it will ignore the ones captured by the custom text fields
  - require_confirmation: Bool that tells the button if it should await the confirmation step or run the transaction on click.
- - completion: Function that will handle the result of the call returning a Tokenization Response or Failure Response
+ - completion: Function that will handle the result of the call returning a dictionary [String:Any] or Failure Response
 
 
 ```swift
@@ -162,12 +169,14 @@ func completion(result: Result<[String: Any], FailureResponse>){
 PTButton(amount: 5000, buyer: buyer, require_confirmation: true, completion: completion)
 ```
 
-### Caputre or Cancel an Authorization
+### Capture or Cancel an Authorization
 
-Once the PTButton has been pressed and a repsonse has been recieved you have two options. You can either cancel or confirm. Those are handled by two functions in the PayTheory object. The capture function accepts a completion handler as an argument. The cancel function does not require a completion handler.
+If require_confirmation is set to true there are functions available to confirm or cancel the transaction. The capture function accepts a completion handler for the repsonse. To access these pull in the PayTheory object as an environment variable as shown below.
 
 ```swift
-func captureCompletion(result: Result<CompletionResponse, FailureResponse>){
+@EnvironmentObject var pt: PayTheory
+
+func captureCompletion(result: Result<[String:Any], FailureResponse>){
     switch result {
     case .success(let completion):
         ...
@@ -259,7 +268,7 @@ class FailureResponse {
 
 ## Styling the text fields and button
 
-To style the text fields and button you can simply treat the as any other standard SwiftUI text field to style.
+To style the text fields and button you can simply treat them as any other standard SwiftUI text field to style.
 
 ```swift
 struct TextField: ViewModifier {
@@ -277,10 +286,9 @@ extension View {
     }
 }
 
-
+PTCardName().textFieldStyle()
 PTCardNumber().textFieldStyle()
-PTExpYear().textFieldStyle()
-PTExpMonth().textFieldStyle()
+PTExp().textFieldStyle()
 PTCvv().textFieldStyle()
 ```
 

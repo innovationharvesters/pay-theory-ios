@@ -44,8 +44,10 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
             let json = String(data: data, encoding: String.Encoding.utf8)
             let errorArray = convertStringToDictionary(text: json!)
             if let errors = errorArray {
-                completion(.failure(FailureResponse(type: errors["reason"] as! String)))
-                return
+                if let error = errors["reason"] {
+                    completion(.failure(FailureResponse(type: error as! String)))
+                    return
+                }
             }
         }
         completion(.failure(FailureResponse(type: response.error!.localizedDescription)))

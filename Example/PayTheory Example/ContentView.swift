@@ -32,7 +32,7 @@ struct ContentView: View {
     @State private var showingMessage = false
     @EnvironmentObject var pt: PayTheory
     
-    let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "513-658-8121")
+    let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "555-555-5555")
     
     @State private var type = 0
     private var types: [String] = ["Card", "ACH"]
@@ -80,8 +80,7 @@ struct ContentView: View {
                 if type == 0 {
                     PTCardName().textFieldStyle()
                     PTCardNumber().textFieldStyle()
-                    PTExpYear().textFieldStyle()
-                    PTExpMonth().textFieldStyle()
+                    PTExp().textFieldStyle()
                     PTCvv().textFieldStyle()
                 } else if type == 1 {
                     PTAchAccountName().textFieldStyle()

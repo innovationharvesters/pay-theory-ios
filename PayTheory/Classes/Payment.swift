@@ -29,8 +29,7 @@ extension String {
 class PaymentCard: ObservableObject, Codable, Equatable {
     static func == (lhs: PaymentCard, rhs: PaymentCard) -> Bool {
         if lhs.name == rhs.name &&
-        lhs.expiration_month == rhs.expiration_month &&
-        lhs.expiration_year == rhs.expiration_year &&
+        lhs.expiration_date == rhs.expiration_date &&
         lhs.identity == rhs.identity &&
         lhs.address == rhs.address &&
         lhs.number == rhs.number &&
@@ -43,21 +42,24 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     }
     
     @Published var name: String?
-    @Published var expiration_month = ""{
+    @Published var expiration_date = ""{
         didSet {
-            let filtered = expiration_month.filter { $0.isNumber }
-            
-            if expiration_month != filtered {
-                expiration_month = filtered
+            if let month = Int(self.expiration_date) {
+                if (self.expiration_date.count == 1 && month > 1){
+                    expiration_date = "0" + expiration_date + " / "
+                }
+                if (self.expiration_date.count == 2 && month > 12) {
+                    expiration_date = "0" + String(expiration_date.prefix(1)) + " / " + String(expiration_date.suffix(1))
+                }
             }
-        }
-    }
-    @Published var expiration_year = ""{
-        didSet {
-            let filtered = expiration_year.filter { $0.isNumber }
-            
-            if expiration_year != filtered {
-                expiration_year = filtered
+            if (self.expiration_date.count == 2) {
+                expiration_date = expiration_date + " / "
+            }
+            if (self.expiration_date.count == 4) {
+                expiration_date = String(expiration_date.prefix(1))
+            }
+            if (self.expiration_date.count > 9){
+                expiration_date = oldValue
             }
         }
     }
@@ -65,10 +67,21 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     @Published var address = Address()
     @Published var number = ""{
         didSet {
-            let filtered = number.filter { $0.isNumber }
-            
-            if number != filtered {
-                number = filtered
+            if ((self.number.prefix(2) == "34" || self.number.prefix(2) == "37") && (self.number.count == 4 || self.number.count == 11)) {
+                if (oldValue.last == " ") {
+                    number.remove(at: oldValue.index(before: number.endIndex))
+                } else {
+                    number = number + " "
+                }
+            } else if ((self.number.prefix(2) != "34" && self.number.prefix(2) != "37") && (self.number.count == 4 || self.number.count == 9 || self.number.count == 14 || self.number.count == 19)) {
+                if (oldValue.last == " ") {
+                    number.remove(at: oldValue.index(before: number.endIndex))
+                } else {
+                    number = number + " "
+                }
+            }
+            if (self.number.count > 23 || ((self.number.prefix(2) == "34" || self.number.prefix(2) == "37") && self.number.count == 18)) {
+                number = oldValue
             }
         }
     }
@@ -84,14 +97,13 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     }
     
     enum CodingKeys: CodingKey {
-        case name, expiration_month, expiration_year, identity, address, number, type, security_code
+        case name, expiration_date, identity, address, number, type, security_code
     }
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
-        try container.encode(expiration_year, forKey: .expiration_year)
-        try container.encode(expiration_month, forKey: .expiration_month)
+        try container.encode(expiration_date, forKey: .expiration_date)
         try container.encode(identity, forKey: .identity)
         try container.encode(address, forKey: .address)
         try container.encode(number, forKey: .number)
@@ -105,20 +117,33 @@ class PaymentCard: ObservableObject, Codable, Equatable {
             name = try container.decodeIfPresent(String.self, forKey: .name) ?? nil
             address = try container.decode(Address.self, forKey: .address)
             security_code = try container.decode(String.self, forKey: .security_code)
-            expiration_month = try container.decode(String.self, forKey: .expiration_month)
-            expiration_year = try container.decode(String.self, forKey: .expiration_year)
+            expiration_date = try container.decode(String.self, forKey: .expiration_date)
             identity = try container.decode(String.self, forKey: .identity)
             number = try container.decode(String.self, forKey: .number)
             type = try container.decode(String.self, forKey: .type)
     }
     
+    var expiration_month: String {
+        return String(expiration_date.prefix(2))
+    }
+
+    var expiration_year: String {
+        var result = ""
+        if expiration_date.count == 7 {
+            result = "20" + String(expiration_date.suffix(2))
+        } else if expiration_date.count == 9 {
+            result = String(expiration_date.suffix(4))
+        }
+        return result
+    }
+    
     var validCardNumber: Bool {
-        if (number.count < 13 || number.count > 19){
+        if (spacelessCard.count < 13 || spacelessCard.count > 19){
             return false
         }
         
         var sum = 0
-        let digitStrings = number.reversed().map { String($0) }
+        let digitStrings = spacelessCard.reversed().map { String($0) }
 
         for tuple in digitStrings.enumerated() {
             if let digit = Int(tuple.element) {
@@ -140,11 +165,15 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     }
     
     var first_six: String {
-        return String(number.prefix(6))
+        return String(spacelessCard.prefix(6))
     }
     
     var last_four: String {
-        return String(number.suffix(4))
+        return String(spacelessCard.suffix(4))
+    }
+    
+    var spacelessCard: String {
+        return String(number.filter { !" \n\t\r".contains($0) })
     }
     
     var brand: String {
@@ -155,7 +184,7 @@ class PaymentCard: ObservableObject, Codable, Equatable {
         let jcb = "^35"
         let dinersClub = "^3(?:0[0-5]|[68][0-9])[0-9]{4,}$"
         
-        let first7 = String(number.prefix(7))
+        let first7 = String(spacelessCard.prefix(7))
         
         if first7.range(of: visa, options: .regularExpression, range: nil, locale: nil) != nil {
             return "Visa"
@@ -204,7 +233,7 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     
     var validSecurityCode: Bool {
         let num = Int(security_code)
-        return num != nil && security_code.length > 1 && security_code.length < 5
+        return num != nil && security_code.length > 2 && security_code.length < 5
     }
     
     var isValid: Bool {
@@ -217,17 +246,15 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     init() {
     }
     
-    init(number: String, expiration_year: String, expiration_month: String, cvv: String) {
+    init(number: String, expiration_date: String, cvv: String) {
         self.number = number
-        self.expiration_year = expiration_year
-        self.expiration_month = expiration_month
+        self.expiration_date = expiration_date
         self.security_code = cvv
     }
     
     func clear() {
         self.number = ""
-        self.expiration_year = ""
-        self.expiration_month = ""
+        self.expiration_date = ""
         self.security_code = ""
         self.address = Address()
         self.identity = ""
@@ -246,7 +273,7 @@ func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
     result["security_code"] = card.security_code
     result["expiration_month"] = card.expiration_month
     result["expiration_year"] = card.expiration_year
-    result["number"] = card.number
+    result["number"] = card.spacelessCard
     result["type"] = "PAYMENT_CARD"
     
     return result

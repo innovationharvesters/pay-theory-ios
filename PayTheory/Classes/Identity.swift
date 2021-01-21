@@ -85,35 +85,3 @@ func buyerToDictionary(buyer: Buyer) -> [String: Any] {
     
     return result
 }
-
-class IdentityBody: Codable {
-    var entity: Buyer
-    
-    init(entity: Buyer) {
-        self.entity = entity
-    }
-}
-
-class IdentityResponse: Codable, Equatable {
-    static func == (lhs: IdentityResponse, rhs: IdentityResponse) -> Bool {
-        if lhs.id == rhs.id &&
-        lhs.application == rhs.application &&
-        lhs.entity == rhs.entity &&
-        lhs.created_at == rhs.created_at &&
-            lhs.updated_at == rhs.updated_at {
-            return true
-        }
-        
-        return false
-    }
-    
-    var id = ""
-    var application = ""
-    var entity = Buyer()
-    var created_at = ""
-    var updated_at = ""
-    
-    init() {
-        
-    }
-}

@@ -36,7 +36,7 @@ public class PayTheory: ObservableObject {
     private var passedBuyer: Buyer?
     
     
-    public init(apiKey: String, fee_mode: FEE_MODE = .SURCHARGE, tags: [String:Any] = [:], environment: Environment = .DEMO){
+    public init(apiKey: String, tags: [String:Any] = [:], environment: Environment = .DEMO, fee_mode: FEE_MODE = .SURCHARGE){
         self.apiKey = apiKey
         self.environment = environment
         self.fee_mode = fee_mode
@@ -205,6 +205,7 @@ public struct PTCardName: View {
     }
 }
 
+
 /// TextField that can be used to capture the Card Number for a card object to be used in a Pay Theory payment
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
@@ -219,8 +220,10 @@ public struct PTCardNumber: View {
     public var body: some View {
         TextField("Card Number", text: $card.number)
             .keyboardType(.decimalPad)
+            
     }
 }
+
 
 /// TextField that can be used to capture the Expiration Year for a card object to be used in a Pay Theory payment
 ///
@@ -228,33 +231,33 @@ public struct PTCardNumber: View {
 ///
 ///  - Important: This is required to be able to run a transaction.
 ///
-public struct PTExpYear: View {
+public struct PTExp: View {
     @EnvironmentObject var card: PaymentCard
     public init(){
         
     }
     public var body: some View {
-        TextField("Expiration Year", text: $card.expiration_year)
+        TextField("MM / YY", text: $card.expiration_date)
             .keyboardType(.decimalPad)
     }
 }
 
-/// TextField that can be used to capture the Expiration Month for a card object to be used in a Pay Theory payment
-///
-///  - Requires: Ancestor view must be wrapped in a PTForm
-///
-///  - Important: This is required to be able to run a transaction.
-///
-public struct PTExpMonth: View {
-    @EnvironmentObject var card: PaymentCard
-    public init(){
-        
-    }
-    public var body: some View {
-        TextField("Expiration Month", text: $card.expiration_month)
-            .keyboardType(.decimalPad)
-    }
-}
+///// TextField that can be used to capture the Expiration Month for a card object to be used in a Pay Theory payment
+/////
+/////  - Requires: Ancestor view must be wrapped in a PTForm
+/////
+/////  - Important: This is required to be able to run a transaction.
+/////
+//public struct PTExpMonth: View {
+//    @EnvironmentObject var card: PaymentCard
+//    public init(){
+//
+//    }
+//    public var body: some View {
+//        TextField("Expiration Month", text: $card.expiration_month)
+//            .keyboardType(.decimalPad)
+//    }
+//}
 
 /// TextField that can be used to capture the CVV for a card object to be used in a Pay Theory payment
 ///
