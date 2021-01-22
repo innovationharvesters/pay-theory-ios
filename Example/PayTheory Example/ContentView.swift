@@ -89,7 +89,9 @@ struct ContentView: View {
                     PTAchAccountType()
                 }
                 
-                PTButton(amount: 5000, buyer: buyer, require_confirmation: true, completion: completion).textFieldStyle()
+                PTButton(amount: 5000, buyer: buyer, completion: confirmCompletion).textFieldStyle()
+                
+//                Text(pt.cardErrors["number"]!["isDirty"] as! Bool ? pt.cardErrors["number"]!["error"] as! String : "" )
             }
         .alert(isPresented: $showingConfirmation) {
             Alert(title: Text("Confirm:"), message: Text(confirmationMessage), primaryButton: .default(Text("Confirm"), action: {

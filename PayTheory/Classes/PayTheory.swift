@@ -41,11 +41,14 @@ public class PayTheory: ObservableObject {
         self.environment = environment
         self.fee_mode = fee_mode
         self.tags = tags
+        self.envAch = BankAccount()
+        self.envCard = PaymentCard()
+        self.envBuyer = Buyer()
     }
     
-    let envCard = PaymentCard()
-    let envBuyer = Buyer()
-    let envAch = BankAccount()
+    let envCard: PaymentCard
+    let envBuyer: Buyer
+    let envAch: BankAccount
     
     //Function that will tokenize  but needs to either be cancelled or captured before the payment goes through. Allows for there to be a confirmation step in the transaction process
     
@@ -362,7 +365,6 @@ public struct PTButton: View {
     var amount: Int
     var text: String
     var buyer: Buyer?
-    var require_confirmation: Bool
     
     /// Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)
     /// - Parameters:
@@ -370,12 +372,11 @@ public struct PTButton: View {
     ///   - buyer: Optional buyer object that can pass Buyer Options for the transaction.
     ///   - require_confirmation: optional param that defaults to false if you don't declare it. Can also pass .SERVICE_FEE as a prop
     ///   - completion: Function that will handle the result of the tokenization response once it has been returned from the server.
-    public init(amount: Int, buyer: Buyer? = nil, text: String = "Confirm", require_confirmation: Bool = false, completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
+    public init(amount: Int, buyer: Buyer? = nil, text: String = "Confirm", completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
         self.completion = completion
         self.amount = amount
         self.text = text
         self.buyer = buyer
-        self.require_confirmation = require_confirmation
     }
     
     func tokenizeCompletion(result: Result<[String: Any], FailureResponse>) {
@@ -393,13 +394,13 @@ public struct PTButton: View {
         Button(text) {
             if let identity = buyer {
                 if card.isValid {
-                    if require_confirmation {
+                    if PT.fee_mode == .SERVICE_FEE {
                         PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: completion)
                     } else {
                         PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
                     }
                 } else if bank.isValid {
-                    if require_confirmation {
+                    if  PT.fee_mode == .SERVICE_FEE {
                         PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: completion)
                     } else {
                         PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
@@ -407,13 +408,13 @@ public struct PTButton: View {
                 }
             } else {
                 if card.isValid {
-                    if require_confirmation {
+                    if  PT.fee_mode == .SERVICE_FEE {
                         PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: completion)
                     } else {
                         PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
                     }
                 } else if bank.isValid {
-                    if require_confirmation {
+                    if  PT.fee_mode == .SERVICE_FEE {
                         PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: completion)
                     } else {
                         PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)

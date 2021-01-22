@@ -27,10 +27,10 @@ import PayTheory
 ## Usage
 
 Initialize a PayTheory element for handling state. It accepts the following arguments.
-- apiKey: Your PayTheory merchant API Key
-- tags: optional custom tags you can include to track purchases
-- environment: tells the SDK if it should be working from a demo or production environment (.DEMO or .PROD). Defaults to .DEMO
-- fee_mode: optionally set the fee mode.  By default .SURCHARGE mode is used .SERVICE_FEE mode is available only when enabled by Pay Theory .SURCHARGE mode applies a fee of 2.9% + $0.30 to be deducted from original amount .SERVICE FEE mode calculates a fee based on predetermined parameters  and adds it to the original amount
+- **apiKey**: Your PayTheory merchant API Key
+- **tags**: optional custom tags you can include to track purchases
+- **environment**: tells the SDK if it should be working from a demo or production environment (**.DEMO** or **.PROD**). Defaults to **.DEMO**
+- **fee_mode**: optionally set the fee mode.  By default **.SURCHARGE** mode is used **.SERVICE_FEE** mode is available only when enabled by Pay Theory **.SURCHARGE** mode applies a fee of 2.9% + $0.30 to be deducted from original amount **.SERVICE FEE** mode calculates a fee based on predetermined parameters  and adds it to the original amount
 
 ```swift
 let apiKey = 'your-api-key'
@@ -135,7 +135,7 @@ PTBuyerZip()
 PTBuyerCountry()
 ```
 
-Another option is to pass the info in as a Buyer object when initializing the payment.
+Another option is to pass the info in as a **Buyer** object when initializing the payment.
 
 ```swift
 let address = Address(line1: "123 Street St", line2: "Apt 12", city: "Somewhere", country: "USA", state: "OH", zip: "12345")
@@ -146,10 +146,9 @@ let buyer = Buyer(first_name: "Some", last_name: "Body", email: "somebody@gmail.
 
 This button component allows a transaction to be initialized. It will be disabled until it has the required data needed to initialize a transaction. It accepts a few arguments needed to initialize the payment.
 
- - amount: Payment amount that should be charged to the card in cents.
- - buyer: Buyer that allows name, email, phone number, and address of the buyer to be associated with the payment. If Buyer Info is passed as an argument it will ignore the ones captured by the custom text fields
- - require_confirmation: Bool that tells the button if it should await the confirmation step or run the transaction on click.
- - completion: Function that will handle the result of the call returning a dictionary [String:Any] or Failure Response
+ - **amount**: Payment amount that should be charged to the card in cents
+ - **buyer**: Buyer that allows name, email, phone number, and address of the buyer to be associated with the payment. If Buyer Info is passed as an argument it will ignore the ones captured by the custom text fields
+ - **completion**: Function that will handle the result of the call returning a dictionary **[String:Any]** or **Failure Response**
 
 
 ```swift
@@ -166,12 +165,12 @@ func completion(result: Result<[String: Any], FailureResponse>){
 }
 
 ...
-PTButton(amount: 5000, buyer: buyer, require_confirmation: true, completion: completion)
+PTButton(amount: 5000, buyer: buyer, completion: completion)
 ```
 
 ### Capture or Cancel an Authorization
 
-If require_confirmation is set to true there are functions available to confirm or cancel the transaction. The capture function accepts a completion handler for the response. To access these pull in the PayTheory object as an environment variable as shown below.
+If the fee_mode is set to **.SERVICE_FEE** there is a confirmation step required. There are functions available to confirm or cancel the transaction after displaying the service fee to the user. The capture function accepts a completion handler for the response. To access these pull in the PayTheory object as an environment variable as shown below.
 
 ```swift
 @EnvironmentObject var pt: PayTheory
@@ -196,7 +195,7 @@ func captureCompletion(result: Result<[String:Any], FailureResponse>){
 
 ## Tokenization Response
 
-When the necessary card info is collected and the PTButton is clicked with the required_confirmation set to true the token details are returned as a dictionary [String: Any] with the following info:
+When the necessary info is collected and the PTButton is clicked when fee_mode is set to **.SERVICE_FEE** the token details are returned as a dictionary **[String: Any]** with the following info:
 
 *note that the service fee is included in amount*
 
@@ -221,7 +220,7 @@ When the necessary card info is collected and the PTButton is clicked with the r
 
 ## Completion Response
 
-Once the PTButton is clicked and require_confirmation is set to false or if the capture function is called after tokenization, a dictionary [String: Any] will be returned with the following info:
+Once the PTButton is clicked and service_fee is set to **.SURCHARGE** or if the capture function is called after tokenization, a dictionary **[String: Any]** will be returned with the following info:
 
 *note that the service fee is included in amount*
 
@@ -252,7 +251,7 @@ Once the PTButton is clicked and require_confirmation is set to false or if the 
 
 ## Failure Response
 
-If a failure or decline occurs during the transaction, a dictionary [String: Any] will be returned with the following info:
+If a failure or decline occurs during the transaction, a FailureResponse object will be returned with the following info:
 
 *note that the service fee is included in amount*
 
