@@ -31,6 +31,7 @@ public class PayTheory: ObservableObject {
     var fee_mode: FEE_MODE
     var tags: [String: Any]
     
+    private var encodedChallenge: String = ""
     private var tokenResponse: [String: Any]?
     private var idempotencyResponse: IdempotencyResponse?
     private var passedBuyer: Buyer?
@@ -63,14 +64,15 @@ public class PayTheory: ObservableObject {
                         debugPrint(error ?? "")
                         return
                     }
-                    let encodedChallenge = challenge.challenge.data(using: .utf8)!
-                    let hash = Data(SHA256.hash(data: encodedChallenge))
+                    let encodedChallengeData = challenge.challenge.data(using: .utf8)!
+                    self.encodedChallenge = encodedChallengeData.base64EncodedString()
+                    let hash = Data(SHA256.hash(data: encodedChallengeData))
                     self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
                         guard error == nil else {
                             debugPrint(error!)
                             return
                         }
-                        let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallenge.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount, fee_mode: self.fee_mode)
+                        let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallengeData.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount, fee_mode: self.fee_mode)
                         postIdempotency(body: attest, apiKey: self.apiKey, endpoint: self.environment.rawValue, completion: idempotencyClosure)
                     }
                 }
@@ -181,6 +183,7 @@ public class PayTheory: ObservableObject {
                 "credId" : idempotency.credId,
                 "signature" : idempotency.signature,
                 "buyer-options" : buyerToDictionary(buyer: envBuyer),
+                "challenge": self.encodedChallenge,
                 "payment" : payment,
                 "tags": self.tags
             ]
