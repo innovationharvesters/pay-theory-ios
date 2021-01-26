@@ -101,9 +101,9 @@ All four text fields are required to capture the info needed to initialize an AC
 
 ```swift
 PTAchAccountName()
+PTAchAccountType()
 PTAchAccountNumber()
 PTAchRoutingNumber()
-PTAchAccountType()
 ```
 
 ### Pay Theory Button

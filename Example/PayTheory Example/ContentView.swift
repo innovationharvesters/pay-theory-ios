@@ -30,7 +30,7 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    @EnvironmentObject var pt: PayTheory
+    let pt = PayTheory(apiKey: "pt-sandbox-dev-f992c4a57b86cb16aefae30d0a450237", tags: ["Test Tag" : "Test Value"], environment: .DEV, fee_mode: .SERVICE_FEE)
     
     let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "555-555-5555")
     
@@ -78,6 +78,7 @@ struct ContentView: View {
                 }.pickerStyle(SegmentedPickerStyle())
                 
                 if type == 0 {
+                    PTForm{
                     PTCardName().textFieldStyle()
                     PTCardNumber().textFieldStyle()
                     PTExp().textFieldStyle()
@@ -86,14 +87,17 @@ struct ContentView: View {
                     PTCardCity().textFieldStyle()
                     PTCardState().textFieldStyle()
                     PTCardZip().textFieldStyle()
+                    PTButton(amount: 5000, completion: completion).textFieldStyle()
+                    }.environmentObject(pt)
                 } else if type == 1 {
+                    PTForm {
                     PTAchAccountName().textFieldStyle()
                     PTAchAccountNumber().textFieldStyle()
                     PTAchRoutingNumber().textFieldStyle()
                     PTAchAccountType()
+                    PTButton(amount: 5000, completion: completion).textFieldStyle()
+                }.environmentObject(pt)
                 }
-                
-                PTButton(amount: 5000, completion: completion).textFieldStyle()
                 
 //                Text(pt.cardErrors["number"]!["isDirty"] as! Bool ? pt.cardErrors["number"]!["error"] as! String : "" )
             }
