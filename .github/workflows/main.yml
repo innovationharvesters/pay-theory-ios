@@ -28,4 +28,4 @@ jobs:
         env:
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: |
-          pod trunk push <YOURLIBRARY>.podspec
+          pod trunk push PayTheory.podspec
