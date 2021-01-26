@@ -69,7 +69,7 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
 }
 
 
-let endpoints = ["https://dev.attested.api.paytheorystudy.com", "https://demo.attested.api.paytheorystudy.com", "https://attested.api.paytheorystudy.com"]
+let endpoints = ["https://dev.attested.api.paytheorystudy.com", "https://demo.attested.api.paytheorystudy.com", "https://attested.api.paytheorystudy.com", "https://test.attested.api.paytheorystudy.com"]
 
 
 func getChallenge(apiKey: String, endpoint: Int, completion: @escaping (Result<Challenge, Error>) -> Void) {

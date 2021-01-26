@@ -75,16 +75,17 @@ There are optional fields for capturing Billing Address and Name On Card
 - Credit Card City
 - Credit Card State
 - Credit Card Zip
-- Credit Card Country
 
 ```swift
+//Name on Card
 PTCardName()
+
+//Billing Address
 PTCardLineOne()
 PTCardLineTwo()
 PTCardCity()
 PTCardState()
 PTCardZip()
-PTCardCountry()
 ```
 
 ### ACH Text Fields
@@ -104,56 +105,17 @@ PTAchAccountNumber()
 PTAchRoutingNumber()
 PTAchAccountType()
 ```
-### Buyer Options
-
-You can optionally pass buyer information that will be tied to a transaction. All pieces of data are optional in the buyer object. 
-
-One way to capture buyer options are to use text fields the same as you would for card details
-
-- Buyer First Name
-- Buyer Last Name
-- Buyer Phone
-- Buyer Email
-- Buyer Address Line One
-- Buyer Address Line Two
-- Buyer City
-- Buyer State
-- Buyer Zip
-- Buyer Country
-
-
-```swift
-PTBuyerFirstName()
-PTBuyerLastName()
-PTBuyerPhone()
-PTBuyerEmail()
-PTBuyerLineOne()
-PTBuyerLineTwo()
-PTBuyerCity()
-PTBuyerState()
-PTBuyerZip()
-PTBuyerCountry()
-```
-
-Another option is to pass the info in as a **Buyer** object when initializing the payment.
-
-```swift
-let address = Address(line1: "123 Street St", line2: "Apt 12", city: "Somewhere", country: "USA", state: "OH", zip: "12345")
-let buyer = Buyer(first_name: "Some", last_name: "Body", email: "somebody@gmail.com", phone: "555-555-5555", address: address)
-```
 
 ### Pay Theory Button
 
 This button component allows a transaction to be initialized. It will be disabled until it has the required data needed to initialize a transaction. It accepts a few arguments needed to initialize the payment.
 
  - **amount**: Payment amount that should be charged to the card in cents
- - **buyer**: Buyer that allows name, email, phone number, and address of the buyer to be associated with the payment. If Buyer Info is passed as an argument it will ignore the ones captured by the custom text fields
  - **completion**: Function that will handle the result of the call returning a dictionary **[String:Any]** or **Failure Response**
 
 
 ```swift
 let amount = 1000
-let buyer = Buyer(first_name: "Some", last_name: "Body", email: "somebody@gmail.com")
 
 func completion(result: Result<[String: Any], FailureResponse>){
     switch result {
@@ -165,7 +127,7 @@ func completion(result: Result<[String: Any], FailureResponse>){
 }
 
 ...
-PTButton(amount: 5000, buyer: buyer, completion: completion)
+PTButton(amount: 5000, completion: completion)
 ```
 
 ### Capture or Cancel an Authorization

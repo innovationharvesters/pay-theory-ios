@@ -20,6 +20,7 @@ public enum Environment: Int {
     case DEV = 0
     case DEMO = 1
     case PROD = 2
+    case TEST = 3
 }
 
 public class PayTheory: ObservableObject {
@@ -30,6 +31,7 @@ public class PayTheory: ObservableObject {
     var environment: Environment
     var fee_mode: FEE_MODE
     var tags: [String: Any]
+    var buttonClicked = false
     
     private var encodedChallenge: String = ""
     private var tokenResponse: [String: Any]?
@@ -80,6 +82,7 @@ public class PayTheory: ObservableObject {
             case .failure(let error):
                 debugPrint(error.localizedDescription)
                 completion(.failure(FailureResponse(type: error.localizedDescription)))
+                buttonClicked = false
             }
         }
         
@@ -101,6 +104,7 @@ public class PayTheory: ObservableObject {
             case .failure(let error):
                 debugPrint(error.localizedDescription)
                 completion(.failure(FailureResponse(type: error.localizedDescription)))
+                buttonClicked = false
             }
         }
         
@@ -122,6 +126,7 @@ public class PayTheory: ObservableObject {
     public func cancel() {
         tokenResponse = nil
         idempotencyResponse = nil
+        buttonClicked = false
     }
 //
 //
@@ -146,6 +151,7 @@ public class PayTheory: ObservableObject {
                     envCard.clear()
                     envBuyer.clear()
                     envAch.clear()
+                    buttonClicked = false
 
                 case .failure(let error):
                     if let confirmed = error as? FailureResponse {
@@ -160,10 +166,12 @@ public class PayTheory: ObservableObject {
                         completion(.failure(confirmed))
                         tokenResponse = nil
                         idempotencyResponse = nil
+                        buttonClicked = false
                     } else {
                         completion(.failure(FailureResponse(type: error.localizedDescription)))
                         tokenResponse = nil
                         idempotencyResponse = nil
+                        buttonClicked = false
                     }
                 }
         }
@@ -178,12 +186,15 @@ public class PayTheory: ObservableObject {
                 type = "ach"
             }
             
+            let decodedData = Data(base64Encoded: self.encodedChallenge)!
+            let challengeString = String(data: decodedData, encoding: .utf8)!
+            
             let body: [String: Any] = [
-                "response" : idempotency.response,
+                "idempotencyToken" : idempotency.response,
                 "credId" : idempotency.credId,
                 "signature" : idempotency.signature,
-                "buyer-options" : buyerToDictionary(buyer: envBuyer),
-                "challenge": self.encodedChallenge,
+                "buyerOptions" : buyerToDictionary(buyer: envBuyer),
+                "challenge": challengeString,
                 "payment" : payment,
                 "tags": self.tags
             ]
@@ -208,6 +219,7 @@ public struct PTCardName: View {
 
     public var body: some View {
         TextField("Name on Card", text: $card.name ?? "")
+            .autocapitalization(UITextAutocapitalizationType.words)
     }
 }
 
@@ -248,23 +260,6 @@ public struct PTExp: View {
     }
 }
 
-///// TextField that can be used to capture the Expiration Month for a card object to be used in a Pay Theory payment
-/////
-/////  - Requires: Ancestor view must be wrapped in a PTForm
-/////
-/////  - Important: This is required to be able to run a transaction.
-/////
-//public struct PTExpMonth: View {
-//    @EnvironmentObject var card: PaymentCard
-//    public init(){
-//
-//    }
-//    public var body: some View {
-//        TextField("Expiration Month", text: $card.expiration_month)
-//            .keyboardType(.decimalPad)
-//    }
-//}
-
 /// TextField that can be used to capture the CVV for a card object to be used in a Pay Theory payment
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
@@ -288,9 +283,13 @@ public struct PTCvv: View {
 ///
 public struct PTCardLineOne: View {
     @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
     
     public var body: some View {
         TextField("Address Line 1", text: $card.address.line1 ?? "")
+            .autocapitalization(UITextAutocapitalizationType.words)
     }
 }
 
@@ -300,6 +299,9 @@ public struct PTCardLineOne: View {
 ///
 public struct PTCardLineTwo: View {
     @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
     
     public var body: some View {
         TextField("Address Line 2", text: $card.address.line2 ?? "")
@@ -312,6 +314,9 @@ public struct PTCardLineTwo: View {
 ///
 public struct PTCardCity: View {
     @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
     
     public var body: some View {
         TextField("City", text: $card.address.city ?? "")
@@ -322,11 +327,16 @@ public struct PTCardCity: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PYCardState: View {
+public struct PTCardState: View {
     @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
     
     public var body: some View {
         TextField("State", text: $card.address.region ?? "")
+            .autocapitalization(UITextAutocapitalizationType.allCharacters)
+            .disableAutocorrection(true)
     }
 }
 
@@ -336,9 +346,13 @@ public struct PYCardState: View {
 ///
 public struct PTCardZip: View {
     @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
     
     public var body: some View {
         TextField("Zip", text: $card.address.postal_code ?? "")
+            .keyboardType(.decimalPad)
     }
 }
 
@@ -348,6 +362,9 @@ public struct PTCardZip: View {
 ///
 public struct PTCardCountry: View {
     @EnvironmentObject var card: PaymentCard
+    public init(){
+        
+    }
     
     public var body: some View {
         TextField("Country", text: $card.address.country ?? "")
@@ -375,11 +392,10 @@ public struct PTButton: View {
     ///   - buyer: Optional buyer object that can pass Buyer Options for the transaction.
     ///   - require_confirmation: optional param that defaults to false if you don't declare it. Can also pass .SERVICE_FEE as a prop
     ///   - completion: Function that will handle the result of the tokenization response once it has been returned from the server.
-    public init(amount: Int, buyer: Buyer? = nil, text: String = "Confirm", completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
+    public init(amount: Int, text: String = "Confirm", completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
         self.completion = completion
         self.amount = amount
         self.text = text
-        self.buyer = buyer
     }
     
     func tokenizeCompletion(result: Result<[String: Any], FailureResponse>) {
@@ -395,32 +411,35 @@ public struct PTButton: View {
     
     public var body: some View {
         Button(text) {
-            if let identity = buyer {
-                if card.isValid {
-                    if PT.fee_mode == .SERVICE_FEE {
-                        PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: completion)
-                    } else {
-                        PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
+            if PT.buttonClicked == false {
+                PT.buttonClicked = true
+                if let identity = buyer {
+                    if card.isValid {
+                        if PT.fee_mode == .SERVICE_FEE {
+                            PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: completion)
+                        } else {
+                            PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
+                        }
+                    } else if bank.isValid {
+                        if  PT.fee_mode == .SERVICE_FEE {
+                            PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: completion)
+                        } else {
+                            PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
+                        }
                     }
-                } else if bank.isValid {
-                    if  PT.fee_mode == .SERVICE_FEE {
-                        PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: completion)
-                    } else {
-                        PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
-                    }
-                }
-            } else {
-                if card.isValid {
-                    if  PT.fee_mode == .SERVICE_FEE {
-                        PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: completion)
-                    } else {
-                        PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
-                    }
-                } else if bank.isValid {
-                    if  PT.fee_mode == .SERVICE_FEE {
-                        PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: completion)
-                    } else {
-                        PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
+                } else {
+                    if card.isValid {
+                        if  PT.fee_mode == .SERVICE_FEE {
+                            PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: completion)
+                        } else {
+                            PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
+                        }
+                    } else if bank.isValid {
+                        if  PT.fee_mode == .SERVICE_FEE {
+                            PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: completion)
+                        } else {
+                            PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
+                        }
                     }
                 }
             }
@@ -470,7 +489,8 @@ public struct PTForm<Content>: View where Content: View {
 ///
 public struct PTBuyerFirstName: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
    public var body: some View {
         TextField("First Name", text: $identity.first_name ?? "")
     }
@@ -482,7 +502,8 @@ public struct PTBuyerFirstName: View {
 ///
 public struct PTBuyerLastName: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("Last Name", text: $identity.last_name ?? "")
     }
@@ -494,7 +515,8 @@ public struct PTBuyerLastName: View {
 ///
 public struct PTBuyerPhone: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("Phone", text: $identity.phone ?? "")
     }
@@ -506,7 +528,8 @@ public struct PTBuyerPhone: View {
 ///
 public struct PTBuyerEmail: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("Email", text: $identity.email ?? "")
     }
@@ -518,7 +541,8 @@ public struct PTBuyerEmail: View {
 ///
 public struct PTBuyerLineOne: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("Address Line 1", text: $identity.personal_address.line1 ?? "")
     }
@@ -530,7 +554,8 @@ public struct PTBuyerLineOne: View {
 ///
 public struct PTBuyerLineTwo: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("Address Line 2", text: $identity.personal_address.line2 ?? "")
     }
@@ -542,7 +567,8 @@ public struct PTBuyerLineTwo: View {
 ///
 public struct PTBuyerCity: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("City", text: $identity.personal_address.city ?? "")
     }
@@ -554,7 +580,8 @@ public struct PTBuyerCity: View {
 ///
 public struct PTBuyerState: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("State", text: $identity.personal_address.region ?? "")
     }
@@ -566,7 +593,8 @@ public struct PTBuyerState: View {
 ///
 public struct PTBuyerZip: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("Zip", text: $identity.personal_address.postal_code ?? "")
     }
@@ -578,7 +606,8 @@ public struct PTBuyerZip: View {
 ///
 public struct PTBuyerCountry: View {
     @EnvironmentObject var identity: Buyer
-    
+    public init() {
+    }
     public var body: some View {
         TextField("Country", text: $identity.personal_address.country ?? "")
     }
@@ -596,6 +625,7 @@ public struct PTAchAccountName: View {
     
     public var body: some View {
         TextField("Name on Account", text: $account.name)
+            .autocapitalization(UITextAutocapitalizationType.words)
     }
 }
 

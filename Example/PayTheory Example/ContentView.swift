@@ -82,6 +82,10 @@ struct ContentView: View {
                     PTCardNumber().textFieldStyle()
                     PTExp().textFieldStyle()
                     PTCvv().textFieldStyle()
+                    PTCardLineOne().textFieldStyle()
+                    PTCardCity().textFieldStyle()
+                    PTCardState().textFieldStyle()
+                    PTCardZip().textFieldStyle()
                 } else if type == 1 {
                     PTAchAccountName().textFieldStyle()
                     PTAchAccountNumber().textFieldStyle()
@@ -89,7 +93,7 @@ struct ContentView: View {
                     PTAchAccountType()
                 }
                 
-                PTButton(amount: 5000, buyer: buyer, completion: confirmCompletion).textFieldStyle()
+                PTButton(amount: 5000, completion: completion).textFieldStyle()
                 
 //                Text(pt.cardErrors["number"]!["isDirty"] as! Bool ? pt.cardErrors["number"]!["error"] as! String : "" )
             }

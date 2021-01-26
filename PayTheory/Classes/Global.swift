@@ -23,10 +23,28 @@ public class Address: ObservableObject, Codable, Equatable {
     
     @Published public var city: String?
     @Published public var country: String?
-    @Published public var region: String?
+    @Published public var region: String?{
+        didSet {
+            if let unwrappedRegion = self.region {
+                if (unwrappedRegion.count > 2){
+                    region = oldValue
+                }
+            }
+        }
+    }
     @Published public var line1: String?
     @Published public var line2: String?
-    @Published public var postal_code: String?
+    @Published public var postal_code: String?{
+        didSet {
+            if let unwrappedCode = postal_code {
+                let filtered = unwrappedCode.filter { $0.isNumber }
+                
+                if unwrappedCode != filtered {
+                    postal_code = filtered
+                }
+            }
+        }
+    }
     
     enum CodingKeys: CodingKey {
         case city, country, region, line1, line2, postal_code
