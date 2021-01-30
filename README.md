@@ -1,4 +1,4 @@
-# PayTheory
+# Pay Theory iOS SDK
 
 [![CI Status](https://img.shields.io/travis/60404116/PayTheory.svg?style=flat)](https://travis-ci.org/60404116/PayTheory)
 [![Version](https://img.shields.io/cocoapods/v/PayTheory.svg?style=flat)](https://cocoapods.org/pods/PayTheory)
@@ -8,6 +8,16 @@
 ## Requirements
 
 Written in SwiftUI and requires iOS 14 for App Attestation
+
+## Register your application
+
+Before you can use Pay Theory iOS SDK you must register your app in Pay Theory's merchant portal
+
+![App Registration](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/ios-registration.png)
+
+For each mobile app you want to register 
+ * enter you applications bundle identifier
+ * enter the associated Apple Team ID
 
 ## Installation
 
