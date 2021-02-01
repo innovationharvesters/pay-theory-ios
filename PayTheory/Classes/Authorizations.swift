@@ -110,7 +110,14 @@ class Payment: Codable, Equatable {
 
 class IdempotencyResponse: Codable, Equatable {
     static func == (lhs: IdempotencyResponse, rhs: IdempotencyResponse) -> Bool {
-        if lhs.response == rhs.response && lhs.signature == rhs.signature && lhs.credId == rhs.credId {return true}
+        if lhs.response == rhs.response &&
+            lhs.signature == rhs.signature &&
+            lhs.credId == rhs.credId &&
+            lhs.idempotency == rhs.idempotency &&
+            lhs.payment == rhs.payment {
+            return true
+            
+        }
         return false
     }
     

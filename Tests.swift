@@ -5,34 +5,35 @@ import Mocker
 
 class Tests: XCTestCase {
     
-//    func testUserFetching() {
-//        let configuration = URLSessionConfiguration.af.default
-//        configuration.protocolClasses = [MockingURLProtocol.self]
-//
-//        let apiEndpoint = URL(string: "https://dev.tags.api.paytheorystudy.com/challenge")!
-//        let expectedUser = Challenge()
-//        let requestExpectation = expectation(description: "Request should finish")
-//
-//        let mockedData = try! JSONEncoder().encode(expectedUser)
-//        Mock(url: apiEndpoint, dataType: .json, statusCode: 200, data: [.get: mockedData]).register()
-//
-//        getChallenge(apiKey: "Test") { (result) in
-//            debugPrint("Test", result)
-//            requestExpectation.fulfill()
-//        }
-//
-//        wait(for: [requestExpectation], timeout: 10.0)
-//    }
+    func testUserFetching() {
+        let configuration = URLSessionConfiguration.af.default
+        configuration.protocolClasses = [MockingURLProtocol.self]
+
+        let apiEndpoint = URL(string: "https://dev.tags.api.paytheorystudy.com/challenge")!
+        let expectedUser = Challenge()
+        let requestExpectation = expectation(description: "Request should finish")
+
+        let mockedData = try! JSONEncoder().encode(expectedUser)
+        Mock(url: apiEndpoint, dataType: .json, statusCode: 200, data: [.get: mockedData]).register()
+
+        getChallenge(apiKey: "Test") { (result) in
+            debugPrint("Test", result)
+            requestExpectation.fulfill()
+        }
+
+        wait(for: [requestExpectation], timeout: 10.0)
+    }
+    
     func testBankAccountIsValid() {
         let bankAccount = BankAccount(identity: "test")
         XCTAssertFalse(bankAccount.isValid)
         XCTAssertTrue(bankAccount.validAccountType)
         
-        bankAccount.account_type = "test"
+        bankAccount.account_type = 3
         
         XCTAssertFalse(bankAccount.validAccountType)
         
-        bankAccount.account_type = "SAVINGS"
+        bankAccount.account_type = 1
         
         XCTAssertTrue(bankAccount.validAccountType)
         
@@ -41,12 +42,13 @@ class Tests: XCTestCase {
         bankAccount.name = "Test Name"
         
         XCTAssertTrue(bankAccount.isValid)
+        XCTAssertEqual(bankAccount.last_four, "1111")
         
         
     }
     
     func testCodingBankAccount() {
-        let bank = BankAccount(name: "Test", account_number: "11111111", account_type: "CHECKING", bank_code: "11111111")
+        let bank = BankAccount(name: "Test", account_number: "11111111", account_type: 0, bank_code: "11111111")
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
@@ -57,7 +59,7 @@ class Tests: XCTestCase {
         
         XCTAssertEqual(bank, decodedBank)
         
-        let bank2 = BankAccount(name: "Test", account_number: "11111111", account_type: "CHECKING", bank_code: "11111111")
+        let bank2 = BankAccount(name: "Test", account_number: "11111111", account_type: 1, bank_code: "11111111")
         bank2.country = "USA"
         
         let data2 = try? encoder.encode(bank2)
@@ -68,15 +70,41 @@ class Tests: XCTestCase {
         XCTAssertNotEqual(bank, bank2)
     }
     
+    func testBankAccountToDictionary() {
+        let name = "test"
+        let accNumber = "111111111"
+        let accountType = 0
+        let bankCode = "789456124"
+        let bank = BankAccount(name: name, account_number: accNumber, account_type: accountType, bank_code: bankCode)
+        
+        let result: [String: Any] = bankAccountToDictionary(account: bank)
+        
+        XCTAssertEqual(name, result["name"] as! String)
+        XCTAssertEqual(accNumber, result["account_number"] as! String)
+        XCTAssertEqual("CHECKING", result["account_type"] as! String)
+        XCTAssertEqual(bankCode, result["bank_code"] as! String)
+    }
+    
+    func testClearBankAccount() {
+        let bank = BankAccount(name: "Test", account_number: "11111111", account_type: 0, bank_code: "11111111")
+        let bank2 = BankAccount()
+        
+        XCTAssertNotEqual(bank, bank2)
+        
+        bank.clear()
+        
+        XCTAssertEqual(bank, bank2)
+    }
+    
     func testBankAccountValidAccountType() {
         let bankAccount = BankAccount(identity: "test")
         XCTAssertTrue(bankAccount.validAccountType)
         
-        bankAccount.account_type = "test"
+        bankAccount.account_type = 3
         
         XCTAssertFalse(bankAccount.validAccountType)
         
-        bankAccount.account_type = "SAVINGS"
+        bankAccount.account_type = 1
         
         XCTAssertTrue(bankAccount.validAccountType)
     }
@@ -112,7 +140,7 @@ class Tests: XCTestCase {
     }
     
     func testCodingPaymentCard() {
-        let card = PaymentCard(number: "11111111", expiration_year: "2022", expiration_month: "12" , cvv: "240")
+        let card = PaymentCard(number: "11111111", expiration_date: "12 / 22", cvv: "240")
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
@@ -123,7 +151,7 @@ class Tests: XCTestCase {
         
         XCTAssertEqual(card, decodedCard)
         
-        let card2 = PaymentCard(number: "11111111", expiration_year: "2022", expiration_month: "12" , cvv: "test")
+        let card2 = PaymentCard(number: "11111111", expiration_date: "12 / 22", cvv: "test")
         
         let data2 = try? encoder.encode(card2)
         let decodedCard2 = try? decoder.decode(PaymentCard.self, from: data2!)
@@ -131,6 +159,92 @@ class Tests: XCTestCase {
         XCTAssertEqual(card2, decodedCard2)
 
         XCTAssertNotEqual(card, card2)
+    }
+    
+    func testClearPaymentCard() {
+        let card = PaymentCard(number: "11111111", expiration_date: "12 / 22", cvv: "240")
+        let card2 = PaymentCard()
+        
+        XCTAssertNotEqual(card, card2)
+        
+        card.clear()
+        
+        XCTAssertEqual(card, card2)
+    }
+    
+    func testCardToDictionary() {
+        let name = "test"
+        let number = "4242424242424242"
+        let exp = "12 / 22"
+        let cvv = "222"
+        let card = PaymentCard(number: number, expiration_date: exp, cvv: cvv)
+        card.name = name
+        
+        let result: [String: Any] = paymentCardToDictionary(card: card)
+        
+        XCTAssertEqual(name, result["name"] as! String)
+        XCTAssertEqual(number, result["number"] as! String)
+        XCTAssertEqual("12", result["expiration_month"] as! String)
+        XCTAssertEqual("2022", result["expiration_year"] as! String)
+        XCTAssertEqual(cvv, result["security_code"] as! String)
+    }
+    
+    func testCreditCardBrand() {
+        let card = PaymentCard()
+        
+        XCTAssertEqual(card.brand, "")
+        
+        card.number = "4024007148719528"
+        
+        XCTAssertEqual(card.brand, "Visa")
+        
+        card.number = "6011876717071788"
+        
+        XCTAssertEqual(card.brand, "Discover")
+        
+        card.number = "5548281345836773"
+        
+        XCTAssertEqual(card.brand, "MasterCard")
+        
+        card.number = "3538346422215451"
+        
+        XCTAssertEqual(card.brand, "JCB")
+        
+        card.number = "376520957732459"
+        
+        XCTAssertEqual(card.brand, "American Express")
+        
+        card.number = "30238697651289"
+        
+        XCTAssertEqual(card.brand, "Diners Club")
+    }
+    
+    func testCardLastFour() {
+        let card = PaymentCard()
+        
+        XCTAssertEqual(card.last_four, "")
+        
+        card.number = "4024007148719528"
+        
+        XCTAssertEqual(card.last_four, "9528")
+        
+        card.number = "6011876717071788"
+        
+        XCTAssertEqual(card.last_four, "1788")
+    }
+    
+    func testCardFirstSix() {
+        let card = PaymentCard()
+        
+        XCTAssertEqual(card.first_six, "")
+        
+        card.number = "4024007148719528"
+        
+        XCTAssertEqual(card.first_six, "402400")
+        
+        card.number = "6011876717071788"
+        
+        XCTAssertEqual(card.first_six, "601187")
     }
     
     func testCreditCardValidCardNumber() {
@@ -150,10 +264,6 @@ class Tests: XCTestCase {
         
         XCTAssertTrue(card.validCardNumber)
         
-        card.number = "4242424242424242424242424242"
-        
-        XCTAssertFalse(card.validCardNumber)
-        
         card.number = "1111111111111111"
         
         XCTAssertFalse(card.validCardNumber)
@@ -163,30 +273,46 @@ class Tests: XCTestCase {
         XCTAssertFalse(card.validCardNumber)
     }
     
+    
     func testCreditCardIsValid() {
         let card = PaymentCard()
         XCTAssertFalse(card.isValid)
         
         card.number =  "424242424242424242424242424242"
-        card.expiration_year = "2022"
-        card.expiration_month = "12"
+        card.expiration_date = "12 / 22"
         card.security_code = "232"
         
         XCTAssertFalse(card.isValid)
         
         card.number = "4242424242424242"
-        card.expiration_year = "2017"
-        card.expiration_month = "12"
+        card.expiration_date = "12 / 17"
         card.security_code = "232"
         
         XCTAssertFalse(card.isValid)
         
         card.number = "4242424242424242"
-        card.expiration_year = "2022"
-        card.expiration_month = "12"
+        card.expiration_date = "12 / 22"
         card.security_code = "232"
         
         XCTAssertTrue(card.isValid)
+        
+    }
+    
+    func testCreditCardExpIsValid() {
+        let card = PaymentCard()
+        XCTAssertFalse(card.validExpirationDate)
+        
+        card.expiration_date = "12 / 22"
+        
+        XCTAssertTrue(card.validExpirationDate)
+        
+        card.expiration_date = "NO / 22"
+        
+        XCTAssertFalse(card.validExpirationDate)
+        
+        card.expiration_date = "12 / NO"
+        
+        XCTAssertFalse(card.validExpirationDate)
         
     }
     
@@ -194,35 +320,111 @@ class Tests: XCTestCase {
         let card = PaymentCard()
         XCTAssertFalse(card.validExpirationDate)
         
-        card.expiration_month = "13"
-        card.expiration_year = "22"
+        card.expiration_date = "13 / 22"
         
         
         XCTAssertFalse(card.validExpirationDate)
        
-        card.expiration_month = "13"
-        card.expiration_year = "2022"
+        card.expiration_date = "13 / 22"
         
         XCTAssertFalse(card.validExpirationDate)
 
-        card.expiration_month = "11"
-        card.expiration_year = "2019"
+        card.expiration_date = "11 / 2019"
         
         XCTAssertFalse(card.validExpirationDate)
         
-        card.expiration_month = "NO"
+        card.expiration_date = "NO"
         
         XCTAssertFalse(card.validExpirationDate)
         
-        card.expiration_month = "11"
-        card.expiration_year = "NOPE"
+        card.expiration_date = "13 / NO"
         
         XCTAssertFalse(card.validExpirationDate)
 
-        card.expiration_month = "11"
-        card.expiration_year = "2021"
+        card.expiration_date = "11 / 22"
         
         XCTAssertTrue(card.validExpirationDate)
+    }
+    
+    func testDidSetCardDate() {
+        let card = PaymentCard()
+        
+        card.expiration_date = "1"
+        
+        XCTAssertEqual(card.expiration_date, "1")
+        
+        card.expiration_date = "2"
+        
+        XCTAssertEqual(card.expiration_date, "02 / ")
+        
+        card.expiration_date = "22"
+        
+        XCTAssertEqual(card.expiration_date, "02 / 2")
+        
+        card.expiration_date = "02 /"
+        
+        XCTAssertEqual(card.expiration_date, "0")
+        
+        card.expiration_date = "02 / 2022"
+        
+        XCTAssertEqual(card.expiration_date, "02 / 2022")
+        
+        card.expiration_date = "02 / 202222"
+        
+        XCTAssertEqual(card.expiration_date, "02 / 2022")
+        
+        card.expiration_date = "02"
+        
+        XCTAssertEqual(card.expiration_date, "02 / ")
+        
+    }
+    
+    func testDidSetCadNumber() {
+        let card = PaymentCard()
+        
+        card.number = "1"
+        
+        XCTAssertEqual(card.number, "1")
+        
+        card.number = "3456"
+        
+        XCTAssertEqual(card.number, "3456 ")
+        
+        card.number = "3456 12345"
+        
+        XCTAssertEqual(card.number, "3456 12345")
+        
+        card.number = "3456 123456"
+        
+        XCTAssertEqual(card.number, "3456 123456 ")
+        
+        card.number = "3456 123456"
+        
+        XCTAssertEqual(card.number, "3456 12345")
+        
+        card.number = "4242"
+        
+        XCTAssertEqual(card.number, "4242 ")
+        
+        card.number = "4242 4"
+        
+        XCTAssertEqual(card.number, "4242 4")
+        
+        card.number = "4242 4242"
+        
+        XCTAssertEqual(card.number, "4242 4242 ")
+        
+        card.number = "4242 4242 424"
+        
+        XCTAssertEqual(card.number, "4242 4242 424")
+        
+        card.number = "4242 4242 4242"
+        
+        XCTAssertEqual(card.number, "4242 4242 4242 ")
+        
+        card.number = "4242 4242 4242"
+        
+        XCTAssertEqual(card.number, "4242 4242 424")
     }
     
     func testCodingAddress() {
@@ -251,6 +453,53 @@ class Tests: XCTestCase {
         XCTAssertEqual(address2, decodedAddress2)
         
         XCTAssertNotEqual(address2, decodedAddress)
+    }
+    
+    func testAddressToDictionary() {
+        let city = "Test Town"
+        let country = "USA"
+        let region = "OH"
+        let line_one = "12 Test Street"
+        let line_two = "Apt 2"
+        let postal_code = "45212"
+        let address = Address()
+        address.city = city
+        address.country = country
+        address.region = region
+        address.line1 = line_one
+        address.line2 = line_two
+        address.postal_code = postal_code
+        
+        let result: [String: Any] = addressToDictionary(address: address)
+        
+        XCTAssertEqual(city, result["city"] as! String)
+        XCTAssertEqual(country, result["country"] as! String)
+        XCTAssertEqual(region, result["region"] as! String)
+        XCTAssertEqual(line_one, result["line1"] as! String)
+        XCTAssertEqual(line_two, result["line2"] as! String)
+        XCTAssertEqual(postal_code, result["postal_code"] as! String)
+    }
+    
+    func testDidSetRegion() {
+        let address = Address()
+        address.region = "TEST"
+        
+        XCTAssertEqual(address.region, nil)
+        
+        address.region = "OH"
+        
+        XCTAssertEqual(address.region, "OH")
+    }
+    
+    func testDidSetPostalCode() {
+        let address = Address()
+        address.postal_code = "TEST"
+        
+        XCTAssertEqual(address.region, nil)
+        
+        address.postal_code = "12345"
+        
+        XCTAssertEqual(address.postal_code, "12345")
     }
     
     func testCodingBuyer() {
@@ -288,112 +537,44 @@ class Tests: XCTestCase {
         XCTAssertNotEqual(buyer2, buyer)
     }
     
-    func testCodingIdentityResponse() {
-        let identity = IdentityResponse()
-        
-        let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
-        
-        
-        let data = try? encoder.encode(identity)
-        let decodedIdentityResponse = try? decoder.decode(IdentityResponse.self, from: data!)
-        
-        XCTAssertEqual(identity, decodedIdentityResponse)
-        
-        let identity2 = IdentityResponse()
-        identity2.id = "1"
-
-        XCTAssertNotEqual(identity2, identity)
-    }
-    
-    func testIdentityBodyInitializer() {
+    func testClearBuyer() {
+        let first_name = "Test"
+        let last_name = "Person"
+        let email = "test@test.com"
+        let phone = "5555555555"
         let buyer = Buyer()
-        buyer.first_name = "Test"
+        buyer.first_name = first_name
+        buyer.last_name = last_name
+        buyer.email = email
+        buyer.phone = phone
         
-        let identity = IdentityBody(entity: buyer)
+        let buyer2 = Buyer()
         
+        XCTAssertNotEqual(buyer, buyer2)
         
-        XCTAssertEqual(identity.entity.first_name, "Test")
+        buyer.clear()
+        
+        XCTAssertEqual(buyer, buyer2)
+        
     }
     
-    func testCodingAuthorization() {
-        let auth = Authorization(merchant_identity: "Test", amount: "1000", source: "Test Source", idempotency_id: "test")
+    func testBuyerToDictionary() {
+        let first_name = "Test"
+        let last_name = "Person"
+        let email = "test@test.com"
+        let phone = "5555555555"
+        let buyer = Buyer()
+        buyer.first_name = first_name
+        buyer.last_name = last_name
+        buyer.email = email
+        buyer.phone = phone
         
-        let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
+        let result: [String: Any] = buyerToDictionary(buyer: buyer)
         
-        
-        let data = try? encoder.encode(auth)
-        let decodedAuth = try? decoder.decode(Authorization.self, from: data!)
-        
-        XCTAssertEqual(auth, decodedAuth)
-        
-        let auth2 = Authorization(merchant_identity: "Test", amount: "1000", source: "Test Source", idempotency_id: "test")
-        auth2.processor = "1"
-        
-        let data2 = try? encoder.encode(auth2)
-        let decodedAuth2 = try? decoder.decode(Authorization.self, from: data2!)
-        
-        XCTAssertEqual(auth2, decodedAuth2)
-
-        XCTAssertNotEqual(auth2, auth)
-    }
-    
-    func testCodingCaptureAuth() {
-        let auth = CaptureAuth(fee: 100, capture_amount: 10000)
-        
-        let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
-        
-        
-        let data = try? encoder.encode(auth)
-        let decodedAuth = try? decoder.decode(CaptureAuth.self, from: data!)
-        
-        XCTAssertEqual(auth, decodedAuth)
-        
-        let auth2 = CaptureAuth(fee: 10, capture_amount: 1000)
-
-        XCTAssertNotEqual(auth2, auth)
-    }
-    
-    func testCodingAuthorizationResponse() {
-        let auth = AuthorizationResponse()
-        
-        let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
-        
-        
-        let data = try? encoder.encode(auth)
-        let decodedAuth = try? decoder.decode(AuthorizationResponse.self, from: data!)
-        
-        XCTAssertEqual(auth, decodedAuth)
-        
-        let auth2 = AuthorizationResponse()
-        auth2.id = "1"
-
-        XCTAssertNotEqual(auth2, auth)
-    }
-    
-    func testCompletionResponseInit() {
-        let success = CompletionResponse(receipt_number: "1111", last_four: "1234", brand: "VISA", created_at: "Today", amount: 1234, convenience_fee: 12, state: "SUCCESS")
-        let success2 = CompletionResponse(receipt_number: "1111", last_four: "1234", brand: "VISA", created_at: "Today", amount: 1234, convenience_fee: 12, state: "SUCCESS")
-        
-        XCTAssertEqual(success, success2)
-        
-        success2.last_four = "4321"
-        
-        XCTAssertNotEqual(success, success2)
-    }
-    
-    func testTokenizationResponseInit() {
-        let token = TokenizationResponse(receipt_number: "1111", first_six: "123456", brand: "VISA", amount: 123, convenience_fee: 12)
-        let token2 = TokenizationResponse(receipt_number: "1111", first_six: "123456", brand: "VISA", amount: 123, convenience_fee: 12)
-        
-        XCTAssertEqual(token, token2)
-        
-        token2.brand = "4321"
-        
-        XCTAssertNotEqual(token, token2)
+        XCTAssertEqual(first_name, result["first_name"] as! String)
+        XCTAssertEqual(last_name, result["last_name"] as! String)
+        XCTAssertEqual(email, result["email"] as! String)
+        XCTAssertEqual(phone, result["phone"] as! String)
     }
     
     func testFailureResponseInit() {
@@ -442,27 +623,10 @@ class Tests: XCTestCase {
         XCTAssertNotEqual(challenge, challenge2)
     }
     
-    func testCodingIdempotency() {
-        let payment = Payment(currency: "USD", amount: 1200, convenience_fee: 200, merchant: "Test")
-        
-        
-        let idempotency = Idempotency(idempotency: "test", payment: payment, token: "Test")
-        
-        let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
-        
-        let data = try? encoder.encode(idempotency)
-        let decodedIdempotency = try? decoder.decode(Idempotency.self, from: data!)
-        
-        XCTAssertEqual(idempotency, decodedIdempotency)
-        
-        idempotency.token = "Test2"
 
-        XCTAssertNotEqual(idempotency, decodedIdempotency)
-    }
     
     func testCodingPayment() {
-        let payment = Payment(currency: "USD", amount: 1200, convenience_fee: 200, merchant: "Test")
+        let payment = Payment(currency: "USD", amount: 1200, service_fee: 200, merchant: "Test", fee_mode: "service_fee")
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
@@ -477,22 +641,22 @@ class Tests: XCTestCase {
         XCTAssertNotEqual(payment, decodedPayment)
     }
     
-    func testCodingAWSResponse() {
-        let aws = AWSResponse(response: "Response", signature: "Test", credId: "Test2")
+    func testCodingIdempotencyResponse() {
+        let payment = Payment(currency: "USD", amount: 2000, service_fee: 120, merchant: "12345", fee_mode: "SURCHARGE")
+        let idempotency = IdempotencyResponse(response: "Test", signature: "test", credId: "1234", idempotency: "09876", payment: payment)
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
         
-        let data = try? encoder.encode(aws)
-        let decodedAWS = try? decoder.decode(AWSResponse.self, from: data!)
+        let data = try? encoder.encode(idempotency)
+        let decodedIdempotency = try? decoder.decode(IdempotencyResponse.self, from: data!)
         
-        XCTAssertEqual(aws, decodedAWS)
+        XCTAssertEqual(idempotency, decodedIdempotency)
         
-        aws.response = "Test"
+        idempotency.response = "Test2"
 
-        XCTAssertNotEqual(aws, decodedAWS)
+        XCTAssertNotEqual(idempotency, decodedIdempotency)
     }
-    
     
     
 //    func testHandleResponse() {

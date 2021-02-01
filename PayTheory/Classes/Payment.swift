@@ -138,7 +138,7 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     }
     
     var validCardNumber: Bool {
-        if (spacelessCard.count < 13 || spacelessCard.count > 19){
+        if (spacelessCard.count < 13){
             return false
         }
         
@@ -198,9 +198,9 @@ class PaymentCard: ObservableObject, Codable, Equatable {
             return "JCB"
         } else if first7.range(of: dinersClub, options: .regularExpression, range: nil, locale: nil) != nil {
             return "Diners Club"
-        } else {
-            return ""
         }
+        
+        return ""
     }
     
     var validExpirationDate: Bool {

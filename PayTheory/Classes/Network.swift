@@ -13,14 +13,6 @@ enum ResponseError: String, Error {
     case CanNotDecode = "Unable to decode the response"
 }
 
-class FinixError: Error {
-    var errors: [[String: String]]
-    
-    init(errors: [[String: String]]) {
-        self.errors = errors
-    }
-}
-
 func convertStringToDictionary(text: String) -> [String:AnyObject]? {
     if let data = text.data(using: .utf8) {
         do {
@@ -69,12 +61,12 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
 }
 
 
-let endpoints = ["https://dev.attested.api.paytheorystudy.com", "https://demo.attested.api.paytheorystudy.com", "https://attested.api.paytheorystudy.com", "https://test.attested.api.paytheorystudy.com"]
+let endpoints = [".attested.api.paytheorystudy.com", "https://demo.attested.api.paytheorystudy.com", "https://attested.api.paytheorystudy.com", "https://test.attested.api.paytheorystudy.com"]
 
 
-func getChallenge(apiKey: String, endpoint: Int, completion: @escaping (Result<Challenge, Error>) -> Void) {
+func getChallenge(apiKey: String, endpoint: String, completion: @escaping (Result<Challenge, Error>) -> Void) {
     
-    let url = "\(endpoints[endpoint])/challenge"
+    let url = endpoint == "prod" ? "https://attested.api.paytheorystudy.com/challenge" : "https://\(endpoint).attested.api.paytheorystudy.com/challenge"
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,
         "Content-Type": "application/json"
@@ -85,9 +77,9 @@ func getChallenge(apiKey: String, endpoint: Int, completion: @escaping (Result<C
     }
 }
 
-func postIdempotency(body: Attestation, apiKey: String, endpoint: Int, completion: @escaping (Result<IdempotencyResponse, Error>) -> Void) {
+func postIdempotency(body: Attestation, apiKey: String, endpoint: String, completion: @escaping (Result<IdempotencyResponse, Error>) -> Void) {
     
-    let url = "\(endpoints[endpoint])/idempotency"
+    let url = endpoint == "prod" ? "https://attested.api.paytheorystudy.com/idempotency" : "https://\(endpoint).attested.api.paytheorystudy.com/idempotency"
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,
         "Content-Type": "application/json"
@@ -98,9 +90,9 @@ func postIdempotency(body: Attestation, apiKey: String, endpoint: Int, completio
 }
 }
 
-func postPayment(body: [String: Any], apiKey: String, endpoint: Int, completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
+func postPayment(body: [String: Any], apiKey: String, endpoint: String, completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
 
-    let url = "\(endpoints[endpoint])/payment"
+    let url = endpoint == "prod" ? "https://attested.api.paytheorystudy.com/payment" : "https://\(endpoint).attested.api.paytheorystudy.com/payment"
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,
         "Content-Type": "application/json"
