@@ -40,6 +40,11 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
                     completion(.failure(FailureResponse(type: error as! String)))
                     return
                 }
+                if let error = errors["message"] {
+                    completion(.failure(FailureResponse(type: error as! String)))
+                    return
+                }
+                
             }
         }
         completion(.failure(FailureResponse(type: response.error!.localizedDescription)))

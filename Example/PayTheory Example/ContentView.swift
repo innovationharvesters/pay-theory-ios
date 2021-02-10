@@ -47,6 +47,7 @@ struct ContentView: View {
             }
                 self.showingConfirmation = true
             case .failure(let error):
+                print(error.type, "completion error")
                 self.confirmationMessage = "Your tokenization failed! \(error.type)"
                 self.showingConfirmation = true
             }
@@ -63,6 +64,7 @@ struct ContentView: View {
             self.showingMessage = true
             debugPrint(token["tags"] as! [String: Any])
         case .failure(let response):
+            print(response.type, "completion error")
             self.confirmationMessage = "The transaction failed to confirm \(response.type)"
             self.showingMessage = true
         }

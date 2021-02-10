@@ -87,7 +87,7 @@ public class PayTheory: ObservableObject {
             
             case .failure(let error):
                 debugPrint(error.localizedDescription)
-                completion(.failure(FailureResponse(type: error.localizedDescription)))
+                completion(.failure(error as! FailureResponse))
                 buttonClicked = false
             }
         }
@@ -109,7 +109,7 @@ public class PayTheory: ObservableObject {
                 
             case .failure(let error):
                 debugPrint(error.localizedDescription)
-                completion(.failure(FailureResponse(type: error.localizedDescription)))
+                completion(.failure(error as! FailureResponse))
                 buttonClicked = false
             }
         }
@@ -410,7 +410,7 @@ public struct PTButton: View {
                 PT.capture(completion: completion)
             case .failure(let error):
                 debugPrint("Your capture failed! \(error.localizedDescription)")
-                completion(.failure(FailureResponse(type: error.localizedDescription)))
+                completion(.failure(error))
             }
     }
     
