@@ -17,9 +17,7 @@ public func ??<T>(lhs: Binding<Optional<T>>, rhs: T) -> Binding<T> {
     )
 }
 public enum Environment{
-    
-    case DEV(String)
-    case DEMO, PROD, TEST
+    case DEMO, PROD
     
     var value: String {
         switch self {
@@ -27,11 +25,7 @@ public enum Environment{
             return "demo"
         case .PROD:
             return "prod"
-        case .TEST:
-            return "test"
-        case .DEV(let customString):
-            return customString
-        }
+    }
     }
 }
 
@@ -40,11 +34,10 @@ public class PayTheory: ObservableObject {
     let service = DCAppAttestService.shared
     
     var apiKey: String
-    var environment: Environment
+    public var environment: String
     var fee_mode: FEE_MODE
     var tags: [String: Any]
     var buttonClicked = false
-    public var devName = "dev"
     
     private var encodedChallenge: String = ""
     private var tokenResponse: [String: Any]?
@@ -54,7 +47,7 @@ public class PayTheory: ObservableObject {
     
     public init(apiKey: String, tags: [String:Any] = [:], environment: Environment = .DEMO, fee_mode: FEE_MODE = .SURCHARGE){
         self.apiKey = apiKey
-        self.environment = environment
+        self.environment = environment.value
         self.fee_mode = fee_mode
         self.tags = tags
         self.envAch = BankAccount()
@@ -88,7 +81,7 @@ public class PayTheory: ObservableObject {
                             return
                         }
                         let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallengeData.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount, fee_mode: self.fee_mode)
-                        postIdempotency(body: attest, apiKey: self.apiKey, endpoint: self.environment.value, completion: idempotencyClosure)
+                        postIdempotency(body: attest, apiKey: self.apiKey, endpoint: self.environment, completion: idempotencyClosure)
                     }
                 }
             
@@ -121,7 +114,7 @@ public class PayTheory: ObservableObject {
             }
         }
         
-        getChallenge(apiKey: apiKey, endpoint: environment.value, completion: challengeClosure)
+        getChallenge(apiKey: apiKey, endpoint: environment, completion: challengeClosure)
     }
     
     // Calculated value that can allow someone to check if there is an active token
@@ -211,7 +204,7 @@ public class PayTheory: ObservableObject {
                 "payment" : payment,
                 "tags": self.tags
             ]
-                postPayment(body: body, apiKey: apiKey, endpoint: self.environment.value, completion: captureCompletion)
+                postPayment(body: body, apiKey: apiKey, endpoint: self.environment, completion: captureCompletion)
         } else {
             let error = FailureResponse(type: "There is no auth to capture")
             completion(.failure(error))

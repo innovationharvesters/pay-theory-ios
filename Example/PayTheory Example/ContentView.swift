@@ -24,13 +24,13 @@ extension View {
     }
 }
 
-
 struct ContentView: View {
     
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let pt = PayTheory(apiKey: "pt-sandbox-dev-f992c4a57b86cb16aefae30d0a450237", tags: ["Test Tag" : "Test Value"], environment: .DEV("dev"))
+    let pt = PayTheory(apiKey: ProcessInfo.processInfo.environment["demo_api_key"]!, tags: ["Test Tag" : "Test Value"], environment: .DEMO)
+    
     
     let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "555-555-5555")
     
