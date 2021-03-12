@@ -24,9 +24,9 @@ extension View {
     }
 }
 
-func makePt(pt: PayTheory) -> PayTheory {
-    pt.environment = "dev"
-    return pt
+func makePt(payTheory: PayTheory) -> PayTheory {
+    payTheory.environment = "dev"
+    return payTheory
 }
 
 func formatMoney(val: Double) -> String {
@@ -38,10 +38,13 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let pt = makePt(pt: PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"]!, tags: ["Test Tag" : "Test Value"], environment: .DEMO, fee_mode: .SURCHARGE))
+    let pt = makePt(payTheory: PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"]!,
+                                         tags: ["Test Tag" : "Test Value"],
+                                         environment: .DEMO,
+                                         fee_mode: .SURCHARGE))
     
     
-    let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "555-555-5555")
+    let buyer = Buyer(firstName: "Some", lastName: "Body", phone: "555-555-5555")
     
     @State private var type = 0
     @State private var amount = 0
@@ -52,9 +55,17 @@ struct ContentView: View {
         switch result {
         case .success(let token):
             if let brand = token["brand"] {
-                self.confirmationMessage = "Are you sure you want to charge $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to the \(brand) card starting in \(token["first_six"] ?? "")?"
+                self.confirmationMessage = """
+                                            Are you sure you want to charge
+                                            $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100)))
+                                            to the \(brand) card starting in \(token["first_six"] ?? "")?
+                                            """
             } else {
-                self.confirmationMessage = "Are you sure you want to charge $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to the Bank Account ending in \(token["last_four"] ?? "")?"
+                self.confirmationMessage = """
+                                            Are you sure you want to charge
+                                            $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100)))
+                                            to the Bank Account ending in \(token["last_four"] ?? "")?
+                                            """
             }
                 self.showingConfirmation = true
             case .failure(let error):
@@ -67,9 +78,15 @@ struct ContentView: View {
         switch result {
         case .success(let token):
             if let brand = token["brand"] {
-                self.confirmationMessage = "You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to \(brand) card ending in \(token["last_four"] ?? "")"
+                self.confirmationMessage = """
+                                            You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100)))
+                                            to \(brand) card ending in \(token["last_four"] ?? "")
+                                            """
             } else {
-                self.confirmationMessage = "You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to Bank Account ending in \(token["last_four"] ?? "")"
+                self.confirmationMessage = """
+                                            You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100)))
+                                            to Bank Account ending in \(token["last_four"] ?? "")
+                                            """
             }
             self.showingMessage = true
         case .failure(let response):

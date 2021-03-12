@@ -94,6 +94,13 @@
             ReferencedContainer = "container:PayTheory.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "dev_api_key"
+            value = "pt-sandbox-dev-34a4a8979a9f3de0057d47eb05245255"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

@@ -9,8 +9,8 @@ import Foundation
 
 public class FailureResponse: Error, Equatable {
     public static func == (lhs: FailureResponse, rhs: FailureResponse) -> Bool {
-        if lhs.receipt_number == rhs.receipt_number &&
-        lhs.last_four == rhs.last_four &&
+        if lhs.receiptNumber == rhs.receiptNumber &&
+        lhs.lastFour == rhs.lastFour &&
         lhs.brand == rhs.brand &&
         lhs.state == rhs.state &&
         lhs.type == rhs.type {
@@ -20,8 +20,8 @@ public class FailureResponse: Error, Equatable {
         return false
     }
     
-    public var receipt_number = ""
-    public var last_four = ""
+    public var receiptNumber = ""
+    public var lastFour = ""
     public var brand: String?
     public var state = "FAILURE"
     public var type: String
@@ -30,10 +30,10 @@ public class FailureResponse: Error, Equatable {
         self.type = type
     }
     
-    public init(type: String, receipt_number: String, last_four: String, brand: String?) {
+    public init(type: String, receiptNumber: String, lastFour: String, brand: String?) {
         self.type = type
-        self.receipt_number = receipt_number
-        self.last_four = last_four
+        self.receiptNumber = receiptNumber
+        self.lastFour = lastFour
         self.brand = brand
     }
 }
@@ -70,15 +70,20 @@ class Attestation: Codable, Equatable {
     var key: String
     var currency: String
     var amount: Int
-    var fee_mode: FEE_MODE
+    var feeMode: FEE_MODE
     
-    init(attestation: String, nonce: String, key: String, currency: String, amount: Int, fee_mode: FEE_MODE = .SURCHARGE) {
+    init(attestation: String,
+         nonce: String,
+         key: String,
+         currency: String,
+         amount: Int,
+         feeMode: FEE_MODE = .SURCHARGE) {
         self.attestation = attestation
         self.nonce = nonce
         self.key = key
         self.amount = amount
         self.currency = currency
-        self.fee_mode = fee_mode
+        self.feeMode = feeMode
     }
 }
 
@@ -97,14 +102,18 @@ class Payment: Codable, Equatable {
     var amount: Int
     var merchant: String
     var service_fee: Int
-    var fee_mode: String
+    var feeMode: String
     
-    init(currency: String, amount: Int, service_fee: Int, merchant: String, fee_mode: String) {
+    init(currency: String,
+         amount: Int,
+         service_fee: Int,
+         merchant: String,
+         feeMode: String) {
         self.amount = amount
         self.currency = currency
         self.service_fee = service_fee
         self.merchant = merchant
-        self.fee_mode = fee_mode
+        self.feeMode = feeMode
     }
 }
 
@@ -127,7 +136,11 @@ class IdempotencyResponse: Codable, Equatable {
     var idempotency: String
     var payment: Payment
     
-    init(response: String, signature: String, credId: String, idempotency: String, payment: Payment) {
+    init(response: String,
+         signature: String,
+         credId: String,
+         idempotency: String,
+         payment: Payment) {
         self.signature = signature
         self.response = response
         self.credId = credId

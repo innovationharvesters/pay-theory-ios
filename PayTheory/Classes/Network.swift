@@ -66,12 +66,20 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
 }
 
 
-let endpoints = [".attested.api.paytheorystudy.com", "https://demo.attested.api.paytheorystudy.com", "https://attested.api.paytheorystudy.com", "https://test.attested.api.paytheorystudy.com"]
+let endpoints = [".attested.api.paytheorystudy.com",
+                 "https://demo.attested.api.paytheorystudy.com",
+                 "https://attested.api.paytheorystudy.com",
+                 "https://test.attested.api.paytheorystudy.com"]
 
 
-func getChallenge(apiKey: String, endpoint: String, completion: @escaping (Result<Challenge, Error>) -> Void) {
+func getChallenge(apiKey: String,
+                  endpoint: String,
+                  completion: @escaping (Result<Challenge, Error>) -> Void) {
     
-    let url = endpoint == "prod" ? "https://attested.api.paytheorystudy.com/challenge" : "https://\(endpoint).attested.api.paytheorystudy.com/challenge"
+    let url = endpoint == "prod" ?
+        "https://attested.api.paytheorystudy.com/challenge" :
+        "https://\(endpoint).attested.api.paytheorystudy.com/challenge"
+    
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,
         "Content-Type": "application/json"
@@ -82,28 +90,42 @@ func getChallenge(apiKey: String, endpoint: String, completion: @escaping (Resul
     }
 }
 
-func postIdempotency(body: Attestation, apiKey: String, endpoint: String, completion: @escaping (Result<IdempotencyResponse, Error>) -> Void) {
+func postIdempotency(body: Attestation,
+                     apiKey: String,
+                     endpoint: String,
+                     completion: @escaping (Result<IdempotencyResponse, Error>) -> Void) {
     
-    let url = endpoint == "prod" ? "https://attested.api.paytheorystudy.com/idempotency" : "https://\(endpoint).attested.api.paytheorystudy.com/idempotency"
+    let url = endpoint == "prod" ?
+        "https://attested.api.paytheorystudy.com/idempotency" :
+        "https://\(endpoint).attested.api.paytheorystudy.com/idempotency"
+    
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,
         "Content-Type": "application/json"
     ]
     
-    AF.request(url, method: .post, parameters: body, encoder: JSONParameterEncoder.default, headers: headers).validate().responseJSON { response in
+    AF.request(url, method: .post, parameters: body, encoder: JSONParameterEncoder.default,
+               headers: headers).validate().responseJSON { response in
         handleResponse(response: response, completion: completion)
 }
 }
 
-func postPayment(body: [String: Any], apiKey: String, endpoint: String, completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
+func postPayment(body: [String: Any],
+                 apiKey: String,
+                 endpoint: String,
+                 completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
 
-    let url = endpoint == "prod" ? "https://attested.api.paytheorystudy.com/payment" : "https://\(endpoint).attested.api.paytheorystudy.com/payment"
+    let url = endpoint == "prod" ?
+        "https://attested.api.paytheorystudy.com/payment" :
+        "https://\(endpoint).attested.api.paytheorystudy.com/payment"
+    
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,
         "Content-Type": "application/json"
     ]
 
-    AF.request(url, method: .post, parameters: body, encoding: JSONEncoding.default, headers: headers).validate().responseJSON { response in
+    AF.request(url, method: .post, parameters: body, encoding: JSONEncoding.default,
+               headers: headers).validate().responseJSON { response in
         debugPrint(response)
         guard response.error == nil else {
                 print("Call failed")

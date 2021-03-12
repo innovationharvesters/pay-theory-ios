@@ -14,7 +14,7 @@ public class Address: ObservableObject, Codable, Equatable {
         lhs.region == rhs.region &&
         lhs.line1 == rhs.line1 &&
         lhs.line2 == rhs.line2 &&
-        lhs.postal_code == rhs.postal_code {
+        lhs.postalCode == rhs.postalCode {
             return true
         }
         
@@ -34,20 +34,20 @@ public class Address: ObservableObject, Codable, Equatable {
     }
     @Published public var line1: String?
     @Published public var line2: String?
-    @Published public var postal_code: String?{
+    @Published public var postalCode: String?{
         didSet {
-            if let unwrappedCode = postal_code {
+            if let unwrappedCode = postalCode {
                 let filtered = unwrappedCode.filter { $0.isNumber }
                 
                 if unwrappedCode != filtered {
-                    postal_code = filtered
+                    postalCode = filtered
                 }
             }
         }
     }
     
     enum CodingKeys: CodingKey {
-        case city, country, region, line1, line2, postal_code
+        case city, country, region, line1, line2, postalCode
     }
     
     public func encode(to encoder: Encoder) throws {
@@ -57,7 +57,7 @@ public class Address: ObservableObject, Codable, Equatable {
         try container.encode(region, forKey: .region)
         try container.encode(line1, forKey: .line1)
         try container.encode(line2, forKey: .line2)
-        try container.encode(postal_code, forKey: .postal_code)
+        try container.encode(postalCode, forKey: .postalCode)
     }
     
     public required init(from decoder: Decoder) throws {
@@ -68,15 +68,20 @@ public class Address: ObservableObject, Codable, Equatable {
         region = try container.decodeIfPresent(String.self, forKey: .region) ?? nil
         line1 = try container.decodeIfPresent(String.self, forKey: .line1) ?? nil
         line2 = try container.decodeIfPresent(String.self, forKey: .line2) ?? nil
-        postal_code = try container.decodeIfPresent(String.self, forKey: .postal_code) ?? nil
+        postalCode = try container.decodeIfPresent(String.self, forKey: .postalCode) ?? nil
     }
     
-    public init(line1: String? = nil, line2: String? = nil, city: String? = nil, country: String? = nil, state: String? = nil, zip: String? = nil) {
+    public init(line1: String? = nil,
+                line2: String? = nil,
+                city: String? = nil,
+                country: String? = nil,
+                state: String? = nil,
+                zip: String? = nil) {
         self.city = city
         self.country = country
         self.line1 = line1
         self.line2 = line2
-        self.postal_code = zip
+        self.postalCode = zip
         self.region = state
     }
 }
@@ -99,8 +104,8 @@ func addressToDictionary(address: Address) -> [String: String] {
     if let line2 = address.line2 {
         result["line2"] = line2
     }
-    if let postal_code = address.postal_code {
-        result["postal_code"] = postal_code
+    if let postalCode = address.postalCode {
+        result["postal_code"] = postalCode
     }
     
     return result

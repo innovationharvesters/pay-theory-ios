@@ -45,7 +45,11 @@ public class PayTheory: ObservableObject {
     private var passedBuyer: Buyer?
     
     
-    public init(apiKey: String, tags: [String:Any] = [:], environment: Environment = .DEMO, fee_mode: FEE_MODE = .SURCHARGE){
+    public init(apiKey: String,
+                tags: [String:Any] = [:],
+                environment: Environment = .DEMO,
+                fee_mode: FEE_MODE = .SURCHARGE){
+        
         self.apiKey = apiKey
         self.environment = environment.value
         self.fee_mode = fee_mode
@@ -59,9 +63,11 @@ public class PayTheory: ObservableObject {
     let envBuyer: Buyer
     let envAch: BankAccount
     
-    //Function that will tokenize  but needs to either be cancelled or captured before the payment goes through. Allows for there to be a confirmation step in the transaction process
-    
-    func tokenize(card: PaymentCard? = nil, bank: BankAccount? = nil, amount: Int,  buyerOptions: Buyer, completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
+    func tokenize(card: PaymentCard? = nil,
+                  bank: BankAccount? = nil,
+                  amount: Int,
+                  buyerOptions: Buyer,
+                  completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
         
         //Closure to run once the challenge has been retrieved from the PT Server
         func challengeClosure(response: Result<Challenge, Error>) {
@@ -80,8 +86,16 @@ public class PayTheory: ObservableObject {
                             debugPrint(error!)
                             return
                         }
-                        let attest = Attestation(attestation: attestation!.base64EncodedString(), nonce: encodedChallengeData.base64EncodedString(), key: keyIdentifier!, currency: "USD", amount: amount, fee_mode: self.fee_mode)
-                        postIdempotency(body: attest, apiKey: self.apiKey, endpoint: self.environment, completion: idempotencyClosure)
+                        let attest = Attestation(attestation: attestation!.base64EncodedString(),
+                                                 nonce: encodedChallengeData.base64EncodedString(),
+                                                 key: keyIdentifier!,
+                                                 currency: "USD",
+                                                 amount: amount,
+                                                 feeMode: self.fee_mode)
+                        postIdempotency(body: attest,
+                                        apiKey: self.apiKey,
+                                        endpoint: self.environment,
+                                        completion: idempotencyClosure)
                     }
                 }
             
@@ -97,12 +111,20 @@ public class PayTheory: ObservableObject {
             case .success(let response):
                 if envCard.isValid {
                     idempotencyResponse = response
-                    tokenResponse = ["receipt_number": response.idempotency, "first_six": envCard.first_six, "brand": envCard.brand, "amount": response.payment.amount, "convenience_fee": response.payment.service_fee ]
+                    tokenResponse = ["receipt_number": response.idempotency,
+                                     "first_six": envCard.firstSix,
+                                     "brand": envCard.brand,
+                                     "amount": response.payment.amount,
+                                     "convenience_fee": response.payment.service_fee ]
                     
                     completion(.success(tokenResponse!))
                 } else if envAch.isValid {
                     idempotencyResponse = response
-                    tokenResponse = ["receipt_number": response.idempotency, "last_four": envAch.last_four, "amount": response.payment.amount, "convenience_fee": response.payment.service_fee ]
+                    tokenResponse = ["receipt_number": response.idempotency,
+                                     "last_four": envAch.lastFour,
+                                     "amount": response.payment.amount,
+                                     "convenience_fee": response.payment.service_fee ]
+                    
                     completion(.success(tokenResponse!))
                 }
                 
@@ -134,7 +156,8 @@ public class PayTheory: ObservableObject {
     }
 //
 //
-    //Public function that will complete the authorization and send a Completion Response with all the transaction details to the completion handler provided
+    //Public function that will complete the authorization and send a
+    //Completion Response with all the transaction details to the completion handler provided
 
     public func capture(completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
         var type: String = ""
@@ -145,9 +168,22 @@ public class PayTheory: ObservableObject {
                     let complete: [String: Any]
                         
                     if type == "card" {
-                        complete = ["receipt_number": idempotencyResponse!.idempotency, "last_four": envCard.last_four, "brand": envCard.brand, "created_at": responseAuth["created_at"] as! String, "amount": responseAuth["amount"] as! Int, "service_fee" : responseAuth["service_fee"] as! Int, "state" : responseAuth["state"] as! String, "tags": responseAuth["tags"] as! [String: Any]]
+                        complete = ["receipt_number": idempotencyResponse!.idempotency,
+                                    "last_four": envCard.lastFour,
+                                    "brand": envCard.brand,
+                                    "created_at": responseAuth["created_at"] as! String,
+                                    "amount": responseAuth["amount"] as! Int,
+                                    "service_fee" : responseAuth["service_fee"] as! Int,
+                                    "state" : responseAuth["state"] as! String,
+                                    "tags": responseAuth["tags"] as! [String: Any]]
                     } else {
-                        complete = ["receipt_number": idempotencyResponse!.idempotency, "last_four": envAch.last_four, "created_at": responseAuth["created_at"] as! String, "amount": responseAuth["amount"] as! Int, "service_fee" : responseAuth["service_fee"] as! Int, "state" : responseAuth["state"] as! String, "tags": responseAuth["tags"] as! [String: Any]]
+                        complete = ["receipt_number": idempotencyResponse!.idempotency,
+                                    "last_four": envAch.lastFour,
+                                    "created_at": responseAuth["created_at"] as! String,
+                                    "amount": responseAuth["amount"] as! Int,
+                                    "service_fee" : responseAuth["service_fee"] as! Int,
+                                    "state" : responseAuth["state"] as! String,
+                                    "tags": responseAuth["tags"] as! [String: Any]]
                     }
                     completion(.success(complete))
                     tokenResponse = nil
@@ -161,11 +197,11 @@ public class PayTheory: ObservableObject {
                     if let confirmed = error as? FailureResponse {
                         if type == "card" {
                             confirmed.brand = envCard.brand
-                            confirmed.receipt_number = idempotencyResponse!.idempotency
-                            confirmed.last_four = envCard.last_four
+                            confirmed.receiptNumber = idempotencyResponse!.idempotency
+                            confirmed.lastFour = envCard.lastFour
                         } else {
-                            confirmed.receipt_number = idempotencyResponse!.idempotency
-                            confirmed.last_four = envAch.last_four
+                            confirmed.receiptNumber = idempotencyResponse!.idempotency
+                            confirmed.lastFour = envAch.lastFour
                         }
                         completion(.failure(confirmed))
                         tokenResponse = nil
@@ -202,7 +238,10 @@ public class PayTheory: ObservableObject {
                 "payment" : payment,
                 "tags": self.tags
             ]
-                postPayment(body: body, apiKey: apiKey, endpoint: self.environment, completion: captureCompletion)
+                postPayment(body: body,
+                            apiKey: apiKey,
+                            endpoint: self.environment,
+                            completion: captureCompletion)
         } else {
             let error = FailureResponse(type: "There is no auth to capture")
             completion(.failure(error))
@@ -210,7 +249,8 @@ public class PayTheory: ObservableObject {
     }
 }
 
-//These fields are for capturing the card info required to create a payment card associated with an identity to run a transaction
+//These fields are for capturing the card info required to
+//create a payment card associated with an identity to run a transaction
 
 /// TextField that can be used to capture the Name for a card object to be used in a Pay Theory payment
 ///
@@ -259,7 +299,7 @@ public struct PTExp: View {
         
     }
     public var body: some View {
-        TextField("MM / YY", text: $card.expiration_date)
+        TextField("MM / YY", text: $card.expirationDate)
             .keyboardType(.decimalPad)
     }
 }
@@ -276,7 +316,7 @@ public struct PTCvv: View {
         
     }
     public var body: some View {
-        TextField("CVV", text: $card.security_code)
+        TextField("CVV", text: $card.securityCode)
             .keyboardType(.decimalPad)
     }
 }
@@ -355,7 +395,7 @@ public struct PTCardZip: View {
     }
     
     public var body: some View {
-        TextField("Zip", text: $card.address.postal_code ?? "")
+        TextField("Zip", text: $card.address.postalCode ?? "")
             .keyboardType(.decimalPad)
     }
 }
@@ -375,14 +415,15 @@ public struct PTCardCountry: View {
     }
 }
 
-/// Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)
+/// Button that allows a payment to be tokenized once it has the necessary data
+/// (Card Number, Expiration Date, and CVV)
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTButton: View {
     @EnvironmentObject var card: PaymentCard
     @EnvironmentObject var envBuyer: Buyer
-    @EnvironmentObject var PT: PayTheory
+    @EnvironmentObject var payTheory: PayTheory
     @EnvironmentObject var bank: BankAccount
     
     var completion: (Result<[String: Any], FailureResponse>) -> Void
@@ -393,10 +434,13 @@ public struct PTButton: View {
     /// Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)
     /// - Parameters:
     ///   - amount: Payment amount that should be charged to the card in cents.
-    ///   - buyer: Optional buyer object that can pass Buyer Options for the transaction.
-    ///   - require_confirmation: optional param that defaults to false if you don't declare it. Can also pass .SERVICE_FEE as a prop
-    ///   - completion: Function that will handle the result of the tokenization response once it has been returned from the server.
-    public init(amount: Int, text: String = "Confirm", completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
+    ///   - text: String that will be the label for the button.
+    ///   - completion: Function that will handle the result of the
+    ///   tokenization response once it has been returned from the server.
+    public init(amount: Int,
+                text: String = "Confirm",
+                completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
+        
         self.completion = completion
         self.amount = amount
         self.text = text
@@ -405,7 +449,7 @@ public struct PTButton: View {
     func tokenizeCompletion(result: Result<[String: Any], FailureResponse>) {
         switch result {
             case .success:
-                PT.capture(completion: completion)
+                payTheory.capture(completion: completion)
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -414,34 +458,58 @@ public struct PTButton: View {
     
     public var body: some View {
         Button(text) {
-            if PT.buttonClicked == false {
-                PT.buttonClicked = true
+            if payTheory.buttonClicked == false {
+                payTheory.buttonClicked = true
                 if let identity = buyer {
                     if card.isValid {
-                        if PT.fee_mode == .SERVICE_FEE {
-                            PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: completion)
+                        if payTheory.fee_mode == .SERVICE_FEE {
+                            payTheory.tokenize(card: card,
+                                               amount: amount,
+                                               buyerOptions: identity,
+                                               completion: completion)
                         } else {
-                            PT.tokenize(card: card, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
+                            payTheory.tokenize(card: card,
+                                               amount: amount,
+                                               buyerOptions: identity,
+                                               completion: tokenizeCompletion)
                         }
                     } else if bank.isValid {
-                        if  PT.fee_mode == .SERVICE_FEE {
-                            PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: completion)
+                        if  payTheory.fee_mode == .SERVICE_FEE {
+                            payTheory.tokenize(bank: bank,
+                                               amount: amount,
+                                               buyerOptions: identity,
+                                               completion: completion)
                         } else {
-                            PT.tokenize(bank: bank, amount: amount, buyerOptions: identity, completion: tokenizeCompletion)
+                            payTheory.tokenize(bank: bank,
+                                               amount: amount,
+                                               buyerOptions: identity,
+                                               completion: tokenizeCompletion)
                         }
                     }
                 } else {
                     if card.isValid {
-                        if  PT.fee_mode == .SERVICE_FEE {
-                            PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: completion)
+                        if  payTheory.fee_mode == .SERVICE_FEE {
+                            payTheory.tokenize(card: card,
+                                               amount: amount,
+                                               buyerOptions: envBuyer,
+                                               completion: completion)
                         } else {
-                            PT.tokenize(card: card, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
+                            payTheory.tokenize(card: card,
+                                               amount: amount,
+                                               buyerOptions: envBuyer,
+                                               completion: tokenizeCompletion)
                         }
                     } else if bank.isValid {
-                        if  PT.fee_mode == .SERVICE_FEE {
-                            PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: completion)
+                        if  payTheory.fee_mode == .SERVICE_FEE {
+                            payTheory.tokenize(bank: bank,
+                                               amount: amount,
+                                               buyerOptions: envBuyer,
+                                               completion: completion)
                         } else {
-                            PT.tokenize(bank: bank, amount: amount, buyerOptions: envBuyer, completion: tokenizeCompletion)
+                            payTheory.tokenize(bank: bank,
+                                               amount: amount,
+                                               buyerOptions: envBuyer,
+                                               completion: tokenizeCompletion)
                         }
                     }
                 }
@@ -468,7 +536,7 @@ public struct PTButton: View {
 public struct PTForm<Content>: View where Content: View {
 
     let content: () -> Content
-    @EnvironmentObject var PT: PayTheory
+    @EnvironmentObject var payTheory: PayTheory
 
     public init(@ViewBuilder content: @escaping () -> Content) {
         self.content = content
@@ -477,14 +545,14 @@ public struct PTForm<Content>: View where Content: View {
     public var body: some View {
         Group{
             content()
-        }.environmentObject(PT.envCard)
-        .environmentObject(PT.envBuyer)
-        .environmentObject(PT.envAch)
+        }.environmentObject(payTheory.envCard)
+        .environmentObject(payTheory.envBuyer)
+        .environmentObject(payTheory.envAch)
     }
 
 }
 
-//These fields are for creating an identity to associate with a purchase if you want to capture customer information
+
 
 /// TextField that can be used to capture the First Name for Buyer Options to be used in a Pay Theory payment
 ///
@@ -495,7 +563,7 @@ public struct PTBuyerFirstName: View {
     public init() {
     }
    public var body: some View {
-        TextField("First Name", text: $identity.first_name ?? "")
+        TextField("First Name", text: $identity.firstName ?? "")
     }
 }
 
@@ -508,7 +576,7 @@ public struct PTBuyerLastName: View {
     public init() {
     }
     public var body: some View {
-        TextField("Last Name", text: $identity.last_name ?? "")
+        TextField("Last Name", text: $identity.lastName ?? "")
     }
 }
 
@@ -547,7 +615,7 @@ public struct PTBuyerLineOne: View {
     public init() {
     }
     public var body: some View {
-        TextField("Address Line 1", text: $identity.personal_address.line1 ?? "")
+        TextField("Address Line 1", text: $identity.personalAddress.line1 ?? "")
     }
 }
 
@@ -560,7 +628,7 @@ public struct PTBuyerLineTwo: View {
     public init() {
     }
     public var body: some View {
-        TextField("Address Line 2", text: $identity.personal_address.line2 ?? "")
+        TextField("Address Line 2", text: $identity.personalAddress.line2 ?? "")
     }
 }
 
@@ -573,7 +641,7 @@ public struct PTBuyerCity: View {
     public init() {
     }
     public var body: some View {
-        TextField("City", text: $identity.personal_address.city ?? "")
+        TextField("City", text: $identity.personalAddress.city ?? "")
     }
 }
 
@@ -586,7 +654,7 @@ public struct PTBuyerState: View {
     public init() {
     }
     public var body: some View {
-        TextField("State", text: $identity.personal_address.region ?? "")
+        TextField("State", text: $identity.personalAddress.region ?? "")
     }
 }
 
@@ -599,7 +667,7 @@ public struct PTBuyerZip: View {
     public init() {
     }
     public var body: some View {
-        TextField("Zip", text: $identity.personal_address.postal_code ?? "")
+        TextField("Zip", text: $identity.personalAddress.postalCode ?? "")
     }
 }
 
@@ -612,7 +680,7 @@ public struct PTBuyerCountry: View {
     public init() {
     }
     public var body: some View {
-        TextField("Country", text: $identity.personal_address.country ?? "")
+        TextField("Country", text: $identity.personalAddress.country ?? "")
     }
 }
 
@@ -643,7 +711,7 @@ public struct PTAchAccountNumber: View {
     }
     
     public var body: some View {
-        TextField("Account Number", text: $account.account_number)
+        TextField("Account Number", text: $account.accountNumber)
             .keyboardType(.decimalPad)
     }
 }
@@ -660,7 +728,7 @@ public struct PTAchAccountType: View {
     }
     
     public var body: some View {
-        Picker("Account Type", selection: $account.account_type){
+        Picker("Account Type", selection: $account.accountType){
             ForEach(0 ..< types.count){
                 Text(self.types[$0])
             }
@@ -679,7 +747,7 @@ public struct PTAchRoutingNumber: View {
     }
     
     public var body: some View {
-        TextField("Routing Number", text: $account.bank_code)
+        TextField("Routing Number", text: $account.bankCode)
             .keyboardType(.decimalPad)
     }
 }
