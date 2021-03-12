@@ -1,6 +1,0 @@
-framework module Pods_PayTheory_Example {
-  umbrella header "Pods-PayTheory Example-umbrella.h"
-
-  export *
-  module * { export * }
-}

@@ -1,6 +1,0 @@
-framework module PayTheory {
-  umbrella header "PayTheory-umbrella.h"
-
-  export *
-  module * { export * }
-}
