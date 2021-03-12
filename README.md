@@ -37,10 +37,10 @@ import PayTheory
 ## Usage
 
 Initialize a PayTheory element for handling state. It accepts the following arguments.
-*  **apiKey**: Your PayTheory merchant API Key
-*  **tags**: optional custom tags you can include to track purchases
-*  **environment**: tells the SDK if it should be working from a demo or production environment (**.DEMO** or **.PROD**). Defaults to **.DEMO**
-*  **fee_mode**: optionally set the fee mode.  By default **.SURCHARGE** mode is used **.SERVICE_FEE** mode is available only when enabled by Pay Theory **.SURCHARGE** mode applies a fee of 2.9% + $0.30 to be deducted from original amount **.SERVICE FEE** mode calculates a fee based on predetermined parameters  and adds it to the original amount
+*   **apiKey**: Your PayTheory merchant API Key
+*   **tags**: optional custom tags you can include to track purchases
+*   **environment**: tells the SDK if it should be working from a demo or production environment (**.DEMO** or **.PROD**). Defaults to **.DEMO**
+*   **fee_mode**: optionally set the fee mode.  By default **.SURCHARGE** mode is used **.SERVICE_FEE** mode is available only when enabled by Pay Theory **.SURCHARGE** mode applies a fee of 2.9% + $0.30 to be deducted from original amount **.SERVICE FEE** mode calculates a fee based on predetermined parameters  and adds it to the original amount
 
 ```swift
 let apiKey = 'your-api-key'
@@ -67,9 +67,9 @@ These custom text fields are what will be used to collect the card information f
 
 There are three required text fields to capture the info needed to initialize a card transaction
 
-*  Credit Card Number
-*  Credit Card Expiration
-*  Credit Card CVV
+*   Credit Card Number
+*   Credit Card Expiration
+*   Credit Card CVV
 
 ```swift
 PTCardNumber()
@@ -79,12 +79,12 @@ PTCvv()
 
 There are optional fields for capturing Billing Address and Name On Card
 
-*  Credit Card Name
-*  Credit Card Address Line One
-*  Credit Card Address Line Two
-*  Credit Card City
-*  Credit Card State
-*  Credit Card Zip
+*   Credit Card Name
+*   Credit Card Address Line One
+*   Credit Card Address Line Two
+*   Credit Card City
+*   Credit Card State
+*   Credit Card Zip
 
 ```swift
 //Name on Card
@@ -104,10 +104,10 @@ These custom text fields are what will be used to collect the ACH information fo
 
 All four text fields are required to capture the info needed to initialize an ACH transaction
 
-*  ACH Account Number
-*  ACH Account Type
-*  ACH Account Name
-*  ACH Routing Number
+*   ACH Account Number
+*   ACH Account Type
+*   ACH Account Name
+*   ACH Routing Number
 
 ```swift
 PTAchAccountName()
@@ -120,8 +120,8 @@ PTAchRoutingNumber()
 
 This button component allows a transaction to be initialized. It will be disabled until it has the required data needed to initialize a transaction. It accepts a few arguments needed to initialize the payment.
 
-*  **amount**: Payment amount that should be charged to the card in cents
-*  **completion**: Function that will handle the result of the call returning a dictionary **[String:Any]** or **Failure Response**
+*   **amount**: Payment amount that should be charged to the card in cents
+*   **completion**: Function that will handle the result of the call returning a dictionary **[String:Any]** or **FailureResponse**
 
 ```swift
 let amount = 1000

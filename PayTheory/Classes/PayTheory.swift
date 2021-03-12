@@ -10,7 +10,7 @@ import Foundation
 import DeviceCheck
 import CryptoKit
 
-public func ??<T>(lhs: Binding<Optional<T>>, rhs: T) -> Binding<T> {
+public func ?? <T>(lhs: Binding<T?>, rhs: T) -> Binding<T> {
     Binding(
         get: { lhs.wrappedValue ?? rhs },
         set: { lhs.wrappedValue = $0 }
@@ -18,7 +18,7 @@ public func ??<T>(lhs: Binding<Optional<T>>, rhs: T) -> Binding<T> {
 }
 public enum Environment {
     case DEMO, PROD
-    
+
     var value: String {
         switch self {
         case .DEMO:
@@ -145,7 +145,6 @@ public class PayTheory: ObservableObject {
         }
     }
     
-    
     //Public function that will void the authorization and relase any funds that may be held.
 
     public func cancel() {
@@ -164,25 +163,16 @@ public class PayTheory: ObservableObject {
         func captureCompletion(response: Result<[String: AnyObject], Error>) {
             switch response {
             case .success(let responseAuth):
-                let complete: [String: Any]
+                var complete: [String: Any] = ["receipt_number": idempotencyResponse!.idempotency,
+                                              "last_four": envAch.lastFour,
+                                              "created_at": responseAuth["created_at"] as? String ?? "",
+                                              "amount": responseAuth["amount"] as? Int ?? 0,
+                                              "service_fee": responseAuth["service_fee"] as? Int ?? 0,
+                                              "state": responseAuth["state"] as? String ?? "",
+                                              "tags": responseAuth["tags"] as? [String: Any] ?? [:]]
                     
                 if type == "card" {
-                    complete = ["receipt_number": idempotencyResponse!.idempotency,
-                                "last_four": envCard.lastFour,
-                                "brand": envCard.brand,
-                                "created_at": responseAuth["created_at"] as? String ?? "",
-                                "amount": responseAuth["amount"] as? Int ?? 0,
-                                "service_fee": responseAuth["service_fee"] as? Int ?? 0,
-                                "state": responseAuth["state"] as? String ?? "",
-                                "tags": responseAuth["tags"] as? [String: Any] ?? [:]]
-                } else {
-                    complete = ["receipt_number": idempotencyResponse!.idempotency,
-                                "last_four": envAch.lastFour,
-                                "created_at": responseAuth["created_at"] as? String ?? "",
-                                "amount": responseAuth["amount"] as? Int ?? 0,
-                                "service_fee": responseAuth["service_fee"] as? Int ?? 0,
-                                "state": responseAuth["state"] as? String ?? "",
-                                "tags": responseAuth["tags"] as? [String: Any] ?? [:]]
+                    complete["brand"] = envCard.brand
                 }
                 completion(.success(complete))
                 tokenResponse = nil
@@ -294,7 +284,7 @@ public struct PTCardNumber: View {
 ///
 public struct PTExp: View {
     @EnvironmentObject var card: PaymentCard
-    public init(){
+    public init() {
         
     }
     public var body: some View {

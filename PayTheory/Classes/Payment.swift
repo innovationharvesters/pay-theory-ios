@@ -37,7 +37,6 @@ class PaymentCard: ObservableObject, Codable, Equatable {
             lhs.securityCode == rhs.securityCode {
             return true
         }
-        
         return false
     }
     
@@ -53,7 +52,7 @@ class PaymentCard: ObservableObject, Codable, Equatable {
                 }
             }
             if self.expirationDate.count == 2 {
-                expirationDate = expirationDate + " / "
+                expirationDate += " / "
             }
             if self.expirationDate.count == 4 {
                 expirationDate = String(expirationDate.prefix(1))
@@ -69,10 +68,10 @@ class PaymentCard: ObservableObject, Codable, Equatable {
         didSet {
             if (self.number.prefix(2) == "34" || self.number.prefix(2) == "37") &&
                 (self.number.count == 4 || self.number.count == 11) {
-                if (oldValue.last == " ") {
+                if oldValue.last == " " {
                     number.remove(at: oldValue.index(before: number.endIndex))
                 } else {
-                    number = number + " "
+                    number += " "
                 }
             } else if (self.number.prefix(2) != "34" && self.number.prefix(2) != "37") &&
                         (self.number.count == 4 || self.number.count == 9 ||
@@ -183,7 +182,10 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     
     var brand: String {
         let visa = "^4"
-        let mastercard = "^5[1-5][0-9]{5,}|222[1-9][0-9]{3,}|22[3-9][0-9]{4,}|2[3-6][0-9]{5,}|27[01][0-9]{4,}|2720[0-9]{3,}$/"
+        let mastercard = """
+                        ^5[1-5][0-9]{5,}|222[1-9][0-9]{3,}|22[3-9]
+                        [0-9]{4,}|2[3-6][0-9]{5,}|27[01][0-9]{4,}|2720[0-9]{3,}$/
+                        """
         let amex = "^3[47][0-9]{5,}$"
         let discover = "^6(?:011|5[0-9]{2})[0-9]{3,}$"
         let jcb = "^35"
@@ -343,28 +345,28 @@ class BankAccount: ObservableObject, Codable, Equatable {
             return false
         }
         
-        var n = 0
+        var number = 0
         for num in stride(from: 0, to: bankCode.count, by: 3) {
             if let first = Int(bankCode[num]) {
-                n += (first * 3)
+                number += (first * 3)
             } else {
                 return false
             }
             
             if let second = Int(bankCode[num + 1]) {
-                n += (second * 7)
+                number += (second * 7)
             } else {
                 return false
             }
             
             if let third = Int(bankCode[num + 2]) {
-                n += (third * 1)
+                number += (third * 1)
             } else {
                 return false
             }
         }
         
-        return n > 0 && n % 10 == 0
+        return number > 0 && number % 10 == 0
     }
     
     var validAccountNumber: Bool {
@@ -382,7 +384,6 @@ class BankAccount: ObservableObject, Codable, Equatable {
     var lastFour: String {
         return String(accountNumber.suffix(4))
     }
-    
     
     init(identity: String) {
         self.identity = identity
