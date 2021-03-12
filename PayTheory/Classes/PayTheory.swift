@@ -16,7 +16,7 @@ public func ??<T>(lhs: Binding<Optional<T>>, rhs: T) -> Binding<T> {
         set: { lhs.wrappedValue = $0 }
     )
 }
-public enum Environment{
+public enum Environment {
     case DEMO, PROD
     
     var value: String {
@@ -44,11 +44,10 @@ public class PayTheory: ObservableObject {
     private var idempotencyResponse: IdempotencyResponse?
     private var passedBuyer: Buyer?
     
-    
     public init(apiKey: String,
-                tags: [String:Any] = [:],
+                tags: [String: Any] = [:],
                 environment: Environment = .DEMO,
-                fee_mode: FEE_MODE = .SURCHARGE){
+                fee_mode: FEE_MODE = .SURCHARGE) {
         
         self.apiKey = apiKey
         self.environment = environment.value
@@ -100,7 +99,7 @@ public class PayTheory: ObservableObject {
                 }
             
             case .failure(let error):
-                completion(.failure(error as! FailureResponse))
+                completion(.failure(error as? FailureResponse ?? FailureResponse(type: "Unknown Error")))
                 buttonClicked = false
             }
         }
@@ -129,7 +128,7 @@ public class PayTheory: ObservableObject {
                 }
                 
             case .failure(let error):
-                completion(.failure(error as! FailureResponse))
+                completion(.failure(error as? FailureResponse ?? FailureResponse(type: "Unknown Error")))
                 buttonClicked = false
             }
         }
@@ -164,56 +163,56 @@ public class PayTheory: ObservableObject {
 
         func captureCompletion(response: Result<[String: AnyObject], Error>) {
             switch response {
-                case .success(let responseAuth):
-                    let complete: [String: Any]
-                        
+            case .success(let responseAuth):
+                let complete: [String: Any]
+                    
+                if type == "card" {
+                    complete = ["receipt_number": idempotencyResponse!.idempotency,
+                                "last_four": envCard.lastFour,
+                                "brand": envCard.brand,
+                                "created_at": responseAuth["created_at"] as? String ?? "",
+                                "amount": responseAuth["amount"] as? Int ?? 0,
+                                "service_fee": responseAuth["service_fee"] as? Int ?? 0,
+                                "state": responseAuth["state"] as? String ?? "",
+                                "tags": responseAuth["tags"] as? [String: Any] ?? [:]]
+                } else {
+                    complete = ["receipt_number": idempotencyResponse!.idempotency,
+                                "last_four": envAch.lastFour,
+                                "created_at": responseAuth["created_at"] as? String ?? "",
+                                "amount": responseAuth["amount"] as? Int ?? 0,
+                                "service_fee": responseAuth["service_fee"] as? Int ?? 0,
+                                "state": responseAuth["state"] as? String ?? "",
+                                "tags": responseAuth["tags"] as? [String: Any] ?? [:]]
+                }
+                completion(.success(complete))
+                tokenResponse = nil
+                idempotencyResponse = nil
+                envCard.clear()
+                envBuyer.clear()
+                envAch.clear()
+                buttonClicked = false
+
+            case .failure(let error):
+                if let confirmed = error as? FailureResponse {
                     if type == "card" {
-                        complete = ["receipt_number": idempotencyResponse!.idempotency,
-                                    "last_four": envCard.lastFour,
-                                    "brand": envCard.brand,
-                                    "created_at": responseAuth["created_at"] as! String,
-                                    "amount": responseAuth["amount"] as! Int,
-                                    "service_fee" : responseAuth["service_fee"] as! Int,
-                                    "state" : responseAuth["state"] as! String,
-                                    "tags": responseAuth["tags"] as! [String: Any]]
+                        confirmed.brand = envCard.brand
+                        confirmed.receiptNumber = idempotencyResponse!.idempotency
+                        confirmed.lastFour = envCard.lastFour
                     } else {
-                        complete = ["receipt_number": idempotencyResponse!.idempotency,
-                                    "last_four": envAch.lastFour,
-                                    "created_at": responseAuth["created_at"] as! String,
-                                    "amount": responseAuth["amount"] as! Int,
-                                    "service_fee" : responseAuth["service_fee"] as! Int,
-                                    "state" : responseAuth["state"] as! String,
-                                    "tags": responseAuth["tags"] as! [String: Any]]
+                        confirmed.receiptNumber = idempotencyResponse!.idempotency
+                        confirmed.lastFour = envAch.lastFour
                     }
-                    completion(.success(complete))
+                    completion(.failure(confirmed))
                     tokenResponse = nil
                     idempotencyResponse = nil
-                    envCard.clear()
-                    envBuyer.clear()
-                    envAch.clear()
                     buttonClicked = false
-
-                case .failure(let error):
-                    if let confirmed = error as? FailureResponse {
-                        if type == "card" {
-                            confirmed.brand = envCard.brand
-                            confirmed.receiptNumber = idempotencyResponse!.idempotency
-                            confirmed.lastFour = envCard.lastFour
-                        } else {
-                            confirmed.receiptNumber = idempotencyResponse!.idempotency
-                            confirmed.lastFour = envAch.lastFour
-                        }
-                        completion(.failure(confirmed))
-                        tokenResponse = nil
-                        idempotencyResponse = nil
-                        buttonClicked = false
-                    } else {
-                        completion(.failure(FailureResponse(type: error.localizedDescription)))
-                        tokenResponse = nil
-                        idempotencyResponse = nil
-                        buttonClicked = false
-                    }
+                } else {
+                    completion(.failure(FailureResponse(type: error.localizedDescription)))
+                    tokenResponse = nil
+                    idempotencyResponse = nil
+                    buttonClicked = false
                 }
+            }
         }
 
         if let idempotency = idempotencyResponse {
@@ -230,12 +229,12 @@ public class PayTheory: ObservableObject {
             let challengeString = String(data: decodedData, encoding: .utf8)!
             
             let body: [String: Any] = [
-                "idempotencyToken" : idempotency.response,
-                "credId" : idempotency.credId,
-                "signature" : idempotency.signature,
-                "buyerOptions" : buyerToDictionary(buyer: envBuyer),
+                "idempotencyToken": idempotency.response,
+                "credId": idempotency.credId,
+                "signature": idempotency.signature,
+                "buyerOptions": buyerToDictionary(buyer: envBuyer),
                 "challenge": challengeString,
-                "payment" : payment,
+                "payment": payment,
                 "tags": self.tags
             ]
                 postPayment(body: body,
@@ -276,7 +275,7 @@ public struct PTCardName: View {
 ///
 public struct PTCardNumber: View {
     @EnvironmentObject var card: PaymentCard
-    public init(){
+    public init() {
         
     }
     public var body: some View {
@@ -431,7 +430,9 @@ public struct PTButton: View {
     var text: String
     var buyer: Buyer?
     
-    /// Button that allows a payment to be tokenized once it has the necessary data (Card Number, Expiration Date, and CVV)
+    /// Button that allows a payment to be tokenized once it has the necessary data
+    /// (Card Number, Expiration Date, and CVV)
+    /// 
     /// - Parameters:
     ///   - amount: Payment amount that should be charged to the card in cents.
     ///   - text: String that will be the label for the button.
@@ -448,11 +449,11 @@ public struct PTButton: View {
     
     func tokenizeCompletion(result: Result<[String: Any], FailureResponse>) {
         switch result {
-            case .success:
-                payTheory.capture(completion: completion)
-            case .failure(let error):
-                completion(.failure(error))
-            }
+        case .success:
+            payTheory.capture(completion: completion)
+        case .failure(let error):
+            completion(.failure(error))
+        }
     }
     
     
@@ -543,7 +544,7 @@ public struct PTForm<Content>: View where Content: View {
     }
 
     public var body: some View {
-        Group{
+        Group {
             content()
         }.environmentObject(payTheory.envCard)
         .environmentObject(payTheory.envBuyer)
@@ -728,8 +729,8 @@ public struct PTAchAccountType: View {
     }
     
     public var body: some View {
-        Picker("Account Type", selection: $account.accountType){
-            ForEach(0 ..< types.count){
+        Picker("Account Type", selection: $account.accountType) {
+            ForEach(0 ..< types.count) {
                 Text(self.types[$0])
             }
         }.pickerStyle(SegmentedPickerStyle())

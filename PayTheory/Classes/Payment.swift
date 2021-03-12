@@ -45,20 +45,20 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     @Published var expirationDate = ""{
         didSet {
             if let month = Int(self.expirationDate) {
-                if (self.expirationDate.count == 1 && month > 1){
+                if self.expirationDate.count == 1 && month > 1 {
                     expirationDate = "0" + expirationDate + " / "
                 }
-                if (self.expirationDate.count == 2 && month > 12) {
+                if self.expirationDate.count == 2 && month > 12 {
                     expirationDate = "0" + String(expirationDate.prefix(1)) + " / " + String(expirationDate.suffix(1))
                 }
             }
-            if (self.expirationDate.count == 2) {
+            if self.expirationDate.count == 2 {
                 expirationDate = expirationDate + " / "
             }
-            if (self.expirationDate.count == 4) {
+            if self.expirationDate.count == 4 {
                 expirationDate = String(expirationDate.prefix(1))
             }
-            if (self.expirationDate.count > 9){
+            if self.expirationDate.count > 9 {
                 expirationDate = oldValue
             }
         }
@@ -67,20 +67,25 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     @Published var address = Address()
     @Published var number = ""{
         didSet {
-            if ((self.number.prefix(2) == "34" || self.number.prefix(2) == "37") && (self.number.count == 4 || self.number.count == 11)) {
+            if (self.number.prefix(2) == "34" || self.number.prefix(2) == "37") &&
+                (self.number.count == 4 || self.number.count == 11) {
                 if (oldValue.last == " ") {
                     number.remove(at: oldValue.index(before: number.endIndex))
                 } else {
                     number = number + " "
                 }
-            } else if ((self.number.prefix(2) != "34" && self.number.prefix(2) != "37") && (self.number.count == 4 || self.number.count == 9 || self.number.count == 14 || self.number.count == 19)) {
+            } else if (self.number.prefix(2) != "34" && self.number.prefix(2) != "37") &&
+                        (self.number.count == 4 || self.number.count == 9 ||
+                            self.number.count == 14 || self.number.count == 19) {
                 if (oldValue.last == " ") {
                     number.remove(at: oldValue.index(before: number.endIndex))
                 } else {
                     number = number + " "
                 }
             }
-            if (self.number.count > 23 || ((self.number.prefix(2) == "34" || self.number.prefix(2) == "37") && self.number.count == 18)) {
+            if self.number.count > 23 ||
+                ((self.number.prefix(2) == "34" || self.number.prefix(2) == "37") &&
+                    self.number.count == 18) {
                 number = oldValue
             }
         }
@@ -138,7 +143,7 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     }
     
     var validCardNumber: Bool {
-        if (spacelessCard.count < 13){
+        if spacelessCard.count < 13 {
             return false
         }
         
@@ -329,7 +334,6 @@ class BankAccount: ObservableObject, Codable, Equatable {
            type = try container.decode(String.self, forKey: .type)
     }
     
-    
     var validAccountType: Bool {
         return accountType < 2
     }
@@ -340,7 +344,7 @@ class BankAccount: ObservableObject, Codable, Equatable {
         }
         
         var n = 0
-        for num in stride(from: 0, to: bankCode.count, by: 3){
+        for num in stride(from: 0, to: bankCode.count, by: 3) {
             if let first = Int(bankCode[num]) {
                 n += (first * 3)
             } else {
@@ -406,7 +410,6 @@ class BankAccount: ObservableObject, Codable, Equatable {
 func bankAccountToDictionary(account: BankAccount) -> [String: Any] {
     var result: [String: Any] = [:]
     let types = ["CHECKING", "SAVINGS"]
-    
     
     result["name"] = account.name
     result["account_number"] = account.accountNumber

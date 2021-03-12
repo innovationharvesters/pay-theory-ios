@@ -17,16 +17,15 @@ public class Address: ObservableObject, Codable, Equatable {
         lhs.postalCode == rhs.postalCode {
             return true
         }
-        
         return false
     }
     
     @Published public var city: String?
     @Published public var country: String?
-    @Published public var region: String?{
+    @Published public var region: String? {
         didSet {
             if let unwrappedRegion = self.region {
-                if (unwrappedRegion.count > 2){
+                if unwrappedRegion.count > 2 {
                     region = oldValue
                 }
             }
@@ -34,7 +33,7 @@ public class Address: ObservableObject, Codable, Equatable {
     }
     @Published public var line1: String?
     @Published public var line2: String?
-    @Published public var postalCode: String?{
+    @Published public var postalCode: String? {
         didSet {
             if let unwrappedCode = postalCode {
                 let filtered = unwrappedCode.filter { $0.isNumber }

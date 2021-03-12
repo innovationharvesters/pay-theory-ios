@@ -34,15 +34,13 @@ func formatMoney(val: Double) -> String {
 }
 
 struct ContentView: View {
-    
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let pt = makePt(payTheory: PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"]!,
-                                         tags: ["Test Tag" : "Test Value"],
+    let pt = makePt(payTheory: PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"] ?? "",
+                                         tags: ["Test Tag": "Test Value"],
                                          environment: .DEMO,
                                          fee_mode: .SURCHARGE))
-    
     
     let buyer = Buyer(firstName: "Some", lastName: "Body", phone: "555-555-5555")
     
@@ -51,40 +49,40 @@ struct ContentView: View {
     private var types: [String] = ["Card", "ACH"]
     private var amounts: [Double] = [1000, 5000]
     
-    func completion(result: Result<[String: Any], FailureResponse>){
+    func completion(result: Result<[String: Any], FailureResponse>) {
         switch result {
         case .success(let token):
             if let brand = token["brand"] {
                 self.confirmationMessage = """
                                             Are you sure you want to charge
-                                            $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100)))
+                                            $\(String(format: "%.2f", (Double(token["amount"] as? Int ?? 0) / 100)))
                                             to the \(brand) card starting in \(token["first_six"] ?? "")?
                                             """
             } else {
                 self.confirmationMessage = """
                                             Are you sure you want to charge
-                                            $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100)))
+                                            $\(String(format: "%.2f", (Double(token["amount"] as? Int ?? 0) / 100)))
                                             to the Bank Account ending in \(token["last_four"] ?? "")?
                                             """
             }
                 self.showingConfirmation = true
-            case .failure(let error):
+        case .failure(let error):
                 self.confirmationMessage = "Your tokenization failed! \(error.type)"
                 self.showingConfirmation = true
             }
     }
     
-    func confirmCompletion(result: Result<[String: Any], FailureResponse>){
+    func confirmCompletion(result: Result<[String: Any], FailureResponse>) {
         switch result {
         case .success(let token):
             if let brand = token["brand"] {
                 self.confirmationMessage = """
-                                            You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100)))
+                                            You charged $\(String(format:"%.2f", (Double(token["amount"] as? Int ?? 0) / 100)))
                                             to \(brand) card ending in \(token["last_four"] ?? "")
                                             """
             } else {
                 self.confirmationMessage = """
-                                            You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100)))
+                                            You charged $\(String(format:"%.2f", (Double(token["amount"] as? Int ?? 0) / 100)))
                                             to Bank Account ending in \(token["last_four"] ?? "")
                                             """
             }
@@ -96,21 +94,21 @@ struct ContentView: View {
     }
     
     var body: some View {
-            VStack{
-                Picker("Amount", selection: $amount){
+            VStack {
+                Picker("Amount", selection: $amount) {
                     ForEach(0 ..< amounts.count){
                         Text(formatMoney(val: self.amounts[$0]))
                     }
                 }.pickerStyle(SegmentedPickerStyle())
                 
-                Picker("Account Type", selection: $type){
-                    ForEach(0 ..< types.count){
+                Picker("Account Type", selection: $type) {
+                    ForEach(0 ..< types.count) {
                         Text(self.types[$0])
                     }
                 }.pickerStyle(SegmentedPickerStyle())
                 
                 if type == 0 {
-                    PTForm{
+                    PTForm {
                     PTCardName().textFieldStyle()
                     PTCardNumber().textFieldStyle()
                     PTExp().textFieldStyle()
@@ -140,7 +138,7 @@ struct ContentView: View {
                 pt.cancel()
             }))
         }
-        HStack{
+        HStack {
             
         }
         .alert(isPresented: $showingMessage) {

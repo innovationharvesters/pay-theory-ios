@@ -16,7 +16,6 @@ public class FailureResponse: Error, Equatable {
         lhs.type == rhs.type {
             return true
         }
-        
         return false
     }
     

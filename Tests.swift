@@ -44,7 +44,6 @@ class Tests: XCTestCase {
         XCTAssertTrue(bankAccount.isValid)
         XCTAssertEqual(bankAccount.lastFour, "1111")
         
-        
     }
     
     func testCodingBankAccount() {
@@ -79,10 +78,10 @@ class Tests: XCTestCase {
         
         let result: [String: Any] = bankAccountToDictionary(account: bank)
         
-        XCTAssertEqual(name, result["name"] as! String)
-        XCTAssertEqual(accNumber, result["account_number"] as! String)
-        XCTAssertEqual("CHECKING", result["account_type"] as! String)
-        XCTAssertEqual(bankCode, result["bank_code"] as! String)
+        XCTAssertEqual(name, result["name"] as? String ?? "")
+        XCTAssertEqual(accNumber, result["account_number"] as? String ?? "")
+        XCTAssertEqual("CHECKING", result["account_type"] as? String ?? "")
+        XCTAssertEqual(bankCode, result["bank_code"] as? String ?? "")
     }
     
     func testClearBankAccount() {
@@ -182,11 +181,11 @@ class Tests: XCTestCase {
         
         let result: [String: Any] = paymentCardToDictionary(card: card)
         
-        XCTAssertEqual(name, result["name"] as! String)
-        XCTAssertEqual(number, result["number"] as! String)
-        XCTAssertEqual("12", result["expiration_month"] as! String)
-        XCTAssertEqual("2022", result["expiration_year"] as! String)
-        XCTAssertEqual(cvv, result["security_code"] as! String)
+        XCTAssertEqual(name, result["name"] as? String ?? "")
+        XCTAssertEqual(number, result["number"] as? String ?? "")
+        XCTAssertEqual("12", result["expiration_month"] as? String ?? "")
+        XCTAssertEqual("2022", result["expiration_year"] as? String ?? "")
+        XCTAssertEqual(cvv, result["security_code"] as? String ?? "")
     }
     
     func testCreditCardBrand() {
@@ -472,12 +471,12 @@ class Tests: XCTestCase {
         
         let result: [String: Any] = addressToDictionary(address: address)
         
-        XCTAssertEqual(city, result["city"] as! String)
-        XCTAssertEqual(country, result["country"] as! String)
-        XCTAssertEqual(region, result["region"] as! String)
-        XCTAssertEqual(lineOne, result["line1"] as! String)
-        XCTAssertEqual(lineTwo, result["line2"] as! String)
-        XCTAssertEqual(postalCode, result["postal_code"] as! String)
+        XCTAssertEqual(city, result["city"] as? String ?? "")
+        XCTAssertEqual(country, result["country"] as? String ?? "")
+        XCTAssertEqual(region, result["region"] as? String ?? "")
+        XCTAssertEqual(lineOne, result["line1"] as? String ?? "")
+        XCTAssertEqual(lineTwo, result["line2"] as? String ?? "")
+        XCTAssertEqual(postalCode, result["postal_code"] as? String ?? "")
     }
     
     func testDidSetRegion() {
@@ -571,10 +570,10 @@ class Tests: XCTestCase {
         
         let result: [String: Any] = buyerToDictionary(buyer: buyer)
         
-        XCTAssertEqual(firstName, result["first_name"] as! String)
-        XCTAssertEqual(lastName, result["last_name"] as! String)
-        XCTAssertEqual(email, result["email"] as! String)
-        XCTAssertEqual(phone, result["phone"] as! String)
+        XCTAssertEqual(firstName, result["first_name"] as? String ?? "")
+        XCTAssertEqual(lastName, result["last_name"] as? String ?? "")
+        XCTAssertEqual(email, result["email"] as? String ?? "")
+        XCTAssertEqual(phone, result["phone"] as? String ?? "")
     }
     
     func testFailureResponseInit() {

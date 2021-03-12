@@ -13,10 +13,10 @@ enum ResponseError: String, Error {
     case CanNotDecode = "Unable to decode the response"
 }
 
-func convertStringToDictionary(text: String) -> [String:AnyObject]? {
+func convertStringToDictionary(text: String) -> [String: AnyObject]? {
     if let data = text.data(using: .utf8) {
         do {
-            let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+            let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: AnyObject]
             return json
         } catch {
             print("Something went wrong")
@@ -25,7 +25,7 @@ func convertStringToDictionary(text: String) -> [String:AnyObject]? {
     return nil
 }
 
-func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escaping (Result<T, Error>) -> Void) {
+func handleResponse<T: Codable>(response: AFDataResponse<Any>, completion: @escaping (Result<T, Error>) -> Void) {
     debugPrint(response)
     guard response.error == nil else {
             print("Call failed")
@@ -37,11 +37,11 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
             let errorArray = convertStringToDictionary(text: json!)
             if let errors = errorArray {
                 if let error = errors["reason"] {
-                    completion(.failure(FailureResponse(type: error as! String)))
+                    completion(.failure(FailureResponse(type: error as? String ?? "Unknown Error")))
                     return
                 }
                 if let error = errors["message"] {
-                    completion(.failure(FailureResponse(type: error as! String)))
+                    completion(.failure(FailureResponse(type: error as? String ?? "Unknown Error")))
                     return
                 }
                 
@@ -64,7 +64,6 @@ func handleResponse<T:Codable>(response: AFDataResponse<Any>, completion: @escap
         completion(.failure(FailureResponse(type: ResponseError.CanNotDecode.rawValue)))
        }
 }
-
 
 let endpoints = [".attested.api.paytheorystudy.com",
                  "https://demo.attested.api.paytheorystudy.com",
@@ -136,7 +135,7 @@ func postPayment(body: [String: Any],
                 let json = String(data: data, encoding: String.Encoding.utf8)
                 let errorArray = convertStringToDictionary(text: json!)
                 if let errors = errorArray {
-                    completion(.failure(FailureResponse(type: errors["reason"] as! String)))
+                    completion(.failure(FailureResponse(type: errors["reason"] as? String ?? "Unknown Error")))
                     return
                 }
             }
