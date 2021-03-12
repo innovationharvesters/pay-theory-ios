@@ -24,18 +24,29 @@ extension View {
     }
 }
 
+func makePt(pt: PayTheory) -> PayTheory {
+    pt.environment = "dev"
+    return pt
+}
+
+func formatMoney(val: Double) -> String {
+    return "$\(val / 100)"
+}
+
 struct ContentView: View {
     
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let pt = PayTheory(apiKey: ProcessInfo.processInfo.environment["demo_api_key"]!, tags: ["Test Tag" : "Test Value"], environment: .DEMO)
+    let pt = makePt(pt: PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"]!, tags: ["Test Tag" : "Test Value"], environment: .DEMO, fee_mode: .SURCHARGE))
     
     
     let buyer = Buyer(first_name: "Some", last_name: "Body", phone: "555-555-5555")
     
     @State private var type = 0
+    @State private var amount = 0
     private var types: [String] = ["Card", "ACH"]
+    private var amounts: [Double] = [1000, 5000]
     
     func completion(result: Result<[String: Any], FailureResponse>){
         switch result {
@@ -47,7 +58,6 @@ struct ContentView: View {
             }
                 self.showingConfirmation = true
             case .failure(let error):
-                print(error.type, "completion error")
                 self.confirmationMessage = "Your tokenization failed! \(error.type)"
                 self.showingConfirmation = true
             }
@@ -62,9 +72,7 @@ struct ContentView: View {
                 self.confirmationMessage = "You charged $\(String(format:"%.2f", (Double(token["amount"] as! Int) / 100))) to Bank Account ending in \(token["last_four"] ?? "")"
             }
             self.showingMessage = true
-            debugPrint(token["tags"] as! [String: Any])
         case .failure(let response):
-            print(response.type, "completion error")
             self.confirmationMessage = "The transaction failed to confirm \(response.type)"
             self.showingMessage = true
         }
@@ -72,6 +80,11 @@ struct ContentView: View {
     
     var body: some View {
             VStack{
+                Picker("Amount", selection: $amount){
+                    ForEach(0 ..< amounts.count){
+                        Text(formatMoney(val: self.amounts[$0]))
+                    }
+                }.pickerStyle(SegmentedPickerStyle())
                 
                 Picker("Account Type", selection: $type){
                     ForEach(0 ..< types.count){
@@ -89,7 +102,7 @@ struct ContentView: View {
                     PTCardCity().textFieldStyle()
                     PTCardState().textFieldStyle()
                     PTCardZip().textFieldStyle()
-                    PTButton(amount: 5000, completion: completion).textFieldStyle()
+                    PTButton(amount: Int(amounts[amount]), completion: completion).textFieldStyle()
                     }.environmentObject(pt)
                 } else if type == 1 {
                     PTForm {
@@ -97,7 +110,7 @@ struct ContentView: View {
                     PTAchAccountNumber().textFieldStyle()
                     PTAchRoutingNumber().textFieldStyle()
                     PTAchAccountType()
-                    PTButton(amount: 5000, completion: completion).textFieldStyle()
+                    PTButton(amount: Int(amounts[amount]), completion: completion).textFieldStyle()
                 }.environmentObject(pt)
                 }
                 
