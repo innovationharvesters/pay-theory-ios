@@ -269,22 +269,6 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     
 }
 
-func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
-    var result: [String: Any] = [:]
-    
-    if let name = card.name {
-        result["name"] = name
-    }
-    result["address"] = addressToDictionary(address: card.address)
-    result["security_code"] = card.securityCode
-    result["expiration_month"] = card.expirationMonth
-    result["expiration_year"] = card.expirationYear
-    result["number"] = card.spacelessCard
-    result["type"] = "PAYMENT_CARD"
-    
-    return result
-}
-
 class BankAccount: ObservableObject, Codable, Equatable {
     static func == (lhs: BankAccount, rhs: BankAccount) -> Bool {
         if lhs.name == rhs.name &&
@@ -405,17 +389,4 @@ class BankAccount: ObservableObject, Codable, Equatable {
         self.bankCode = ""
     }
     
-}
-
-func bankAccountToDictionary(account: BankAccount) -> [String: Any] {
-    var result: [String: Any] = [:]
-    let types = ["CHECKING", "SAVINGS"]
-    
-    result["name"] = account.name
-    result["account_number"] = account.accountNumber
-    result["account_type"] = types[account.accountType]
-    result["bank_code"] = account.bankCode
-    result["type"] = "BANK_ACCOUNT"
-    
-    return result
 }

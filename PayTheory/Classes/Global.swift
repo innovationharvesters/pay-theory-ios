@@ -83,28 +83,3 @@ public class Address: ObservableObject, Codable, Equatable {
         self.region = state
     }
 }
-
-func addressToDictionary(address: Address) -> [String: String] {
-    var result: [String: String] = [:]
-    
-    if let city = address.city {
-        result["city"] = city
-    }
-    if let country = address.country {
-        result["country"] = country
-    }
-    if let region = address.region {
-        result["region"] = region
-    }
-    if let line1 = address.line1 {
-        result["line1"] = line1
-    }
-    if let line2 = address.line2 {
-        result["line2"] = line2
-    }
-    if let postalCode = address.postalCode {
-        result["postal_code"] = postalCode
-    }
-    
-    return result
-}

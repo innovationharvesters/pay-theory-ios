@@ -13,18 +13,6 @@ enum ResponseError: String, Error {
     case canNotDecode = "Unable to decode the response"
 }
 
-func convertStringToDictionary(text: String) -> [String: AnyObject]? {
-    if let data = text.data(using: .utf8) {
-        do {
-            let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: AnyObject]
-            return json
-        } catch {
-            print("Something went wrong")
-        }
-    }
-    return nil
-}
-
 func handleResponse<T: Codable>(response: AFDataResponse<Any>, completion: @escaping (Result<T, Error>) -> Void) {
     debugPrint(response)
     guard response.error == nil else {
