@@ -121,7 +121,7 @@ PTAchRoutingNumber()
 This button component allows a transaction to be initialized. It will be disabled until it has the required data needed to initialize a transaction. It accepts a few arguments needed to initialize the payment.
 
 *   **amount**: Payment amount that should be charged to the card in cents
-*   **completion**: Function that will handle the result of the call returning a dictionary **[String:Any]** or **FailureResponse**
+*   **completion**: Function that will handle the result of the call returning a dictionary or **FailureResponse**
 
 ```swift
 let amount = 1000
@@ -166,7 +166,7 @@ func captureCompletion(result: Result<[String:Any], FailureResponse>){
 
 ## Tokenization Response
 
-When the necessary info is collected and the PTButton is clicked when fee_mode is set to **.SERVICE_FEE** the token details are returned as a dictionary **[String: Any]** with the following info:
+When the necessary info is collected and the PTButton is clicked when fee_mode is set to **.SERVICE_FEE** the token details are returned as a dictionary with the following info:
 
 *note that the service fee is included in amount*
 
@@ -191,7 +191,7 @@ When the necessary info is collected and the PTButton is clicked when fee_mode i
 
 ## Completion Response
 
-Once the PTButton is clicked and service_fee is set to **.SURCHARGE** or if the capture function is called after tokenization, a dictionary **[String: Any]** will be returned with the following info:
+Once the PTButton is clicked and service_fee is set to **.SURCHARGE** or if the capture function is called after tokenization, a dictionary will be returned with the following info:
 
 *note that the service fee is included in amount*
 

@@ -269,7 +269,6 @@ class Tests: XCTestCase {
         XCTAssertFalse(card.validCardNumber)
     }
     
-    
     func testCreditCardIsValid() {
         let card = PaymentCard()
         XCTAssertFalse(card.isValid)
@@ -516,7 +515,6 @@ class Tests: XCTestCase {
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
-        
         
         let data = try? encoder.encode(buyer)
         let decodedBuyer = try? decoder.decode(Buyer.self, from: data!)
