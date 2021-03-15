@@ -4,7 +4,7 @@ import Alamofire
 import Mocker
 
 class Tests: XCTestCase {
-    
+
 //    func testUserFetching() {
 //        let configuration = URLSessionConfiguration.af.default
 //        configuration.protocolClasses = [MockingURLProtocol.self]
@@ -51,7 +51,6 @@ class Tests: XCTestCase {
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
-        
         
         let data = try? encoder.encode(bank)
         let decodedBank = try? decoder.decode(BankAccount.self, from: data!)
@@ -642,7 +641,11 @@ class Tests: XCTestCase {
     
     func testCodingIdempotencyResponse() {
         let payment = Payment(currency: "USD", amount: 2000, service_fee: 120, merchant: "12345", feeMode: "SURCHARGE")
-        let idempotency = IdempotencyResponse(response: "Test", signature: "test", credId: "1234", idempotency: "09876", payment: payment)
+        let idempotency = IdempotencyResponse(response: "Test",
+                                              signature: "test",
+                                              credId: "1234",
+                                              idempotency: "09876",
+                                              payment: payment)
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
@@ -656,21 +659,6 @@ class Tests: XCTestCase {
 
         XCTAssertNotEqual(idempotency, decodedIdempotency)
     }
-    
-    
-//    func testHandleResponse() {
-//        let attestation =  Attestation(attestation: "Test", nonce: "Test", key: "Test", currency: "USD", amount: 1000)
-//        let encoder = JSONEncoder()
-//        let data = try? encoder.encode(attestation)
-//        let response = AFDataResponse(request: nil, response: nil, data: data , metrics: nil, serializationDuration: 0, result: .success(data))
-//        handleResponse(response: response) { response in
-//            XCTAssertEqual(response.success, data)
-//        }
-//
-//    }
-    
-    
-
 
     static var allTests = [
         ("Bank Account Has Required Fields", testBankAccountIsValid),

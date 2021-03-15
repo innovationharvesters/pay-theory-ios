@@ -19,7 +19,7 @@ public class Address: ObservableObject, Codable, Equatable {
         }
         return false
     }
-    
+
     @Published public var city: String?
     @Published public var country: String?
     @Published public var region: String? {

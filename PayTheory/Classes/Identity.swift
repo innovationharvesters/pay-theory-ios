@@ -18,7 +18,7 @@ public class Buyer: ObservableObject, Codable, Equatable {
         }
         return false
     }
-    
+
     @Published public var phone: String?
     @Published public var firstName: String?
     @Published public var lastName: String?

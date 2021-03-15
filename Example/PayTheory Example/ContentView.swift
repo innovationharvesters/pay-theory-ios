@@ -37,11 +37,11 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let pt = makePt(payTheory: PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"] ?? "",
+    let ptObject = makePt(payTheory: PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"] ?? "",
                                          tags: ["Test Tag": "Test Value"],
                                          environment: .DEMO,
                                          fee_mode: .SURCHARGE))
-    
+
     let buyer = Buyer(firstName: "Some", lastName: "Body", phone: "555-555-5555")
     
     @State private var type = 0
@@ -77,12 +77,14 @@ struct ContentView: View {
         case .success(let token):
             if let brand = token["brand"] {
                 self.confirmationMessage = """
-                                            You charged $\(String(format:"%.2f", (Double(token["amount"] as? Int ?? 0) / 100)))
+                                            You charged $\(String(format:"%.2f",
+                                            (Double(token["amount"] as? Int ?? 0) / 100)))
                                             to \(brand) card ending in \(token["last_four"] ?? "")
                                             """
             } else {
                 self.confirmationMessage = """
-                                            You charged $\(String(format:"%.2f", (Double(token["amount"] as? Int ?? 0) / 100)))
+                                            You charged $\(String(format:"%.2f",
+                                            (Double(token["amount"] as? Int ?? 0) / 100)))
                                             to Bank Account ending in \(token["last_four"] ?? "")
                                             """
             }
@@ -96,7 +98,7 @@ struct ContentView: View {
     var body: some View {
             VStack {
                 Picker("Amount", selection: $amount) {
-                    ForEach(0 ..< amounts.count){
+                    ForEach(0 ..< amounts.count) {
                         Text(formatMoney(val: self.amounts[$0]))
                     }
                 }.pickerStyle(SegmentedPickerStyle())
@@ -118,7 +120,7 @@ struct ContentView: View {
                     PTCardState().textFieldStyle()
                     PTCardZip().textFieldStyle()
                     PTButton(amount: Int(amounts[amount]), completion: completion).textFieldStyle()
-                    }.environmentObject(pt)
+                    }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
                     PTAchAccountName().textFieldStyle()
@@ -126,23 +128,26 @@ struct ContentView: View {
                     PTAchRoutingNumber().textFieldStyle()
                     PTAchAccountType()
                     PTButton(amount: Int(amounts[amount]), completion: completion).textFieldStyle()
-                }.environmentObject(pt)
+                }.environmentObject(ptObject)
                 }
-                
-//                Text(pt.cardErrors["number"]!["isDirty"] as! Bool ? pt.cardErrors["number"]!["error"] as! String : "" )
             }
         .alert(isPresented: $showingConfirmation) {
-            Alert(title: Text("Confirm:"), message: Text(confirmationMessage), primaryButton: .default(Text("Confirm"), action: {
-                pt.capture(completion: confirmCompletion)
+            Alert(title: Text("Confirm:"),
+                  message: Text(confirmationMessage),
+                  primaryButton: .default(Text("Confirm"),
+                                          action: {
+                ptObject.capture(completion: confirmCompletion)
             }), secondaryButton: .cancel(Text("Cancel"), action: {
-                pt.cancel()
+                ptObject.cancel()
             }))
         }
         HStack {
             
         }
         .alert(isPresented: $showingMessage) {
-            Alert(title: Text("Success!"), message: Text(confirmationMessage), dismissButton: .default(Text("Ok!")))
+            Alert(title: Text("Success!"),
+                  message: Text(confirmationMessage),
+                  dismissButton: .default(Text("Ok!")))
         }
     }
     

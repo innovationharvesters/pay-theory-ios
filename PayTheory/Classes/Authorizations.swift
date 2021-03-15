@@ -18,7 +18,7 @@ public class FailureResponse: Error, Equatable {
         }
         return false
     }
-    
+
     public var receiptNumber = ""
     public var lastFour = ""
     public var brand: String?

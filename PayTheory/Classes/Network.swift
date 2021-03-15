@@ -9,8 +9,8 @@ import Foundation
 import Alamofire
 
 enum ResponseError: String, Error {
-    case NoData = "There was no data in the repsonse"
-    case CanNotDecode = "Unable to decode the response"
+    case noData = "There was no data in the repsonse"
+    case canNotDecode = "Unable to decode the response"
 }
 
 func convertStringToDictionary(text: String) -> [String: AnyObject]? {
@@ -44,7 +44,6 @@ func handleResponse<T: Codable>(response: AFDataResponse<Any>, completion: @esca
                     completion(.failure(FailureResponse(type: error as? String ?? "Unknown Error")))
                     return
                 }
-                
             }
         }
         completion(.failure(FailureResponse(type: response.error!.localizedDescription)))
@@ -52,7 +51,7 @@ func handleResponse<T: Codable>(response: AFDataResponse<Any>, completion: @esca
             }
    guard let data = response.data else {
             print("No Data")
-    completion(.failure(FailureResponse(type: ResponseError.NoData.rawValue)))
+    completion(.failure(FailureResponse(type: ResponseError.noData.rawValue)))
             return
             }
     
@@ -61,7 +60,7 @@ func handleResponse<T: Codable>(response: AFDataResponse<Any>, completion: @esca
         completion(.success(decodedResponse))
        } else {
             print("Can't decode")
-        completion(.failure(FailureResponse(type: ResponseError.CanNotDecode.rawValue)))
+        completion(.failure(FailureResponse(type: ResponseError.canNotDecode.rawValue)))
        }
 }
 
@@ -69,7 +68,6 @@ let endpoints = [".attested.api.paytheorystudy.com",
                  "https://demo.attested.api.paytheorystudy.com",
                  "https://attested.api.paytheorystudy.com",
                  "https://test.attested.api.paytheorystudy.com"]
-
 
 func getChallenge(apiKey: String,
                   endpoint: String,
@@ -147,7 +145,7 @@ func postPayment(body: [String: Any],
             completion(.success(value))
                 } else {
                 print("Can't decode")
-                    completion(.failure(FailureResponse(type: ResponseError.CanNotDecode.rawValue)))
+                    completion(.failure(FailureResponse(type: ResponseError.canNotDecode.rawValue)))
            }
 }
 }

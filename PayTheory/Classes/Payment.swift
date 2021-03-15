@@ -39,7 +39,7 @@ class PaymentCard: ObservableObject, Codable, Equatable {
         }
         return false
     }
-    
+
     @Published var name: String?
     @Published var expirationDate = ""{
         didSet {
@@ -76,10 +76,10 @@ class PaymentCard: ObservableObject, Codable, Equatable {
             } else if (self.number.prefix(2) != "34" && self.number.prefix(2) != "37") &&
                         (self.number.count == 4 || self.number.count == 9 ||
                             self.number.count == 14 || self.number.count == 19) {
-                if (oldValue.last == " ") {
+                if oldValue.last == " " {
                     number.remove(at: oldValue.index(before: number.endIndex))
                 } else {
-                    number = number + " "
+                    number += " "
                 }
             }
             if self.number.count > 23 ||

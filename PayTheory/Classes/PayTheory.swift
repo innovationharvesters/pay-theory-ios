@@ -30,7 +30,6 @@ public enum Environment {
 }
 
 public class PayTheory: ObservableObject {
-    
     let service = DCAppAttestService.shared
     
     var apiKey: String
@@ -256,7 +255,6 @@ public struct PTCardName: View {
     }
 }
 
-
 /// TextField that can be used to capture the Card Number for a card object to be used in a Pay Theory payment
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
@@ -301,7 +299,7 @@ public struct PTExp: View {
 ///
 public struct PTCvv: View {
     @EnvironmentObject var card: PaymentCard
-    public init(){
+    public init() {
         
     }
     public var body: some View {
