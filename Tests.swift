@@ -23,7 +23,6 @@ class Tests: XCTestCase {
 //
 //        wait(for: [requestExpectation], timeout: 10.0)
 //    }
-    
     func testBankAccountIsValid() {
         let bankAccount = BankAccount(identity: "test")
         XCTAssertFalse(bankAccount.isValid)
@@ -142,7 +141,6 @@ class Tests: XCTestCase {
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
-        
         
         let data = try? encoder.encode(card)
         let decodedCard = try? decoder.decode(PaymentCard.self, from: data!)

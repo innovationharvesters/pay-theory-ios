@@ -93,7 +93,6 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     @Published var securityCode = ""{
         didSet {
             let filtered = securityCode.filter { $0.isNumber }
-            
             if securityCode != filtered {
                 securityCode = filtered
             }
@@ -420,5 +419,3 @@ func bankAccountToDictionary(account: BankAccount) -> [String: Any] {
     
     return result
 }
-
-

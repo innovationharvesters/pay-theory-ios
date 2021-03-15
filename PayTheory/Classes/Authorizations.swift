@@ -24,7 +24,6 @@ public class FailureResponse: Error, Equatable {
     public var brand: String?
     public var state = "FAILURE"
     public var type: String
-    
     public init(type: String) {
         self.type = type
     }
@@ -148,4 +147,3 @@ class IdempotencyResponse: Codable, Equatable {
     }
         
 }
-

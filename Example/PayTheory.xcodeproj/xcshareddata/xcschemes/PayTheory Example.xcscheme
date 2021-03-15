@@ -74,7 +74,7 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "demo_api_key"
-            value = "pt-sandbox-demo-165f0d8fafc73a2f8f6a82d79c589007"
+            value = "pt-sandbox-dev-34a4a8979a9f3de0057d47eb05245255"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
@@ -84,7 +84,7 @@
          </EnvironmentVariable>
          <EnvironmentVariable
             key = "dev_api_key"
-            value = "pt-sandbox-dev-f992c4a57b86cb16aefae30d0a450237"
+            value = "pt-sandbox-dev-34a4a8979a9f3de0057d47eb05245255"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

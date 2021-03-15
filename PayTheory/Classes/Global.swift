@@ -37,7 +37,6 @@ public class Address: ObservableObject, Codable, Equatable {
         didSet {
             if let unwrappedCode = postalCode {
                 let filtered = unwrappedCode.filter { $0.isNumber }
-                
                 if unwrappedCode != filtered {
                     postalCode = filtered
                 }

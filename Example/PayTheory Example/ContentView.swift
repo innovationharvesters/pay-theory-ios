@@ -43,7 +43,6 @@ struct ContentView: View {
                                          fee_mode: .SURCHARGE))
 
     let buyer = Buyer(firstName: "Some", lastName: "Body", phone: "555-555-5555")
-    
     @State private var type = 0
     @State private var amount = 0
     private var types: [String] = ["Card", "ACH"]
