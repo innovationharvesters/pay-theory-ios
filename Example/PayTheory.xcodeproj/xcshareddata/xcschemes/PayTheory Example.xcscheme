@@ -78,6 +78,11 @@
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
+            key = "prod_api_key"
+            value = "pt-live-859268a17551bc98e296d653270aa1b0"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
             key = "austin_api_key"
             value = "pt-sandbox-austin-1698b7a80c4e02da380dc86b047a1a75"
             isEnabled = "YES">

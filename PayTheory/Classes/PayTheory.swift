@@ -60,51 +60,11 @@ public class PayTheory: ObservableObject {
     let envBuyer: Buyer
     let envAch: BankAccount
     
-    func tokenize(card: PaymentCard? = nil,
-                  bank: BankAccount? = nil,
-                  amount: Int,
-                  buyerOptions: Buyer,
-                  completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
-        
-        //Closure to run once the challenge has been retrieved from the PT Server
-        func challengeClosure(response: Result<Challenge, Error>) {
-            switch response {
-            case .success(let challenge):
-                service.generateKey { (keyIdentifier, error) in
-                    guard error == nil else {
-                        debugPrint(error ?? "")
-                        return
-                    }
-                    let encodedChallengeData = challenge.challenge.data(using: .utf8)!
-                    self.encodedChallenge = encodedChallengeData.base64EncodedString()
-                    let hash = Data(SHA256.hash(data: encodedChallengeData))
-                    self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
-                        guard error == nil else {
-                            debugPrint(error!)
-                            return
-                        }
-                        let attest = Attestation(attestation: attestation!.base64EncodedString(),
-                                                 nonce: encodedChallengeData.base64EncodedString(),
-                                                 key: keyIdentifier!,
-                                                 currency: "USD",
-                                                 amount: amount,
-                                                 feeMode: self.fee_mode)
-                        postIdempotency(body: attest,
-                                        apiKey: self.apiKey,
-                                        endpoint: self.environment,
-                                        completion: idempotencyClosure)
-                    }
-                }
-            
-            case .failure(let error):
-                completion(.failure(error as? FailureResponse ?? FailureResponse(type: "Unknown Error")))
-                buttonClicked = false
-            }
-        }
-        
-        //Closure to run once the idempotency has been retrieved from the PT Server
-        func idempotencyClosure(response: Result<IdempotencyResponse, Error>) {
-            switch response {
+    //Closure to run once the idempotency has been retrieved from the PT Server
+    func idempotencyClosure(completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) ->
+                            (_ response: Result<IdempotencyResponse, Error>) -> () {
+            return { [self]response in
+                switch response {
             case .success(let response):
                 if envCard.isValid {
                     idempotencyResponse = response
@@ -130,8 +90,57 @@ public class PayTheory: ObservableObject {
                 buttonClicked = false
             }
         }
+    }
+    
+    //Closure to run once the challenge has been retrieved from the PT Server
+    func challengeClosure(amount: Int,
+                          completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) ->
+                        (Result<Challenge, Error>) -> () {
+       { [self]response in
+        switch response {
+        case .success(let challenge):
+            service.generateKey { (keyIdentifier, error) in
+                guard error == nil else {
+                    debugPrint(error ?? "")
+                    return
+                }
+                let encodedChallengeData = challenge.challenge.data(using: .utf8)!
+                self.encodedChallenge = encodedChallengeData.base64EncodedString()
+                let hash = Data(SHA256.hash(data: encodedChallengeData))
+                self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
+                    guard error == nil else {
+                        debugPrint(error!)
+                        return
+                    }
+                    let attest = Attestation(attestation: attestation!.base64EncodedString(),
+                                             nonce: encodedChallengeData.base64EncodedString(),
+                                             key: keyIdentifier!,
+                                             currency: "USD",
+                                             amount: amount,
+                                             feeMode: self.fee_mode)
+                    postIdempotency(body: attest,
+                                    apiKey: self.apiKey,
+                                    endpoint: self.environment,
+                                    completion: idempotencyClosure(completion: completion))
+                }
+            }
         
-        getChallenge(apiKey: apiKey, endpoint: environment, completion: challengeClosure)
+        case .failure(let error):
+            completion(.failure(error as? FailureResponse ?? FailureResponse(type: "Unknown Error")))
+            buttonClicked = false
+        }
+       }
+    }
+    
+    func tokenize(card: PaymentCard? = nil,
+                  bank: BankAccount? = nil,
+                  amount: Int,
+                  buyerOptions: Buyer,
+                  completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
+        
+        getChallenge(apiKey: apiKey,
+                     endpoint: environment,
+                     completion: challengeClosure(amount: amount, completion: completion))
     }
     
     // Calculated value that can allow someone to check if there is an active token

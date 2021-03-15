@@ -37,16 +37,16 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let ptObject = makePt(payTheory: PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"] ?? "",
+    let ptObject = PayTheory(apiKey: ProcessInfo.processInfo.environment["prod_api_key"] ?? "",
                                          tags: ["Test Tag": "Test Value"],
-                                         environment: .DEMO,
-                                         fee_mode: .SURCHARGE))
+                                         environment: .PROD,
+                                         fee_mode: .SURCHARGE)
 
     let buyer = Buyer(firstName: "Some", lastName: "Body", phone: "555-555-5555")
     @State private var type = 0
     @State private var amount = 0
     private var types: [String] = ["Card", "ACH"]
-    private var amounts: [Double] = [1000, 5000]
+    private var amounts: [Double] = [37, 39]
     
     func completion(result: Result<[String: Any], FailureResponse>) {
         switch result {
@@ -118,7 +118,7 @@ struct ContentView: View {
                     PTCardCity().textFieldStyle()
                     PTCardState().textFieldStyle()
                     PTCardZip().textFieldStyle()
-                    PTButton(amount: Int(amounts[amount]), completion: completion).textFieldStyle()
+                    PTButton(amount: 33, completion: completion).textFieldStyle()
                     }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
@@ -126,7 +126,7 @@ struct ContentView: View {
                     PTAchAccountNumber().textFieldStyle()
                     PTAchRoutingNumber().textFieldStyle()
                     PTAchAccountType()
-                    PTButton(amount: Int(amounts[amount]), completion: completion).textFieldStyle()
+                    PTButton(amount: 33, completion: completion).textFieldStyle()
                 }.environmentObject(ptObject)
                 }
             }

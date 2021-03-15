@@ -54,7 +54,7 @@ func handleResponse<T: Codable>(response: AFDataResponse<Any>, completion: @esca
 
 let endpoints = [".attested.api.paytheorystudy.com",
                  "https://demo.attested.api.paytheorystudy.com",
-                 "https://attested.api.paytheorystudy.com",
+                 "https://attested.api.paytheory.com",
                  "https://test.attested.api.paytheorystudy.com"]
 
 func getChallenge(apiKey: String,
@@ -62,7 +62,7 @@ func getChallenge(apiKey: String,
                   completion: @escaping (Result<Challenge, Error>) -> Void) {
     
     let url = endpoint == "prod" ?
-        "https://attested.api.paytheorystudy.com/challenge" :
+        "https://attested.api.paytheory.com/challenge" :
         "https://\(endpoint).attested.api.paytheorystudy.com/challenge"
     
     let headers: HTTPHeaders = [
@@ -81,7 +81,7 @@ func postIdempotency(body: Attestation,
                      completion: @escaping (Result<IdempotencyResponse, Error>) -> Void) {
     
     let url = endpoint == "prod" ?
-        "https://attested.api.paytheorystudy.com/idempotency" :
+        "https://attested.api.paytheory.com/idempotency" :
         "https://\(endpoint).attested.api.paytheorystudy.com/idempotency"
     
     let headers: HTTPHeaders = [
@@ -101,7 +101,7 @@ func postPayment(body: [String: Any],
                  completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
 
     let url = endpoint == "prod" ?
-        "https://attested.api.paytheorystudy.com/payment" :
+        "https://attested.api.paytheory.com/payment" :
         "https://\(endpoint).attested.api.paytheorystudy.com/payment"
     
     let headers: HTTPHeaders = [
