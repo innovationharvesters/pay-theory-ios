@@ -60,34 +60,36 @@ public class PayTheory: ObservableObject {
     let envBuyer: Buyer
     let envAch: BankAccount
     
+    //idempotencyClosre and challengeClosure used for the tokenize function
+    
     //Closure to run once the idempotency has been retrieved from the PT Server
     func idempotencyClosure(completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) ->
-                            (_ response: Result<IdempotencyResponse, Error>) -> () {
+                            (_ response: Result<IdempotencyResponse, Error>) -> Void {
             return { [self]response in
                 switch response {
-            case .success(let response):
-                if envCard.isValid {
-                    idempotencyResponse = response
-                    tokenResponse = ["receipt_number": response.idempotency,
-                                     "first_six": envCard.firstSix,
-                                     "brand": envCard.brand,
-                                     "amount": response.payment.amount,
-                                     "convenience_fee": response.payment.service_fee ]
+                case .success(let response):
+                    if envCard.isValid {
+                        idempotencyResponse = response
+                        tokenResponse = ["receipt_number": response.idempotency,
+                                         "first_six": envCard.firstSix,
+                                         "brand": envCard.brand,
+                                         "amount": response.payment.amount,
+                                         "convenience_fee": response.payment.service_fee ]
+                        
+                        completion(.success(tokenResponse!))
+                    } else if envAch.isValid {
+                        idempotencyResponse = response
+                        tokenResponse = ["receipt_number": response.idempotency,
+                                         "last_four": envAch.lastFour,
+                                         "amount": response.payment.amount,
+                                         "convenience_fee": response.payment.service_fee ]
+                        
+                        completion(.success(tokenResponse!))
+                    }
                     
-                    completion(.success(tokenResponse!))
-                } else if envAch.isValid {
-                    idempotencyResponse = response
-                    tokenResponse = ["receipt_number": response.idempotency,
-                                     "last_four": envAch.lastFour,
-                                     "amount": response.payment.amount,
-                                     "convenience_fee": response.payment.service_fee ]
-                    
-                    completion(.success(tokenResponse!))
-                }
-                
-            case .failure(let error):
-                completion(.failure(error as? FailureResponse ?? FailureResponse(type: "Unknown Error")))
-                buttonClicked = false
+                case .failure(let error):
+                    completion(.failure(error as? FailureResponse ?? FailureResponse(type: "Unknown Error")))
+                    buttonClicked = false
             }
         }
     }
@@ -95,7 +97,7 @@ public class PayTheory: ObservableObject {
     //Closure to run once the challenge has been retrieved from the PT Server
     func challengeClosure(amount: Int,
                           completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) ->
-                        (Result<Challenge, Error>) -> () {
+                        (Result<Challenge, Error>) -> Void {
        { [self]response in
         switch response {
         case .success(let challenge):
@@ -159,15 +161,12 @@ public class PayTheory: ObservableObject {
         idempotencyResponse = nil
         buttonClicked = false
     }
-//
-//
-    //Public function that will complete the authorization and send a
-    //Completion Response with all the transaction details to the completion handler provided
-
-    public func capture(completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
-        var type: String = ""
-
-        func captureCompletion(response: Result<[String: AnyObject], Error>) {
+    
+    //Completion used for the capture function
+    func captureCompletion(type: String,
+                           completion: @escaping (Result<[String: Any], FailureResponse>) -> Void)
+                            -> (Result<[String: AnyObject], Error>) -> Void {
+        { [self]response in
             switch response {
             case .success(let responseAuth):
                 var complete: [String: Any] = ["receipt_number": idempotencyResponse!.idempotency,
@@ -211,6 +210,13 @@ public class PayTheory: ObservableObject {
                 }
             }
         }
+    }
+    
+    //Public function that will complete the authorization and send a
+    //Completion Response with all the transaction details to the completion handler provided
+
+    public func capture(completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
+        var type: String = ""
 
         if let idempotency = idempotencyResponse {
             var payment: [String: Any] = [:]
@@ -237,7 +243,7 @@ public class PayTheory: ObservableObject {
                 postPayment(body: body,
                             apiKey: apiKey,
                             endpoint: self.environment,
-                            completion: captureCompletion)
+                            completion: captureCompletion(type: type, completion: completion))
         } else {
             let error = FailureResponse(type: "There is no auth to capture")
             completion(.failure(error))
