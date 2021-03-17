@@ -130,7 +130,14 @@ func postPayment(body: [String: Any],
                 }
         
         if let value = response.value as? [String: AnyObject] {
-            completion(.success(value))
+            if value["state"] as? String ?? "" == "FAILURE" {
+                completion(.failure(FailureResponse(type: value["type"] as? String ?? "",
+                                                    receiptNumber: value["receipt_number"] as? String ?? "",
+                                                    lastFour: value["last_four"] as? String ?? "",
+                                                    brand: value["brand"] as? String ?? "")))
+            } else {
+                completion(.success(value))
+            }
                 } else {
                 print("Can't decode")
                     completion(.failure(FailureResponse(type: ResponseError.canNotDecode.rawValue)))

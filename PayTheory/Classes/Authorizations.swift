@@ -68,20 +68,20 @@ class Attestation: Codable, Equatable {
     var key: String
     var currency: String
     var amount: Int
-    var feeMode: FEE_MODE
+    var fee_mode: FEE_MODE
     
     init(attestation: String,
          nonce: String,
          key: String,
          currency: String,
          amount: Int,
-         feeMode: FEE_MODE = .SURCHARGE) {
+         fee_mode: FEE_MODE = .SURCHARGE) {
         self.attestation = attestation
         self.nonce = nonce
         self.key = key
         self.amount = amount
         self.currency = currency
-        self.feeMode = feeMode
+        self.fee_mode = fee_mode
     }
 }
 
@@ -100,18 +100,18 @@ class Payment: Codable, Equatable {
     var amount: Int
     var merchant: String
     var service_fee: Int
-    var feeMode: String
+    var fee_mode: String
     
     init(currency: String,
          amount: Int,
          service_fee: Int,
          merchant: String,
-         feeMode: String) {
+         fee_mode: String) {
         self.amount = amount
         self.currency = currency
         self.service_fee = service_fee
         self.merchant = merchant
-        self.feeMode = feeMode
+        self.fee_mode = fee_mode
     }
 }
 

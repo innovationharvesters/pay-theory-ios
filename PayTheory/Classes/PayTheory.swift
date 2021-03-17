@@ -70,6 +70,8 @@ public class PayTheory: ObservableObject {
                 case .success(let response):
                     if envCard.isValid {
                         idempotencyResponse = response
+                        tags["pt-number"] = response.idempotency
+                        tags["pay-theory-environment"] = environment
                         tokenResponse = ["receipt_number": response.idempotency,
                                          "first_six": envCard.firstSix,
                                          "brand": envCard.brand,
@@ -79,6 +81,8 @@ public class PayTheory: ObservableObject {
                         completion(.success(tokenResponse!))
                     } else if envAch.isValid {
                         idempotencyResponse = response
+                        tags["pt-number"] = response.idempotency
+                        tags["pay-theory-environment"] = environment
                         tokenResponse = ["receipt_number": response.idempotency,
                                          "last_four": envAch.lastFour,
                                          "amount": response.payment.amount,
@@ -119,7 +123,7 @@ public class PayTheory: ObservableObject {
                                              key: keyIdentifier!,
                                              currency: "USD",
                                              amount: amount,
-                                             feeMode: self.fee_mode)
+                                             fee_mode: self.fee_mode)
                     postIdempotency(body: attest,
                                     apiKey: self.apiKey,
                                     endpoint: self.environment,
