@@ -52,10 +52,59 @@ func handleResponse<T: Codable>(response: AFDataResponse<Any>, completion: @esca
        }
 }
 
-let endpoints = [".attested.api.paytheorystudy.com",
-                 "https://demo.attested.api.paytheorystudy.com",
-                 "https://attested.api.paytheory.com",
-                 "https://test.attested.api.paytheorystudy.com"]
+func handleMapResponse(response: AFDataResponse<Any>, completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
+                        
+                        guard response.error == nil else {
+                                print("Call failed")
+                                if let value = response.value as? [String: AnyObject] {
+                                          print(value)
+                                       }
+                            if let data = response.data {
+                                let json = String(data: data, encoding: String.Encoding.utf8)
+                                let errorArray = convertStringToDictionary(text: json!)
+                                if let errors = errorArray {
+                                    completion(.failure(FailureResponse(type: errors["reason"] as? String ?? "Unknown Error")))
+                                    return
+                                }
+                            }
+                            completion(.failure(FailureResponse(type: response.error!.localizedDescription)))
+                                return
+                                }
+                        
+                        if let value = response.value as? [String: AnyObject] {
+                            if value["state"] as? String ?? "" == "FAILURE" {
+                                completion(.failure(FailureResponse(type: value["type"] as? String ?? "",
+                                                                    receiptNumber: value["receipt_number"] as? String ?? "",
+                                                                    lastFour: value["last_four"] as? String ?? "",
+                                                                    brand: value["brand"] as? String ?? "")))
+                            } else {
+                                completion(.success(value))
+                            }
+                                } else {
+                                print("Can't decode")
+                                    completion(.failure(FailureResponse(type: ResponseError.canNotDecode.rawValue)))
+                           }
+                        }
+
+
+
+func getToken(apiKey: String,
+              endpoint: String,
+              completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
+    
+    let url = endpoint == "prod" ?
+        "https://tags.api.paytheory.com/pt-token" :
+        "https://\(endpoint).tags.api.paytheorystudy.com/pt-token"
+    
+    let headers: HTTPHeaders = [
+        "X-API-Key": apiKey,
+        "Content-Type": "application/json"
+    ]
+    
+    AF.request(url, headers: headers).validate().responseJSON { response in
+        handleMapResponse(response: response, completion: completion)
+    }
+}
 
 func getChallenge(apiKey: String,
                   endpoint: String,
@@ -111,36 +160,6 @@ func postPayment(body: [String: Any],
 
     AF.request(url, method: .post, parameters: body, encoding: JSONEncoding.default,
                headers: headers).validate().responseJSON { response in
-        debugPrint(response)
-        guard response.error == nil else {
-                print("Call failed")
-                if let value = response.value as? [String: AnyObject] {
-                          print(value)
-                       }
-            if let data = response.data {
-                let json = String(data: data, encoding: String.Encoding.utf8)
-                let errorArray = convertStringToDictionary(text: json!)
-                if let errors = errorArray {
-                    completion(.failure(FailureResponse(type: errors["reason"] as? String ?? "Unknown Error")))
-                    return
-                }
-            }
-            completion(.failure(FailureResponse(type: response.error!.localizedDescription)))
-                return
-                }
-        
-        if let value = response.value as? [String: AnyObject] {
-            if value["state"] as? String ?? "" == "FAILURE" {
-                completion(.failure(FailureResponse(type: value["type"] as? String ?? "",
-                                                    receiptNumber: value["receipt_number"] as? String ?? "",
-                                                    lastFour: value["last_four"] as? String ?? "",
-                                                    brand: value["brand"] as? String ?? "")))
-            } else {
-                completion(.success(value))
-            }
-                } else {
-                print("Can't decode")
-                    completion(.failure(FailureResponse(type: ResponseError.canNotDecode.rawValue)))
-           }
+        handleMapResponse(response: response, completion: completion)
 }
 }

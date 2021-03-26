@@ -10,6 +10,8 @@ import Foundation
 import DeviceCheck
 import CryptoKit
 
+import Starscream
+
 public func ?? <T>(lhs: Binding<T?>, rhs: T) -> Binding<T> {
     Binding(
         get: { lhs.wrappedValue ?? rhs },
@@ -40,12 +42,71 @@ public class PayTheory: ObservableObject {
     private var encodedChallenge: String = ""
     private var tokenResponse: [String: Any]?
     private var idempotencyResponse: IdempotencyResponse?
+    private var isConnected = false
     private var passedBuyer: Buyer?
+    private var socket: WebSocket?
+    private var ptToken: String?{
+        didSet {
+            var request = URLRequest(url: URL(string: "wss://\(self.environment).secure.socket.paytheorystudy.com/?pt_token=\(self.ptToken!)")!)
+            request.timeoutInterval = 5
+            socket = WebSocket(request: request)
+            socket!.onEvent = { event in
+                switch event {
+                case .connected(let headers):
+                    self.isConnected = true
+                    print("websocket is connected: \(headers)")
+                case .disconnected(let reason, let code):
+                    self.isConnected = false
+                    print("websocket is disconnected: \(reason) with code: \(code)")
+                case .text(let string):
+                    print("Received text: \(string)")
+                case .binary(let data):
+                    print("Received data: \(data.count)")
+                case .ping(_):
+                    break
+                case .pong(_):
+                    break
+                case .viabilityChanged(_):
+                    break
+                case .reconnectSuggested(_):
+                    break
+                case .cancelled:
+                    self.isConnected = false
+                case .error(let error):
+                    self.isConnected = false
+                    self.handleSocketError(error)
+                }
+            }
+            socket!.connect()
+        }
+    }
+    
+    func handleSocketError(_ error: Error?) {
+            if let e = error as? WSError {
+                print(e)
+                print("websocket encountered an error: \(e.message)")
+            } else if let e = error {
+                print("websocket encountered an error: \(e.localizedDescription)")
+            } else {
+                print("websocket encountered an error")
+            }
+        }
+
+    
+    func ptTokenClosure(response: Result<[String: AnyObject], Error>) {
+        switch response {
+            case .success(let token):
+                ptToken = token["pt-token"] as? String ?? ""
+            case .failure(_):
+                print("failed to fetch pt-token")
+        }
+    }
+    
     
     public init(apiKey: String,
                 tags: [String: Any] = [:],
                 environment: Environment = .DEMO,
-                fee_mode: FEE_MODE = .SURCHARGE) {
+                fee_mode: FEE_MODE = .SERVICE_FEE) {
         
         self.apiKey = apiKey
         self.environment = environment.value
@@ -54,6 +115,24 @@ public class PayTheory: ObservableObject {
         self.envAch = BankAccount()
         self.envCard = PaymentCard()
         self.envBuyer = Buyer()
+        
+        getToken(apiKey: apiKey, endpoint: environment.value, completion: ptTokenClosure)
+    }
+    
+    public init(apiKey: String,
+                tags: [String: Any] = [:],
+                fee_mode: FEE_MODE = .SERVICE_FEE,
+                dev: String) {
+        
+        self.apiKey = apiKey
+        self.environment = dev
+        self.fee_mode = fee_mode
+        self.tags = tags
+        self.envAch = BankAccount()
+        self.envCard = PaymentCard()
+        self.envBuyer = Buyer()
+        
+        getToken(apiKey: apiKey, endpoint: dev, completion: ptTokenClosure)
     }
     
     let envCard: PaymentCard

@@ -1,8 +1,10 @@
 PODS:
   - Alamofire (5.4.1)
   - Mocker (2.2.0)
-  - PayTheory (0.2.3):
+  - PayTheory (0.2.11):
     - Alamofire (~> 5.2)
+    - Starscream (~> 4.0.0)
+  - Starscream (4.0.4)
 
 DEPENDENCIES:
   - Mocker (~> 2.2)
@@ -12,6 +14,7 @@ SPEC REPOS:
   trunk:
     - Alamofire
     - Mocker
+    - Starscream
 
 EXTERNAL SOURCES:
   PayTheory:
@@ -20,7 +23,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
   Mocker: d0ceb340eddd5c28539a691ce67d068674cef9a0
-  PayTheory: 5d264aa83c857fcf026be341416a0632ca08f8fb
+  PayTheory: 433e746b31d93b1a0f03b7572ea5a658d077f8fd
+  Starscream: 5178aed56b316f13fa3bc55694e583d35dd414d9
 
 PODFILE CHECKSUM: 44f0ff4676e1664ada578f54a7549cc41fe5d0b0
 
