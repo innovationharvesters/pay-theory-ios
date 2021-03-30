@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Sodium
 
 func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
     var result: [String: Any] = [:]
@@ -93,3 +94,24 @@ func convertStringToDictionary(text: String) -> [String: AnyObject]? {
     }
     return nil
 }
+
+func stringify(jsonDictionary: [String: Any]) -> String {
+  do {
+    let data = try JSONSerialization.data(withJSONObject: jsonDictionary, options: .prettyPrinted)
+    return String(data: data, encoding: String.Encoding.utf8) ?? ""
+  } catch {
+    return ""
+  }
+}
+
+func convertBytesToString(bytes: Bytes) -> String {
+    let data = NSData(bytes: bytes, length: bytes.count)
+    let base64Data = data.base64EncodedData(options: NSData.Base64EncodingOptions.endLineWithLineFeed)
+    let newData = NSData(base64Encoded: base64Data, options: NSData.Base64DecodingOptions.ignoreUnknownCharacters)!
+    return newData.base64EncodedString()
+}
+
+func convertStringToByte(string: String) -> Bytes {
+    return [UInt8](NSData(base64Encoded: string, options: NSData.Base64DecodingOptions(rawValue: 0))!)
+}
+

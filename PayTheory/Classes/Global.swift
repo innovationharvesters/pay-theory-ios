@@ -83,3 +83,8 @@ public class Address: ObservableObject, Codable, Equatable {
         self.region = state
     }
 }
+
+let HOST_TOKEN = "host:hostToken"
+let PT_INSTRUMENT = "host:ptInstrument"
+let IDEMPOTENCY = "host:idempotency"
+let TRANSFER = "host:transfer"

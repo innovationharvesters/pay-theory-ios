@@ -10,7 +10,7 @@ import Foundation
 import DeviceCheck
 import CryptoKit
 
-import Starscream
+import Sodium
 
 public func ?? <T>(lhs: Binding<T?>, rhs: T) -> Binding<T> {
     Binding(
@@ -43,60 +43,47 @@ public class PayTheory: ObservableObject {
     private var tokenResponse: [String: Any]?
     private var idempotencyResponse: IdempotencyResponse?
     private var isConnected = false
+    private var transaction: Transaction
     private var passedBuyer: Buyer?
-    private var socket: WebSocket?
-    private var ptToken: String?{
+    private var socket: URLSessionWebSocketTask!
+    private var ptToken: String?
+    private var attestationString: String?{
         didSet {
-            var request = URLRequest(url: URL(string: "wss://\(self.environment).secure.socket.paytheorystudy.com/?pt_token=\(self.ptToken!)")!)
-            request.timeoutInterval = 5
-            socket = WebSocket(request: request)
-            socket!.onEvent = { event in
-                switch event {
-                case .connected(let headers):
-                    self.isConnected = true
-                    print("websocket is connected: \(headers)")
-                case .disconnected(let reason, let code):
-                    self.isConnected = false
-                    print("websocket is disconnected: \(reason) with code: \(code)")
-                case .text(let string):
-                    print("Received text: \(string)")
-                case .binary(let data):
-                    print("Received data: \(data.count)")
-                case .ping(_):
-                    break
-                case .pong(_):
-                    break
-                case .viabilityChanged(_):
-                    break
-                case .reconnectSuggested(_):
-                    break
-                case .cancelled:
-                    self.isConnected = false
-                case .error(let error):
-                    self.isConnected = false
-                    self.handleSocketError(error)
-                }
-            }
-            socket!.connect()
+            let webSocketDelegate = WebSocket(ptToken: self.ptToken!, attestation: self.attestationString!, transaction: transaction)
+            let session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: OperationQueue())
+            let url = URL(string: "wss://\(self.environment).secure.socket.paytheorystudy.com/?pt_token=\(self.ptToken!)")!
+            self.socket = session.webSocketTask(with: url)
+            self.socket.resume()
         }
+           
     }
     
-    func handleSocketError(_ error: Error?) {
-            if let e = error as? WSError {
-                print(e)
-                print("websocket encountered an error: \(e.message)")
-            } else if let e = error {
-                print("websocket encountered an error: \(e.localizedDescription)")
-            } else {
-                print("websocket encountered an error")
-            }
-        }
+
 
     
     func ptTokenClosure(response: Result<[String: AnyObject], Error>) {
         switch response {
             case .success(let token):
+                print(token["challengeOptions"]!["challenge"] as? String ?? "")
                 ptToken = token["pt-token"] as? String ?? ""
+                if let challenge = token["challengeOptions"]?["challenge"] as? String {
+                service.generateKey { (keyIdentifier, error) in
+                    guard error == nil else {
+                        debugPrint(error ?? "")
+                        return
+                    }
+                    let encodedChallengeData = challenge.data(using: .utf8)!
+                    self.encodedChallenge = encodedChallengeData.base64EncodedString()
+                    let hash = Data(SHA256.hash(data: encodedChallengeData))
+                    self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
+                        guard error == nil else {
+                            debugPrint(error!)
+                            return
+                        }
+                        self.attestationString = attestation!.base64EncodedString()
+                    }
+                }
+                }
             case .failure(_):
                 print("failed to fetch pt-token")
         }
@@ -115,6 +102,10 @@ public class PayTheory: ObservableObject {
         self.envAch = BankAccount()
         self.envCard = PaymentCard()
         self.envBuyer = Buyer()
+        self.transaction = Transaction()
+        self.transaction.feeMode = fee_mode.rawValue
+        self.transaction.apiKey = apiKey
+        self.transaction.tags = tags
         
         getToken(apiKey: apiKey, endpoint: environment.value, completion: ptTokenClosure)
     }
@@ -131,6 +122,10 @@ public class PayTheory: ObservableObject {
         self.envAch = BankAccount()
         self.envCard = PaymentCard()
         self.envBuyer = Buyer()
+        self.transaction = Transaction()
+        self.transaction.feeMode = fee_mode.rawValue
+        self.transaction.apiKey = apiKey
+        self.transaction.tags = tags
         
         getToken(apiKey: apiKey, endpoint: dev, completion: ptTokenClosure)
     }
@@ -223,9 +218,16 @@ public class PayTheory: ObservableObject {
                   buyerOptions: Buyer,
                   completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
         
-        getChallenge(apiKey: apiKey,
-                     endpoint: environment,
-                     completion: challengeClosure(amount: amount, completion: completion))
+        self.transaction.tokenizationCompletion = completion
+        self.transaction.amount = amount
+        
+        if let creditCard = card {
+            let body = transaction.createInstrumentBody(instrument: paymentCardToDictionary(card: creditCard))
+            sendMessage(socket: socket, action: PT_INSTRUMENT, messageBody: body, transaction: transaction)
+        } else if let bankAccount = bank {
+            let body = transaction.createInstrumentBody(instrument: bankAccountToDictionary(account: bankAccount))
+            sendMessage(socket: socket, action: PT_INSTRUMENT, messageBody: body, transaction: transaction)
+        }
     }
     
     // Calculated value that can allow someone to check if there is an active token
