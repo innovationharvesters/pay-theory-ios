@@ -207,7 +207,7 @@ class WebSocket: NSObject, URLSessionWebSocketDelegate {
 
 func close(socket: URLSessionWebSocketTask) {
   let reason = "Closing connection".data(using: .utf8)
-  socket.cancel(with: .goingAway, reason: reason)
+    socket.cancel(with: .normalClosure, reason: reason)
 }
 
 
@@ -219,15 +219,13 @@ func receive(socket: URLSessionWebSocketTask, transaction: Transaction) {
       case .data(let data):
         print("Data received \(data)")
       case .string(let text):
-        print("Text received \(text)")
         onMessage(response: text, transaction: transaction, socket: socket)
       default:
         print("recieved unknown response type")
       }
     case .failure(let error):
-      print("Error when receiving \(error)")
+        print("Error when receiving \(error)")
     }
-    
     receive(socket: socket, transaction: transaction)
   }
 }
@@ -252,6 +250,7 @@ func sendMessage(socket: URLSessionWebSocketTask, action: String, messageBody: [
         message["publicKey"] = convertBytesToString(bytes: transaction.keyPair.publicKey)
     }
     
+    transaction.lastMessage = stringify(jsonDictionary: message)
     socket.send(.string(stringify(jsonDictionary: message))) { error in
       if let error = error {
         print("Error when sending a message \(error)")
@@ -261,22 +260,50 @@ func sendMessage(socket: URLSessionWebSocketTask, action: String, messageBody: [
 
 func onMessage(response: String, transaction: Transaction, socket: URLSessionWebSocketTask) {
     if let dictionary = convertStringToDictionary(text: response) {
+        
         if let hostToken = dictionary["hostToken"] {
-            transaction.hostToken = hostToken as? String ?? ""
+            DispatchQueue.main.async {
+                transaction.hostToken = hostToken as? String ?? ""
+            }
             transaction.sessionKey = dictionary["sessionKey"] as? String ?? ""
             let key = dictionary["publicKey"] as? String ?? ""
             transaction.publicKey = convertStringToByte(string: key)
+            
         } else if let instrument = dictionary["pt-instrument"] {
-            transaction.ptInstrument = instrument as! String
-            sendMessage(socket: socket, action: IDEMPOTENCY, messageBody: transaction.createIdempotencyBody(), transaction: transaction)
+            transaction.ptInstrument = instrument as? String ?? ""
+            sendMessage(socket: socket, action: IDEMPOTENCY, messageBody: transaction.createIdempotencyBody()!, transaction: transaction)
+            
         } else if let _ = dictionary["payment-token"] {
             transaction.paymentToken = dictionary
-            sendMessage(socket: socket, action: TRANSFER, messageBody: transaction.createTransferBody(), transaction: transaction)
+            if transaction.feeMode == .SURCHARGE {
+                sendMessage(socket: socket, action: TRANSFER, messageBody: transaction.createTransferBody()!, transaction: transaction)
+            } else {
+                transaction.buttonCompletion!(.success(transaction.createTokenizationResponse()!))
+            }
+            
         } else if let _ = dictionary["state"] {
             transaction.transferToken = dictionary
-            print(transaction.createCompletionResponse())
-        }else if let error = dictionary["error"] {
+            if transaction.feeMode == .SURCHARGE {
+                transaction.buttonCompletion!(.success(transaction.createCompletionResponse()!))
+                transaction.resetTransaction()
+            } else {
+                transaction.captureCompletion!(.success(transaction.createCompletionResponse()!))
+                transaction.resetTransaction()
+            }
+            
+        } else if let error = dictionary["error"] {
             print(error)
+            
+        } else if let serverError = dictionary["message"] {
+            if serverError as? String ?? "" == "Internal server error" {
+                if let message = transaction.lastMessage {
+                    socket.send(.string(message)) { error in
+                      if let error = error {
+                        print("Error when sending a message \(error)")
+                      }
+                    }
+                }
+            }
         }
     } else {
         print("Could not convert the response to a Dictionary")

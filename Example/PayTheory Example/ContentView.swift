@@ -39,7 +39,7 @@ struct ContentView: View {
     @State private var showingMessage = false
     let ptObject = PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"] ?? "",
                                          tags: ["Test Tag": "Test Value"],
-                                         fee_mode: .SURCHARGE,
+                                         fee_mode: .SERVICE_FEE,
                                          dev: "dev")
 
     let buyer = Buyer(firstName: "Some", lastName: "Body", phone: "555-555-5555")
