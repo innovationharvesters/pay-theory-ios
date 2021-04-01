@@ -10,7 +10,7 @@ import Foundation
 import DeviceCheck
 import CryptoKit
 
-import Sodium
+//import Sodium
 
 public func ?? <T>(lhs: Binding<T?>, rhs: T) -> Binding<T> {
     Binding(
@@ -31,7 +31,34 @@ public enum Environment {
     }
 }
 
-public class PayTheory: ObservableObject {
+public class PayTheory: ObservableObject, WebSocketProtocol {
+    func receiveMessage(message: String) {
+        print("handle receiveMessage")
+        print(message)
+    }
+    
+    func handleConnect() {
+        print("handle connected")
+        let hostToken: [String: Any] = [
+            "ptToken": ptToken!,
+            "origin": "native",
+            "attestation":attestationString!,
+            "timing": Date().millisecondsSince1970
+            
+        ]
+        print("sending host token")
+        session!.sendMessage(action: HOST_TOKEN, messageBody: hostToken, requiresResponse: session!.REQUIRE_RESPONSE)
+    }
+    
+    func handleError(error: Error) {
+        print("handle error")
+        print(error)
+    }
+    
+    func handleDisconnect() {
+        print("handle disconnected")
+    }
+    
     let service = DCAppAttestService.shared
     var apiKey: String
     public var environment: String
@@ -47,19 +74,31 @@ public class PayTheory: ObservableObject {
     private var passedBuyer: Buyer?
     private var socket: URLSessionWebSocketTask!
     private var ptToken: String?
+    private var session: WebSocketSession?
     private var attestationString: String?{
         didSet {
-            let webSocketDelegate = WebSocket(ptToken: self.ptToken!, attestation: self.attestationString!, transaction: transaction)
-            let session = URLSession(configuration: .default, delegate: webSocketDelegate, delegateQueue: OperationQueue())
-            let url = URL(string: "wss://\(self.environment).secure.socket.paytheorystudy.com/?pt_token=\(self.ptToken!)")!
-            self.socket = session.webSocketTask(with: url)
-            self.socket.resume()
+            let provider = WebSocketProvider()
+            session = WebSocketSession()
+            session!.prepare(_provider: provider, _handler: self)
+            session!.open(ptToken:ptToken!)
+            let notificationCenter = NotificationCenter.default
+            notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+            notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+                
         }
            
     }
     
 
 
+
+    @objc func appMovedToBackground() {
+        session!.close()
+    }
+    
+    @objc func appCameToForeground() {
+        getToken(apiKey: apiKey, endpoint: "finix", completion: ptTokenClosure)
+    }
     
     func ptTokenClosure(response: Result<[String: AnyObject], Error>) {
         switch response {

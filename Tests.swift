@@ -620,7 +620,7 @@ class Tests: XCTestCase {
 
     
     func testCodingPayment() {
-        let payment = Payment(currency: "USD", amount: 1200, service_fee: 200, merchant: "Test", feeMode: "service_fee")
+        let payment = Payment(currency: "USD", amount: 1200, service_fee: 200, merchant: "Test", fee_mode: "service_fee")
         
         let encoder = JSONEncoder()
         let decoder = JSONDecoder()
@@ -636,7 +636,7 @@ class Tests: XCTestCase {
     }
     
     func testCodingIdempotencyResponse() {
-        let payment = Payment(currency: "USD", amount: 2000, service_fee: 120, merchant: "12345", feeMode: "SURCHARGE")
+        let payment = Payment(currency: "USD", amount: 2000, service_fee: 120, merchant: "12345", fee_mode: "SURCHARGE")
         let idempotency = IdempotencyResponse(response: "Test",
                                               signature: "test",
                                               credId: "1234",

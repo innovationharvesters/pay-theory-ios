@@ -25,7 +25,7 @@ extension View {
 }
 
 func makePt(payTheory: PayTheory) -> PayTheory {
-    payTheory.environment = "dev"
+    payTheory.environment = "finix"
     return payTheory
 }
 
@@ -37,10 +37,10 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let ptObject = PayTheory(apiKey: ProcessInfo.processInfo.environment["dev_api_key"] ?? "",
+    let ptObject = PayTheory(apiKey: "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87",
                                          tags: ["Test Tag": "Test Value"],
                                          fee_mode: .SERVICE_FEE,
-                                         dev: "dev")
+                                         dev: "finix")
 
     let buyer = Buyer(firstName: "Some", lastName: "Body", phone: "555-555-5555")
     @State private var type = 0
@@ -110,14 +110,9 @@ struct ContentView: View {
                 
                 if type == 0 {
                     PTForm {
-                    PTCardName().textFieldStyle()
                     PTCardNumber().textFieldStyle()
                     PTExp().textFieldStyle()
                     PTCvv().textFieldStyle()
-                    PTCardLineOne().textFieldStyle()
-                    PTCardCity().textFieldStyle()
-                    PTCardState().textFieldStyle()
-                    PTCardZip().textFieldStyle()
                     PTButton(amount: 33, completion: completion).textFieldStyle()
                     }.environmentObject(ptObject)
                 } else if type == 1 {

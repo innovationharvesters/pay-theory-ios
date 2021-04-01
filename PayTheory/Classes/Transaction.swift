@@ -6,20 +6,20 @@
 //
 
 import Foundation
-import Sodium
+//import Sodium
 
 class Transaction: ObservableObject {
     
     @Published var hostToken: String?
     var sessionKey: String = ""
-    var publicKey: Bytes = "".bytes
+//    var publicKey: Bytes = "".bytes
     var ptInstrument: String?
     var paymentToken: [String: AnyObject]?
     var transferToken: [String: AnyObject]?
-    var keyPair: Box.KeyPair
+//    var keyPair: Box.KeyPair
     var buttonCompletion: ((Result<[String: Any], FailureResponse>) -> Void)?
     var captureCompletion: ((Result<[String: Any], FailureResponse>) -> Void)?
-    var sodium: Sodium
+    //var sodium: Sodium
     var apiKey: String = ""
     var amount: Int = 0
     var feeMode: FEE_MODE = .SURCHARGE
@@ -27,8 +27,8 @@ class Transaction: ObservableObject {
     var lastMessage: String?
     
     init() {
-        self.sodium = Sodium()
-        self.keyPair = sodium.box.keyPair()!
+//        self.sodium = Sodium()
+//        self.keyPair = sodium.box.keyPair()!
     }
     
     func createInstrumentBody(instrument: [String: Any]) -> [String: Any]? {
