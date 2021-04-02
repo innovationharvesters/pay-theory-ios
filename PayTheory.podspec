@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'PayTheory'
-  s.version          = '0.2.12-alpha.1'
+  s.version          = '0.2.13-alpha.1'
   s.summary          = 'Framework to include PayTheory transactions in your App.'
   s.swift_version    = '5.3'
 
