@@ -26,7 +26,7 @@ extension String {
     }
 }
 
-class PaymentCard: ObservableObject, Codable, Equatable {
+class PaymentCard: ObservableObject, Equatable {
     static func == (lhs: PaymentCard, rhs: PaymentCard) -> Bool {
         if lhs.name == rhs.name &&
         lhs.expirationDate == rhs.expirationDate &&
@@ -97,33 +97,6 @@ class PaymentCard: ObservableObject, Codable, Equatable {
                 securityCode = filtered
             }
         }
-    }
-    
-    enum CodingKeys: CodingKey {
-        case name, expirationDate, identity, address, number, type, securityCode
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(name, forKey: .name)
-        try container.encode(expirationDate, forKey: .expirationDate)
-        try container.encode(identity, forKey: .identity)
-        try container.encode(address, forKey: .address)
-        try container.encode(number, forKey: .number)
-        try container.encode(type, forKey: .type)
-        try container.encode(securityCode, forKey: .securityCode)
-    }
-    
-    required init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-
-            name = try container.decodeIfPresent(String.self, forKey: .name) ?? nil
-            address = try container.decode(Address.self, forKey: .address)
-            securityCode = try container.decode(String.self, forKey: .securityCode)
-            expirationDate = try container.decode(String.self, forKey: .expirationDate)
-            identity = try container.decode(String.self, forKey: .identity)
-            number = try container.decode(String.self, forKey: .number)
-            type = try container.decode(String.self, forKey: .type)
     }
     
     var expirationMonth: String {
@@ -252,12 +225,6 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     init() {
     }
     
-    init(number: String, expirationDate: String, cvv: String) {
-        self.number = number
-        self.expirationDate = expirationDate
-        self.securityCode = cvv
-    }
-    
     func clear() {
         self.number = ""
         self.expirationDate = ""
@@ -269,7 +236,7 @@ class PaymentCard: ObservableObject, Codable, Equatable {
     
 }
 
-class BankAccount: ObservableObject, Codable, Equatable {
+class BankAccount: ObservableObject, Equatable {
     static func == (lhs: BankAccount, rhs: BankAccount) -> Bool {
         if lhs.name == rhs.name &&
         lhs.accountNumber == rhs.accountNumber &&
@@ -291,33 +258,6 @@ class BankAccount: ObservableObject, Codable, Equatable {
     @Published var country: String?
     @Published var identity = ""
     private var type = "BANK_ACCOUNT"
-    
-    enum CodingKeys: CodingKey {
-        case name, accountNumber, accountType, bankCode, country, identity, type
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(name, forKey: .name)
-        try container.encode(accountNumber, forKey: .accountNumber)
-        try container.encode(accountType, forKey: .accountType)
-        try container.encode(identity, forKey: .identity)
-        try container.encode(bankCode, forKey: .bankCode)
-        try container.encode(country, forKey: .country)
-        try container.encode(type, forKey: .type)
-    }
-    
-    required init(from decoder: Decoder) throws {
-           let container = try decoder.container(keyedBy: CodingKeys.self)
-
-           name = try container.decode(String.self, forKey: .name)
-           accountNumber = try container.decode(String.self, forKey: .accountNumber)
-           accountType = try container.decode(Int.self, forKey: .accountType)
-           bankCode = try container.decode(String.self, forKey: .bankCode)
-           country = try container.decodeIfPresent(String.self, forKey: .country) ?? nil
-           identity = try container.decode(String.self, forKey: .identity)
-           type = try container.decode(String.self, forKey: .type)
-    }
     
     var validAccountType: Bool {
         return accountType < 2
@@ -366,17 +306,6 @@ class BankAccount: ObservableObject, Codable, Equatable {
     
     var lastFour: String {
         return String(accountNumber.suffix(4))
-    }
-    
-    init(identity: String) {
-        self.identity = identity
-    }
-    
-    init(name: String, accountNumber: String, accountType: Int, bankCode: String ) {
-        self.name = name
-        self.accountType = accountType
-        self.accountNumber = accountNumber
-        self.bankCode = bankCode
     }
     
     init() {

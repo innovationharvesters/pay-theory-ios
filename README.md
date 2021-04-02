@@ -22,10 +22,17 @@ For each mobile app you want to register
 ## Installation
 
 PayTheory is available through [CocoaPods](https://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+the most recent stable build, simply add the following line to your Podfile:
 
 ```ruby
 pod 'PayTheory'
+```
+
+Check our page on [CocoaPods](https://cocoapods.org) for the most recent version and 
+beta versions, to use a specific or beta version add it to the line like so:
+
+```ruby
+pod 'PayTheory', '~> 0.2.13-alpha.1' 
 ```
 
 At the top of the view import PayTheory
@@ -212,6 +219,7 @@ Once the PTButton is clicked and service_fee is set to **.SURCHARGE** or if the 
 [
    "receipt_number":"pt-env-XXXXXX",
     "last_four": "XXXX",
+    "brand": "ACH",
     "created_at":"YYYY-MM-DDTHH:MM:SS.ssZ",
     "amount": 999,
     "service_fee": 195,

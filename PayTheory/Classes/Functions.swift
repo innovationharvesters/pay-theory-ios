@@ -115,3 +115,17 @@ func convertStringToByte(string: String) -> Bytes {
     return [UInt8](NSData(base64Encoded: string, options: NSData.Base64DecodingOptions(rawValue: 0))!)
 }
 
+func parseError(errors: [String: AnyObject]) -> String {
+    var type = ""
+    var message = ""
+    let field = errors["_embedded"] as? [String: AnyObject]
+    let errors = field?["errors"] as? [[String: AnyObject]]
+    if let initialType = errors?[0]["field"] {
+        type = initialType as? String ?? ""
+    }
+    if let initialMessage = errors?[0]["message"] {
+        message = initialMessage as? String ?? ""
+    }
+    
+    return "\(type) \(message)"
+}

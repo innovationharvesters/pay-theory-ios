@@ -48,7 +48,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             "timing": Date().millisecondsSince1970
         ]
         message["encoded"] = stringify(jsonDictionary: hostToken).data(using: .utf8)!.base64EncodedString()
-        print("sending host token")
         session!.sendMessage(messageBody: stringify(jsonDictionary: message), requiresResponse: session!.REQUIRE_RESPONSE)
     }
     
@@ -109,26 +108,29 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 if transaction.feeMode == .SURCHARGE {
                 session?.sendMessage(messageBody: transaction.createTransferBody()!, requiresResponse: session!.REQUIRE_RESPONSE)
                 } else {
-                    transaction.completionHandler!(.success(transaction.createTokenizationResponse()!))
+                    transaction.completionHandler?(.success(transaction.createTokenizationResponse()!))
                 }
 
             } else if let state = dictionary["state"] {
                 transaction.transferToken = dictionary
                 if state as? String ?? "" == "FAILURE" {
-                    transaction.completionHandler!(.failure(transaction.createFailureResponse()))
+                    transaction.completionHandler?(.failure(transaction.createFailureResponse()))
+                    resetTransaction()
                 } else {
                     if transaction.feeMode == .SURCHARGE {
-                        transaction.completionHandler!(.success(transaction.createCompletionResponse()!))
+                        transaction.completionHandler?(.success(transaction.createCompletionResponse()!))
                         transaction.resetTransaction()
+                        
                     } else {
-                        transaction.completionHandler!(.success(transaction.createCompletionResponse()!))
+                        transaction.completionHandler?(.success(transaction.createCompletionResponse()!))
                         transaction.resetTransaction()
                     }
                 }
 
             } else if let error = dictionary["error"] {
                 print(error)
-
+                transaction.completionHandler?(.failure(FailureResponse(type: error as? String ?? "")))
+                resetTransaction()
             }
         } else {
             print("Could not convert the response to a Dictionary")
@@ -243,19 +245,16 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         }
     }
     
-    var isReady: Bool {
-        if transaction.hostToken != nil {
-            return true
-        } else {
-            return false
-        }
+    //Used to reset when a transaction fails or an error is returned. Also used by cancel function.
+    func resetTransaction() {
+        buttonClicked = false
+        transaction.resetTransaction()
+        getToken(apiKey: apiKey, endpoint: environment, completion: ptTokenClosure)
     }
     
     //Public function that will void the authorization and relase any funds that may be held.
     public func cancel() {
-        buttonClicked = false
-        transaction.resetTransaction()
-        getToken(apiKey: apiKey, endpoint: environment, completion: ptTokenClosure)
+       resetTransaction()
     }
     
     //Public function that will complete the authorization and send a

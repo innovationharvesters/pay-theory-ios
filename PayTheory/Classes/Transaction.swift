@@ -93,14 +93,20 @@ class Transaction: ObservableObject {
     
     func createCompletionResponse() -> [String: Any]? {
         if let transfer = transferToken {
-            return [
+            var result: [String: Any] = [
               "receipt_number": paymentToken!["idempotency"] as? String ?? "",
               "last_four": transfer["last_four"] as? String ?? "",
               "created_at": transfer["created_at"] as? String ?? "",
               "amount": transfer["amount"] as? Int ?? 0,
               "service_fee": transfer["service_fee"] as? Int ?? 0,
               "state": transfer["state"] as? String ?? "",
-              "tags": transfer["tags"] as? [String: Any] ?? [:]]
+              "tags": transfer["tags"] as? [String: Any] ?? [:]
+            ]
+            if let brand = transfer["card_brand"] {
+                result["brand"] = brand as? String ?? ""
+            }
+            
+            return result
         } else {
             return nil
         }

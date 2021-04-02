@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'PayTheory'
-  s.version          = '0.2.13-alpha.1'
+  s.version          = '0.2.13-alpha.2'
   s.summary          = 'Framework to include PayTheory transactions in your App.'
   s.swift_version    = '5.3'
 
@@ -33,13 +33,6 @@ This pod allows you to incoporate PayTheory payments into your app. Includes a P
 
   s.source_files = 'PayTheory/Classes/**/*'
   
-  # s.resource_bundles = {
-  #   'PayTheory' => ['PayTheory/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  # s.frameworks = 'UIKit', 'MapKit'
   s.dependency 'Alamofire', '~> 5.2'
   s.dependency 'Sodium', '~> 0.9'
-#  s.dependency 'libsodium', '~> 1.0'
 end
