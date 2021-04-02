@@ -35,14 +35,9 @@ public class WebSocketSession: NSObject {
     }
 
     
-    func sendMessage(action: String, messageBody: [String: Any], requiresResponse: Bool = false) {
-        var message: [String: Any] = [
-            "action": action
-        ]
-        if action == HOST_TOKEN {
-            message["encoded"] = stringify(jsonDictionary: messageBody).data(using: .utf8)!.base64EncodedString()
-        }
-        self.provider!.sendMessage(message: .string(stringify(jsonDictionary: message)), handler: self.handler!)
+    func sendMessage(messageBody: String, requiresResponse: Bool = false) {
+
+        self.provider!.sendMessage(message: .string(messageBody), handler: self.handler!)
         
         if (requiresResponse) {
             self.provider!.receive()

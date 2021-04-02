@@ -6,20 +6,19 @@
 //
 
 import Foundation
-//import Sodium
+import Sodium
 
 class Transaction: ObservableObject {
     
     @Published var hostToken: String?
     var sessionKey: String = ""
-//    var publicKey: Bytes = "".bytes
+    var publicKey: Bytes = "".bytes
     var ptInstrument: String?
     var paymentToken: [String: AnyObject]?
     var transferToken: [String: AnyObject]?
-//    var keyPair: Box.KeyPair
-    var buttonCompletion: ((Result<[String: Any], FailureResponse>) -> Void)?
-    var captureCompletion: ((Result<[String: Any], FailureResponse>) -> Void)?
-    //var sodium: Sodium
+    var keyPair: Box.KeyPair
+    var completionHandler: ((Result<[String: Any], FailureResponse>) -> Void)?
+    var sodium: Sodium
     var apiKey: String = ""
     var amount: Int = 0
     var feeMode: FEE_MODE = .SURCHARGE
@@ -27,24 +26,39 @@ class Transaction: ObservableObject {
     var lastMessage: String?
     
     init() {
-//        self.sodium = Sodium()
-//        self.keyPair = sodium.box.keyPair()!
+        self.sodium = Sodium()
+        self.keyPair = sodium.box.keyPair()!
     }
     
-    func createInstrumentBody(instrument: [String: Any]) -> [String: Any]? {
+    func encryptBody(body: [String: Any], action: String) -> String {
+        var message: [String: Any] = [:]
+        let strigifiedMessage = stringify(jsonDictionary: body).bytes
+        let encryptedMessage: Bytes =
+            sodium.box.seal(message: strigifiedMessage,
+                            recipientPublicKey: publicKey,
+                            senderSecretKey: self.keyPair.secretKey)!
+
+        message["encoded"] = convertBytesToString(bytes: encryptedMessage)
+        message["sessionKey"] = sessionKey
+        message["publicKey"] = convertBytesToString(bytes: self.keyPair.publicKey)
+        message["action"] =  action
+        return stringify(jsonDictionary: message)
+    }
+    
+    func createInstrumentBody(instrument: [String: Any]) -> String? {
         if let host = hostToken {
-            return [
+            return encryptBody(body: [
                 "hostToken": host,
                 "sessionKey": sessionKey,
                 "timing": Date().millisecondsSince1970,
                 "payment": instrument
-            ]
+            ], action: PT_INSTRUMENT)
         } else {
             return nil
         }
     }
     
-    func createIdempotencyBody() -> [String: Any]? {
+    func createIdempotencyBody() -> String? {
         if let instrument = ptInstrument {
             var body: [String: Any] = [:]
             body["apiKey"] = apiKey
@@ -58,20 +72,20 @@ class Transaction: ObservableObject {
                 "fee_mode": feeMode.rawValue
             ]
             
-            return body
+            return encryptBody(body: body, action: IDEMPOTENCY)
         } else {
             return nil
         }
     }
     
-    func createTransferBody() -> [String: Any]? {
+    func createTransferBody() -> String? {
         if let payment = paymentToken {
             var body: [String: Any] = [:]
             body["transfer"] = payment
             body["sessionKey"] = sessionKey
             body["timing"] = Date().millisecondsSince1970
             body["tags"] = tags
-            return body
+            return encryptBody(body: body, action: TRANSFER)
         } else {
             return nil
         }
@@ -112,6 +126,15 @@ class Transaction: ObservableObject {
         }
     }
     
+    func createFailureResponse() -> FailureResponse {
+        let type = transferToken?["type"] as? String ?? ""
+        let receipt = transferToken?["receipt_number"] as? String ?? ""
+        let lastFour = transferToken?["last_four"] as? String ?? ""
+        let brand = transferToken?["brand"] as? String ?? ""
+        
+        return FailureResponse(type: type, receiptNumber: receipt, lastFour: lastFour, brand: brand)
+    }
+    
     func resetTransaction() {
         DispatchQueue.main.async {
             self.hostToken = nil
@@ -120,8 +143,7 @@ class Transaction: ObservableObject {
         ptInstrument = nil
         paymentToken = nil
         transferToken = nil
-        buttonCompletion = nil
-        captureCompletion = nil
+        completionHandler = nil
         amount = 0
         lastMessage = nil
     }

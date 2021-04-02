@@ -35,19 +35,21 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     func receiveMessage(message: String) {
         print("handle receiveMessage")
         print(message)
+        onMessage(response: message)
     }
     
     func handleConnect() {
         print("handle connected")
+        var message: [String: Any] = ["action": HOST_TOKEN]
         let hostToken: [String: Any] = [
             "ptToken": ptToken!,
             "origin": "native",
             "attestation":attestationString!,
             "timing": Date().millisecondsSince1970
-            
         ]
+        message["encoded"] = stringify(jsonDictionary: hostToken).data(using: .utf8)!.base64EncodedString()
         print("sending host token")
-        session!.sendMessage(action: HOST_TOKEN, messageBody: hostToken, requiresResponse: session!.REQUIRE_RESPONSE)
+        session!.sendMessage(messageBody: stringify(jsonDictionary: message), requiresResponse: session!.REQUIRE_RESPONSE)
     }
     
     func handleError(error: Error) {
@@ -68,8 +70,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var transaction = Transaction()
     
     private var encodedChallenge: String = ""
-    private var tokenResponse: [String: Any]?
-    private var idempotencyResponse: IdempotencyResponse?
     private var isConnected = false
     private var passedBuyer: Buyer?
     private var socket: URLSessionWebSocketTask!
@@ -89,7 +89,51 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
            
     }
     
+    func onMessage(response: String) {
+        if let dictionary = convertStringToDictionary(text: response) {
 
+            if let hostToken = dictionary["hostToken"] {
+                DispatchQueue.main.async {
+                    self.transaction.hostToken = hostToken as? String ?? ""
+                }
+                transaction.sessionKey = dictionary["sessionKey"] as? String ?? ""
+                let key = dictionary["publicKey"] as? String ?? ""
+                self.transaction.publicKey = convertStringToByte(string: key)
+
+            } else if let instrument = dictionary["pt-instrument"] {
+                transaction.ptInstrument = instrument as? String ?? ""
+                session?.sendMessage(messageBody: transaction.createIdempotencyBody()!, requiresResponse: session!.REQUIRE_RESPONSE)
+
+            } else if let _ = dictionary["payment-token"] {
+                transaction.paymentToken = dictionary
+                if transaction.feeMode == .SURCHARGE {
+                session?.sendMessage(messageBody: transaction.createTransferBody()!, requiresResponse: session!.REQUIRE_RESPONSE)
+                } else {
+                    transaction.completionHandler!(.success(transaction.createTokenizationResponse()!))
+                }
+
+            } else if let state = dictionary["state"] {
+                transaction.transferToken = dictionary
+                if state as? String ?? "" == "FAILURE" {
+                    transaction.completionHandler!(.failure(transaction.createFailureResponse()))
+                } else {
+                    if transaction.feeMode == .SURCHARGE {
+                        transaction.completionHandler!(.success(transaction.createCompletionResponse()!))
+                        transaction.resetTransaction()
+                    } else {
+                        transaction.completionHandler!(.success(transaction.createCompletionResponse()!))
+                        transaction.resetTransaction()
+                    }
+                }
+
+            } else if let error = dictionary["error"] {
+                print(error)
+
+            }
+        } else {
+            print("Could not convert the response to a Dictionary")
+        }
+    }
 
 
     @objc func appMovedToBackground() {
@@ -177,15 +221,15 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                   buyerOptions: Buyer,
                   completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
         if buttonClicked == false {
-            self.transaction.buttonCompletion = completion
+            self.transaction.completionHandler = completion
             self.transaction.amount = amount
             buttonClicked = true
             if let creditCard = card {
-                let body = transaction.createInstrumentBody(instrument: paymentCardToDictionary(card: creditCard)) ?? [:]
-                sendMessage(socket: socket, action: PT_INSTRUMENT, messageBody: body, transaction: transaction)
+                let body = transaction.createInstrumentBody(instrument: paymentCardToDictionary(card: creditCard)) ?? ""
+                session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             } else if let bankAccount = bank {
-                let body = transaction.createInstrumentBody(instrument: bankAccountToDictionary(account: bankAccount)) ?? [:]
-                sendMessage(socket: socket, action: PT_INSTRUMENT, messageBody: body, transaction: transaction)
+                let body = transaction.createInstrumentBody(instrument: bankAccountToDictionary(account: bankAccount)) ?? ""
+                session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             }
         }
     }
@@ -207,23 +251,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         }
     }
     
-    func resetTokenClosure(response: Result<[String: AnyObject], Error>) {
-        switch response {
-            case .success(let token):
-                ptToken = token["pt-token"] as? String ?? ""
-                let hostToken: [String: Any] = [
-                    "ptToken": ptToken ?? "",
-                    "origin": "native",
-                    "timing": Date().millisecondsSince1970,
-                    "attestation": attestationString ?? ""
-                ]
-                sendMessage(socket: socket, action: HOST_TOKEN, messageBody: hostToken, transaction: transaction)
-                
-            case .failure(_):
-                print("failed to fetch pt-token")
-        }
-    }
-    
     //Public function that will void the authorization and relase any funds that may be held.
     public func cancel() {
         buttonClicked = false
@@ -237,8 +264,8 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     public func capture(completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
         
         if isTokenized && fee_mode == .SERVICE_FEE {
-            transaction.captureCompletion = completion
-            sendMessage(socket: socket, action: TRANSFER, messageBody: transaction.createTransferBody()!, transaction: transaction)
+            transaction.completionHandler = completion
+            session?.sendMessage(messageBody: transaction.createTransferBody()!, requiresResponse: session!.REQUIRE_RESPONSE)
         } else {
             let error = FailureResponse(type: "There is no payment authorization to capture")
             print("The capture function should only be used with the .SERVICE_FEE fee mode")

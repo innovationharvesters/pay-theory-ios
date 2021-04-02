@@ -88,3 +88,18 @@ let HOST_TOKEN = "host:hostToken"
 let PT_INSTRUMENT = "host:ptInstrument"
 let IDEMPOTENCY = "host:idempotency"
 let TRANSFER = "host:transfer"
+
+public enum FEE_MODE: String, Codable {
+    case SURCHARGE = "surcharge"
+    case SERVICE_FEE = "service_fee"
+}
+
+extension Date {
+    var millisecondsSince1970:Int64 {
+        return Int64((self.timeIntervalSince1970 * 1000.0).rounded())
+    }
+
+    init(milliseconds:Int64) {
+        self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
+    }
+}
