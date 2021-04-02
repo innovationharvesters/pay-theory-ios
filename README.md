@@ -29,7 +29,7 @@ pod 'PayTheory'
 ```
 
 Check our page on [CocoaPods](https://cocoapods.org) for the most recent version and 
-beta versions, to use a specific or beta version add it to the line like so:
+development versions, to use a specific or development version add it to the line like so:
 
 ```ruby
 pod 'PayTheory', '~> 0.2.13-alpha.1' 
@@ -41,7 +41,13 @@ At the top of the view import PayTheory
 import PayTheory
 ```
 
+### Troubleshooting
+
+If you encounter missing libraries, ensure that Xcode and CocoaPods are both up to date
+
 ## Usage
+
+### Standard Initialization
 
 Initialize a PayTheory element for handling state. It accepts the following arguments.
 *   **apiKey**: Your PayTheory merchant API Key
@@ -56,18 +62,38 @@ let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
 let pt = PayTheory(apiKey: apiKey, tags: tags, environment: .DEMO, fee_mode: .SURCHARGE)
 ```
 
-The content view in which the PayTheory object will be used needs to be wrapped with the PTForm component. You should pass the PayTheory object as an EnvironmentObject to the PTForm.
+### Developer Initialization
+
+_Pay Theory developers use a named environment_
+
+    public init(apiKey: String,
+                tags: [String: Any] = [:],
+                fee_mode: FEE_MODE = .SERVICE_FEE,
+                dev: String)
+
+Initialize a PayTheory element for handling state. It accepts the following arguments.
+*   **apiKey**: Your PayTheory merchant API Key
+*   **tags**: optional custom tags you can include to track purchases
+*   **fee_mode**: optionally set the fee mode.  By default **.SURCHARGE** mode is used **.SERVICE_FEE** mode is available only when enabled by Pay Theory **.SURCHARGE** mode applies a fee of 2.9% + $0.30 to be deducted from original amount **.SERVICE FEE** mode calculates a fee based on predetermined parameters  and adds it to the original amount
+*   **dev**: tells the SDK the named environment you are working in
 
 ```swift
 let apiKey = 'your-api-key'
 let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
 
-let pt = PayTheory(apiKey: apiKey, tags: tags, environment: .DEMO, fee_mode: .SURCHARGE)
+let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE, dev:"finix")
+```
 
+### Wrapping the content view
+
+The content view in which the PayTheory object will be used needs to be wrapped with the PTForm component. You should pass the PayTheory object as an `environmentObject` to the PTForm.
+
+```swift
 PTForm{
     ContentView()
-}.EnvironmentObject(pt)
+}.environmentObject(pt)
 ```
+
 ### Credit Card Text Fields
 
 These custom text fields are what will be used to collect the card information for the transaction.
