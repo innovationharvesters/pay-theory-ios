@@ -32,8 +32,12 @@ Check our page on [CocoaPods](https://cocoapods.org) for the most recent version
 development versions, to use a specific or development version add it to the line like so:
 
 ```ruby
-pod 'PayTheory', '~> 0.2.13-alpha.1' 
+pod 'PayTheory', '~> RELEASE' 
 ```
+
+_replace release with the number below_
+
+[![Version](https://img.shields.io/cocoapods/v/PayTheory.svg?style=flat)](https://cocoapods.org/pods/PayTheory)
 
 At the top of the view import PayTheory
 
