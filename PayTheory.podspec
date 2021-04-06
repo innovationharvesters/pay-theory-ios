@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'PayTheory'
-  s.version          = '0.2.13-alpha.2'
+  s.version          = '0.2.14-alpha'
   s.summary          = 'Framework to include PayTheory transactions in your App.'
   s.swift_version    = '5.3'
 
@@ -34,5 +34,5 @@ This pod allows you to incoporate PayTheory payments into your app. Includes a P
   s.source_files = 'PayTheory/Classes/**/*'
   
   s.dependency 'Alamofire', '~> 5.2'
-  s.dependency 'Sodium', '~> 0.9'
+  s.dependency 'Sodium', '~> 0.9.1'
 end

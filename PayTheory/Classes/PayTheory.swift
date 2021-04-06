@@ -176,11 +176,13 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     public init(apiKey: String,
                 tags: [String: Any] = [:],
-                environment: Environment = .DEMO,
                 fee_mode: FEE_MODE = .SERVICE_FEE) {
         
         self.apiKey = apiKey
-        self.environment = environment.value
+        
+        let apiParts = apiKey.split{$0 == "-"}.map { String($0) }
+        let environmental = apiParts.count > 2 ? apiParts[2] : "demo"
+        self.environment = environmental
         self.fee_mode = fee_mode
         self.tags = tags
         self.envAch = BankAccount()
@@ -190,26 +192,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         self.transaction.apiKey = apiKey
         self.transaction.tags = tags
         
-        getToken(apiKey: apiKey, endpoint: environment.value, completion: ptTokenClosure)
-    }
-    
-    public init(apiKey: String,
-                tags: [String: Any] = [:],
-                fee_mode: FEE_MODE = .SERVICE_FEE,
-                dev: String) {
-        
-        self.apiKey = apiKey
-        self.environment = dev
-        self.fee_mode = fee_mode
-        self.tags = tags
-        self.envAch = BankAccount()
-        self.envCard = PaymentCard()
-        self.envBuyer = Buyer()
-        self.transaction.feeMode = fee_mode
-        self.transaction.apiKey = apiKey
-        self.transaction.tags = tags
-        
-        getToken(apiKey: apiKey, endpoint: dev, completion: ptTokenClosure)
+        getToken(apiKey: apiKey, endpoint: environmental, completion: ptTokenClosure)
     }
     
     let envCard: PaymentCard

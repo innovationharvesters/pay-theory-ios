@@ -1,9 +1,9 @@
 PODS:
   - Alamofire (5.4.1)
   - Mocker (2.2.0)
-  - PayTheory (0.2.11):
+  - PayTheory (0.2.14-alpha):
     - Alamofire (~> 5.2)
-    - Sodium (~> 0.9)
+    - Sodium (~> 0.9.1)
   - Sodium (0.9.1)
 
 DEPENDENCIES:
@@ -23,7 +23,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: 2291f7d21ca607c491dd17642e5d40fdcda0e65c
   Mocker: d0ceb340eddd5c28539a691ce67d068674cef9a0
-  PayTheory: 81f3bb8c9430cd2ecc98126539a753470a7d167a
+  PayTheory: 1e208f7ac9a2bd4712e0447589a25a5387e89705
   Sodium: 23d11554ecd556196d313cf6130d406dfe7ac6da
 
 PODFILE CHECKSUM: 0025a7e774811fe9ad20b2e87efa9062a91f170d
