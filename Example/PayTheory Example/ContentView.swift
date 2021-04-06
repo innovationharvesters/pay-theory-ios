@@ -39,8 +39,7 @@ struct ContentView: View {
     @State private var showingMessage = false
     let ptObject = PayTheory(apiKey: "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87",
                                          tags: ["Test Tag": "Test Value"],
-                                         fee_mode: .SURCHARGE,
-                                         dev: "finix")
+                                         fee_mode: .SURCHARGE)
 
     let buyer = Buyer(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
     @State private var type = 0

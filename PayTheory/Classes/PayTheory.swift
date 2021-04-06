@@ -173,6 +173,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         }
     }
     
+
     
     public init(apiKey: String,
                 tags: [String: Any] = [:],
@@ -193,6 +194,22 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         self.transaction.tags = tags
         
         getToken(apiKey: apiKey, endpoint: environmental, completion: ptTokenClosure)
+    }
+    
+    @available(*, deprecated, message: "environment in init is deprecated")
+    public convenience init(apiKey: String,
+                tags: [String: Any] = [:],
+                environment: Environment,
+                fee_mode: FEE_MODE = .SERVICE_FEE) {
+        self.init(apiKey: apiKey,tags: tags,fee_mode: fee_mode)
+    }
+    
+    @available(*, deprecated, message: "dev in init is deprecated")
+    public convenience init(apiKey: String,
+                tags: [String: Any] = [:],
+                fee_mode: FEE_MODE = .SERVICE_FEE,
+                dev:String) {
+        self.init(apiKey: apiKey,tags: tags,fee_mode: fee_mode)
     }
     
     let envCard: PaymentCard

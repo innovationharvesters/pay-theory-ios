@@ -47,41 +47,18 @@ If you encounter missing libraries, ensure that Xcode and CocoaPods are both up 
 
 ## Usage
 
-### Standard Initialization
+### Initialization
 
 Initialize a PayTheory element for handling state. It accepts the following arguments.
 *   **apiKey**: Your PayTheory merchant API Key
 *   **tags**: optional custom tags you can include to track purchases
-*   **environment**: tells the SDK if it should be working from a demo or production environment (**.DEMO** or **.PROD**). Defaults to **.DEMO**
 *   **fee_mode**: optionally set the fee mode.  By default **.SURCHARGE** mode is used **.SERVICE_FEE** mode is available only when enabled by Pay Theory **.SURCHARGE** mode applies a fee of 2.9% + $0.30 to be deducted from original amount **.SERVICE FEE** mode calculates a fee based on predetermined parameters  and adds it to the original amount
 
 ```swift
 let apiKey = 'your-api-key'
 let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
 
-let pt = PayTheory(apiKey: apiKey, tags: tags, environment: .DEMO, fee_mode: .SURCHARGE)
-```
-
-### Developer Initialization
-
-_Pay Theory developers use a named environment_
-
-    public init(apiKey: String,
-                tags: [String: Any] = [:],
-                fee_mode: FEE_MODE = .SERVICE_FEE,
-                dev: String)
-
-Initialize a PayTheory element for handling state. It accepts the following arguments.
-*   **apiKey**: Your PayTheory merchant API Key
-*   **tags**: optional custom tags you can include to track purchases
-*   **fee_mode**: optionally set the fee mode.  By default **.SURCHARGE** mode is used **.SERVICE_FEE** mode is available only when enabled by Pay Theory **.SURCHARGE** mode applies a fee of 2.9% + $0.30 to be deducted from original amount **.SERVICE FEE** mode calculates a fee based on predetermined parameters  and adds it to the original amount
-*   **dev**: tells the SDK the named environment you are working in
-
-```swift
-let apiKey = 'your-api-key'
-let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
-
-let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE, dev:"finix")
+let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE)
 ```
 
 ### Wrapping the content view
