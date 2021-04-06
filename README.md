@@ -35,7 +35,7 @@ development versions, to use a specific or development version add it to the lin
 pod 'PayTheory', '~> RELEASE' 
 ```
 
-_replace release with the number below_
+_replace RELEASE with the number below_
 
 [![Version](https://img.shields.io/cocoapods/v/PayTheory.svg?style=flat)](https://cocoapods.org/pods/PayTheory)
 
