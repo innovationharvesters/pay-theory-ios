@@ -13,7 +13,7 @@ Written in SwiftUI and requires iOS 14 for App Attestation
 
 Before you can use Pay Theory iOS SDK you must register your app in Pay Theory's merchant portal
 
-![App Registration](http://books-ui-assets.s3-website-us-east-1.amazonaws.com/android/ios-registration.png)
+![App Registration](https://assets.paytheory.com/android/ios-registration.png)
 
 For each mobile app you want to register 
 *   enter you applications bundle identifier
