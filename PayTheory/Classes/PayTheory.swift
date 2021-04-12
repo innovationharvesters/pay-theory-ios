@@ -79,7 +79,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             let provider = WebSocketProvider()
             session = WebSocketSession()
             session!.prepare(_provider: provider, _handler: self)
-            session!.open(ptToken:ptToken!)
+            session!.open(ptToken:ptToken!,environment: environment)
             let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -143,7 +143,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     }
     
     @objc func appCameToForeground() {
-        getToken(apiKey: apiKey, endpoint: "finix", completion: ptTokenClosure)
+        getToken(apiKey: apiKey, endpoint: environment, completion: ptTokenClosure)
     }
     
     func ptTokenClosure(response: Result<[String: AnyObject], Error>) {
@@ -343,7 +343,7 @@ public struct PTButton: View {
                     }
                 }
         }
-        .disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
+        //.disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
     }
 }
 

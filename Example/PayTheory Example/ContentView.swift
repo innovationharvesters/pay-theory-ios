@@ -25,7 +25,6 @@ extension View {
 }
 
 func makePt(payTheory: PayTheory) -> PayTheory {
-    payTheory.environment = "finix"
     return payTheory
 }
 
@@ -37,7 +36,7 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let ptObject = PayTheory(apiKey: "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87",
+    let ptObject = PayTheory(apiKey: "pt-sandbox-zippslip-00326fa654b2196cd2f420478cb16b3f",
                                          tags: ["Test Tag": "Test Value"],
                                          fee_mode: .SURCHARGE)
 
