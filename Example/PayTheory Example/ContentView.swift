@@ -12,15 +12,70 @@ import PayTheory
 struct TextField: ViewModifier {
     func body(content: Content) -> some View {
         content
-            .padding(15)
-            .font(Font.system(size: 15, weight: .medium, design: .serif))
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.blue, lineWidth: 2))
+            .font(Font.custom("Trebuchet MS Bold", size: 15))
+            .foregroundColor(Color(hex: "8E868F"))
+            .padding(12)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))
+    }
+}
+
+struct CombinedTextField: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .font(Font.custom("Trebuchet MS Bold", size: 15))
+            .foregroundColor(Color(hex: "8E868F"))
+    }
+}
+
+struct ButtonField: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(12)
+            .font(Font.custom("Trebuchet MS", size: 15))
+            .background(LinearGradient(gradient: Gradient(colors: [Color(hex: "#7C2CDD"), Color(hex: "#DB367D")]), startPoint: .leading, endPoint: .trailing ))
+            .foregroundColor(.white)
+            .cornerRadius(10)
+    }
+}
+
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: // RGB (12-bit)
+            (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: // RGB (24-bit)
+            (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: // ARGB (32-bit)
+            (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default:
+            (a, r, g, b) = (1, 1, 1, 0)
+        }
+
+        self.init(
+            .sRGB,
+            red: Double(r) / 255,
+            green: Double(g) / 255,
+            blue:  Double(b) / 255,
+            opacity: Double(a) / 255
+        )
     }
 }
 
 extension View {
     func textFieldStyle() -> some View {
         self.modifier(TextField())
+    }
+    
+    func combinedStyle() -> some View {
+        self.modifier(CombinedTextField())
+    }
+    
+    func buttonStyle() -> some View {
+        self.modifier(ButtonField())
     }
 }
 
@@ -96,14 +151,16 @@ struct ContentView: View {
     }
     
     var body: some View {
-            VStack {
-                Picker("Amount", selection: $amount) {
-                    ForEach(0 ..< amounts.count) {
-                        Text(formatMoney(val: self.amounts[$0]))
-                    }
-                }.pickerStyle(SegmentedPickerStyle())
-                
-                Picker("Account Type", selection: $type) {
+        VStack(spacing: 10) {
+                Spacer().frame(height: 50)
+                Text("$54.20").bold()
+                    .font(Font.custom("Trebuchet MS Bold", size: 45))
+                Text("SCHOOL FEES")
+                    .font(Font.custom("Trebuchet MS", size: 20))
+                Spacer().frame(height: 30)
+                Text("PAYMENT METHOD")
+                    .font(Font.custom("Arial Black", size: 20))
+                Picker("Payment Method", selection: $type) {
                     ForEach(0 ..< types.count) {
                         Text(self.types[$0])
                     }
@@ -111,10 +168,20 @@ struct ContentView: View {
                 
                 if type == 0 {
                     PTForm {
-                    PTCardNumber().textFieldStyle()
-                    PTExp().textFieldStyle()
-                    PTCvv().textFieldStyle()
-                    PTButton(amount: 200, completion: confirmCompletion).textFieldStyle()
+                    PTCardName().textFieldStyle()
+                    HStack{
+                        PTCardNumber().combinedStyle()
+                            .frame(minWidth: 190)
+                        PTExp().combinedStyle()
+                            .frame(minWidth: 90)
+                        PTCvv().combinedStyle()
+                            .frame(maxWidth: 50)
+                    }.padding(.leading, 12)
+                    .padding(.top, 12)
+                    .padding(.bottom, 12)
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))
+                    Spacer().frame(height: 25)
+                    PTButton(amount: 200, text: "PAY $54.20", completion: confirmCompletion).buttonStyle()
                     }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
@@ -122,22 +189,31 @@ struct ContentView: View {
                     PTAchAccountNumber().textFieldStyle()
                     PTAchRoutingNumber().textFieldStyle()
                     PTAchAccountType()
-                    PTButton(amount: 200, completion: confirmCompletion).textFieldStyle()
-                }.environmentObject(ptObject)
+                    Spacer().frame(height: 25)
+                    PTButton(amount: 200, text: "PAY $54.20", completion: confirmCompletion).buttonStyle()
+                        .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
+                    }.environmentObject(ptObject)
                 }
+            }.padding()
+            .frame(
+                  minWidth: 0,
+                  maxWidth: .infinity,
+                  minHeight: 0,
+                  maxHeight: .infinity,
+                  alignment: .topLeading
+                )
+            .alert(isPresented: $showingConfirmation) {
+                Alert(title: Text("Confirm:"),
+                      message: Text(confirmationMessage),
+                      primaryButton: .default(Text("Confirm"),
+                                              action: {
+                    ptObject.capture(completion: confirmCompletion)
+                }), secondaryButton: .cancel(Text("Cancel"), action: {
+                    ptObject.cancel()
+                }))
             }
-        .alert(isPresented: $showingConfirmation) {
-            Alert(title: Text("Confirm:"),
-                  message: Text(confirmationMessage),
-                  primaryButton: .default(Text("Confirm"),
-                                          action: {
-                ptObject.capture(completion: confirmCompletion)
-            }), secondaryButton: .cancel(Text("Cancel"), action: {
-                ptObject.cancel()
-            }))
-        }
         HStack {
-            
+            Spacer().frame(height: 50)
         }
         .alert(isPresented: $showingMessage) {
             Alert(title: Text("Success!"),

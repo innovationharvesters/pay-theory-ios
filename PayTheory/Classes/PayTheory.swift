@@ -277,7 +277,11 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
 /// (Card Number, Expiration Date, and CVV)
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
-///
+///  - Parameters:
+///   - amount: Payment amount that should be charged to the card in cents.
+///   - text: String that will be the label for the button.
+///   - completion: Function that will handle the result of the
+///   tokenization response once it has been returned from the server.
 public struct PTButton: View {
     @EnvironmentObject var card: PaymentCard
     @EnvironmentObject var envBuyer: Buyer
@@ -344,6 +348,7 @@ public struct PTButton: View {
                 }
         }
         .disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
+        .frame(maxWidth: .infinity)
     }
 }
 

@@ -13,6 +13,7 @@
 		9386AE362552ED63009DEE33 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9386AE352552ED63009DEE33 /* ContentView.swift */; };
 		9386AE382552ED68009DEE33 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9386AE372552ED68009DEE33 /* Assets.xcassets */; };
 		9386AE3B2552ED68009DEE33 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9386AE3A2552ED68009DEE33 /* Preview Assets.xcassets */; };
+		93BD65D6263A41C000BD2AFA /* Arial Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 93BD65D5263A41C000BD2AFA /* Arial Black.ttf */; };
 		F214BDAB6FA08472F13EAA18 /* Pods_PayTheory_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E3096C4C08782731BA16C18 /* Pods_PayTheory_Tests.framework */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,7 @@
 		9386AE372552ED68009DEE33 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9386AE3A2552ED68009DEE33 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		9386AE3C2552ED68009DEE33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		93BD65D5263A41C000BD2AFA /* Arial Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Arial Black.ttf"; sourceTree = "<group>"; };
 		93E7AFBA785C86AA4B763044 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		9E3096C4C08782731BA16C18 /* Pods_PayTheory_Tests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PayTheory_Tests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B51D9BAC699F6146139F713C /* Pods-PayTheory Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PayTheory Example.debug.xcconfig"; path = "Target Support Files/Pods-PayTheory Example/Pods-PayTheory Example.debug.xcconfig"; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			children = (
 				9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */,
 				9386AE352552ED63009DEE33 /* ContentView.swift */,
+				93BD65D5263A41C000BD2AFA /* Arial Black.ttf */,
 				9386AE372552ED68009DEE33 /* Assets.xcassets */,
 				9386AE3C2552ED68009DEE33 /* Info.plist */,
 				9386AE392552ED68009DEE33 /* Preview Content */,
@@ -214,7 +217,7 @@
 					};
 					9386AE302552ED63009DEE33 = {
 						CreatedOnToolsVersion = 12.1;
-						DevelopmentTeam = A66JS763VS;
+						DevelopmentTeam = SFM8A4Z9K3;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -252,6 +255,7 @@
 			files = (
 				9386AE3B2552ED68009DEE33 /* Preview Assets.xcassets in Resources */,
 				9386AE382552ED68009DEE33 /* Assets.xcassets in Resources */,
+				93BD65D6263A41C000BD2AFA /* Arial Black.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,11 +293,13 @@
 				"${PODS_ROOT}/Target Support Files/Pods-PayTheory Example/Pods-PayTheory Example-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
 				"${BUILT_PRODUCTS_DIR}/PayTheory/PayTheory.framework",
+				"${BUILT_PRODUCTS_DIR}/Sodium/Sodium.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PayTheory.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Sodium.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -533,7 +539,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_ASSET_PATHS = "\"PayTheory Example/Preview Content\"";
-				DEVELOPMENT_TEAM = A66JS763VS;
+				DEVELOPMENT_TEAM = SFM8A4Z9K3;
 				ENABLE_PREVIEWS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "PayTheory Example/Info.plist";
@@ -541,7 +547,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.paytheory.SDK-Example";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.austinzani.PayTheory-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
@@ -563,14 +569,14 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"PayTheory Example/Preview Content\"";
-				DEVELOPMENT_TEAM = A66JS763VS;
+				DEVELOPMENT_TEAM = SFM8A4Z9K3;
 				ENABLE_PREVIEWS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "PayTheory Example/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.paytheory.SDK-Example";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.austinzani.PayTheory-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
