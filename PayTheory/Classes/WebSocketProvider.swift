@@ -23,6 +23,7 @@ public class WebSocketProvider: NSObject {
         let socketUrl = "wss://\(environment).secure.socket.paytheorystudy.com/?pt_token=\(ptToken)"
         handler = _handler
         webSocket = urlSession.webSocketTask(with: URL(string:socketUrl)!)
+        print("socket connected")
         self.webSocket!.resume()
     }
     

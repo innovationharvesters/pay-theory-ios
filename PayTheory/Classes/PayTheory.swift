@@ -79,11 +79,10 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             let provider = WebSocketProvider()
             session = WebSocketSession()
             session!.prepare(_provider: provider, _handler: self)
-            session!.open(ptToken:ptToken!)
+            session!.open(ptToken:ptToken!, environment: environment)
             let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-                
         }
            
     }
@@ -143,7 +142,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     }
     
     @objc func appCameToForeground() {
-        getToken(apiKey: apiKey, endpoint: "finix", completion: ptTokenClosure)
+        getToken(apiKey: apiKey, endpoint: environment, completion: ptTokenClosure)
     }
     
     func ptTokenClosure(response: Result<[String: AnyObject], Error>) {
@@ -277,7 +276,11 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
 /// (Card Number, Expiration Date, and CVV)
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
-///
+///  - Parameters:
+///   - amount: Payment amount that should be charged to the card in cents.
+///   - text: String that will be the label for the button.
+///   - completion: Function that will handle the result of the
+///   tokenization response once it has been returned from the server.
 public struct PTButton: View {
     @EnvironmentObject var card: PaymentCard
     @EnvironmentObject var envBuyer: Buyer
@@ -290,10 +293,6 @@ public struct PTButton: View {
     var text: String
     var buyer: Buyer?
     var onClick: () -> Void
-    
-    func defaultClick() {
-        print("PTButton has been clicked")
-    }
     
     /// Button that allows a payment to be tokenized once it has the necessary data
     /// (Card Number, Expiration Date, and CVV)
@@ -316,6 +315,7 @@ public struct PTButton: View {
     
     public var body: some View {
         Button(text) {
+                print("Clicked")
                 onClick()
                 if let identity = buyer {
                     if card.isValid {

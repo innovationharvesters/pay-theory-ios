@@ -214,7 +214,7 @@
 					};
 					9386AE302552ED63009DEE33 = {
 						CreatedOnToolsVersion = 12.1;
-						DevelopmentTeam = A66JS763VS;
+						DevelopmentTeam = SFM8A4Z9K3;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -535,7 +535,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_ASSET_PATHS = "\"PayTheory Example/Preview Content\"";
-				DEVELOPMENT_TEAM = A66JS763VS;
+				DEVELOPMENT_TEAM = SFM8A4Z9K3;
 				ENABLE_PREVIEWS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "PayTheory Example/Info.plist";
@@ -543,7 +543,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.paytheory.SDK-Example";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.austinzani.PayTheory-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
@@ -565,14 +565,14 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"PayTheory Example/Preview Content\"";
-				DEVELOPMENT_TEAM = A66JS763VS;
+				DEVELOPMENT_TEAM = SFM8A4Z9K3;
 				ENABLE_PREVIEWS = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				INFOPLIST_FILE = "PayTheory Example/Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.paytheory.SDK-Example";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.austinzani.PayTheory-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
