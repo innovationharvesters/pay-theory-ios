@@ -79,11 +79,10 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             let provider = WebSocketProvider()
             session = WebSocketSession()
             session!.prepare(_provider: provider, _handler: self)
-            session!.open(ptToken:ptToken!)
+            session!.open(ptToken:ptToken!, environment: environment)
             let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-                
         }
            
     }
@@ -143,7 +142,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     }
     
     @objc func appCameToForeground() {
-        getToken(apiKey: apiKey, endpoint: "finix", completion: ptTokenClosure)
+        getToken(apiKey: apiKey, endpoint: environment, completion: ptTokenClosure)
     }
     
     func ptTokenClosure(response: Result<[String: AnyObject], Error>) {
@@ -295,10 +294,6 @@ public struct PTButton: View {
     var buyer: Buyer?
     var onClick: () -> Void
     
-    func defaultClick() {
-        print("PTButton has been clicked")
-    }
-    
     /// Button that allows a payment to be tokenized once it has the necessary data
     /// (Card Number, Expiration Date, and CVV)
     /// 
@@ -320,6 +315,7 @@ public struct PTButton: View {
     
     public var body: some View {
         Button(text) {
+                print("Clicked")
                 onClick()
                 if let identity = buyer {
                     if card.isValid {
@@ -348,7 +344,6 @@ public struct PTButton: View {
                 }
         }
         .disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
-        .frame(maxWidth: .infinity)
     }
 }
 

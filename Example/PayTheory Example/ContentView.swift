@@ -30,6 +30,7 @@ struct CombinedTextField: ViewModifier {
 struct ButtonField: ViewModifier {
     func body(content: Content) -> some View {
         content
+            .frame(maxWidth: .infinity)
             .padding(12)
             .font(Font.custom("Trebuchet MS", size: 15))
             .background(LinearGradient(gradient: Gradient(colors: [Color(hex: "#7C2CDD"), Color(hex: "#DB367D")]), startPoint: .leading, endPoint: .trailing ))
@@ -92,10 +93,10 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let ptObject = PayTheory(apiKey: "pt-sandbox-finix-3f77175085e9834c6f514a77eddfdb87",
+    let ptObject = PayTheory(apiKey: "pt-sandbox",
                                          tags: ["Test Tag": "Test Value"],
-                                         fee_mode: .SURCHARGE,
-                                         dev: "finix")
+                                         fee_mode: .SERVICE_FEE,
+                                         dev: "")
 
     let buyer = Buyer(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
     @State private var type = 0
@@ -181,7 +182,7 @@ struct ContentView: View {
                     .padding(.bottom, 12)
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))
                     Spacer().frame(height: 25)
-                    PTButton(amount: 200, text: "PAY $54.20", completion: confirmCompletion).buttonStyle()
+                        PTButton(amount: 200, text: "PAY $54.20", completion: completion).buttonStyle()
                     }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
@@ -190,11 +191,12 @@ struct ContentView: View {
                     PTAchRoutingNumber().textFieldStyle()
                     PTAchAccountType()
                     Spacer().frame(height: 25)
-                    PTButton(amount: 200, text: "PAY $54.20", completion: confirmCompletion).buttonStyle()
+                    PTButton(amount: 200, text: "PAY $54.20", completion: completion).buttonStyle()
                         .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
                     }.environmentObject(ptObject)
                 }
-            }.padding()
+            }
+            .padding()
             .frame(
                   minWidth: 0,
                   maxWidth: .infinity,
