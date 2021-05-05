@@ -25,14 +25,14 @@ PayTheory is available through [CocoaPods](https://cocoapods.org). To install
 the most recent stable build, simply add the following line to your Podfile:
 
 ```ruby
-pod 'PayTheory', :git => 'https://github.com/pay-theory/pay-theory-ios', :branch => 'zippslip'
+pod 'PayTheory'
 ```
 
 Check our page on [CocoaPods](https://cocoapods.org) for the most recent version and 
 development versions, to use a specific or development version add it to the line like so:
 
 ```ruby
-pod 'PayTheory', :git => 'https://github.com/pay-theory/pay-theory-ios', :branch => 'dev' 
+pod 'PayTheory', :git => 'https://github.com/pay-theory/pay-theory-ios', :branch => 'zippslip' 
 
 ```
 
