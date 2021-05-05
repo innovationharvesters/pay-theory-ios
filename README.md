@@ -32,7 +32,8 @@ Check our page on [CocoaPods](https://cocoapods.org) for the most recent version
 development versions, to use a specific or development version add it to the line like so:
 
 ```ruby
-pod 'PayTheory', '~> RELEASE' 
+pod 'PayTheory', '~> RELEASE'
+
 ```
 
 _replace RELEASE with the number below_

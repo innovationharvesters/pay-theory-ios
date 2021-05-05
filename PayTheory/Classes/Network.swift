@@ -15,7 +15,7 @@ enum ResponseError: String, Error {
 }
 
 func handleMapResponse(response: AFDataResponse<Any>, completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
-                        
+    print(response)
                         guard response.error == nil else {
                                 print("Call failed")
                                 if let value = response.value as? [String: AnyObject] {
@@ -55,8 +55,8 @@ func getToken(apiKey: String,
               completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
     
     let url = endpoint == "prod" ?
-        "https://tags.api.paytheory.com/pt-token" :
-        "https://\(endpoint).tags.api.paytheorystudy.com/pt-token"
+        "https://token.service.paytheory.com/token" :
+        "https://\(endpoint).token.service.paytheorystudy.com/token"
     
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,
