@@ -32,7 +32,7 @@ Check our page on [CocoaPods](https://cocoapods.org) for the most recent version
 development versions, to use a specific or development version add it to the line like so:
 
 ```ruby
-pod 'PayTheory', :git => 'https://github.com/pay-theory/pay-theory-ios', :branch => 'zippslip' 
+pod 'PayTheory', '~> RELEASE'
 
 ```
 
