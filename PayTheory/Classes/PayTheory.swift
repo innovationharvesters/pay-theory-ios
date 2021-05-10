@@ -315,7 +315,6 @@ public struct PTButton: View {
     
     public var body: some View {
         Button(text) {
-                print("Clicked")
                 onClick()
                 if let identity = buyer {
                     if card.isValid {
