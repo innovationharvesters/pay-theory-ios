@@ -107,12 +107,12 @@ func stringify(jsonDictionary: [String: Any]) -> String {
 func convertBytesToString(bytes: Bytes) -> String {
     let data = NSData(bytes: bytes, length: bytes.count)
     let base64Data = data.base64EncodedData(options: NSData.Base64EncodingOptions.endLineWithLineFeed)
-    let newData = NSData(base64Encoded: base64Data, options: NSData.Base64DecodingOptions.ignoreUnknownCharacters)!
+    let newData = NSData(base64Encoded: base64Data, options: NSData.Base64DecodingOptions.ignoreUnknownCharacters) ?? NSData()
     return newData.base64EncodedString()
 }
 
 func convertStringToByte(string: String) -> Bytes {
-    return [UInt8](NSData(base64Encoded: string, options: NSData.Base64DecodingOptions(rawValue: 0))!)
+    return [UInt8](NSData(base64Encoded: string, options: NSData.Base64DecodingOptions(rawValue: 0)) ?? NSData())
 }
 
 func parseError(errors: [String: AnyObject]) -> String {

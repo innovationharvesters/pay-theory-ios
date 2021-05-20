@@ -7,8 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		607FACEC1AFB9204008FA782 /* Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 607FACEB1AFB9204008FA782 /* Tests.swift */; };
 		73D983F65CBD5B1350D39F8B /* Pods_PayTheory_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 662216D0F4A82C6F2C164E3D /* Pods_PayTheory_Example.framework */; };
+		9384169B2652DF1A00746980 /* DataModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9384169A2652DF1A00746980 /* DataModelTests.swift */; };
+		9384169D2652E13400746980 /* NetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9384169C2652E13400746980 /* NetworkTests.swift */; };
+		9384169F2652E86700746980 /* ViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9384169E2652E86600746980 /* ViewTests.swift */; };
+		938416A12652E9AE00746980 /* PayTheoryClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938416A02652E9AE00746980 /* PayTheoryClassTests.swift */; };
+		938416A52652F76900746980 /* EncryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938416A42652F76900746980 /* EncryptionTests.swift */; };
+		938416A72652F86400746980 /* FunctionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938416A62652F86400746980 /* FunctionTests.swift */; };
+		938416A926543FC400746980 /* TestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 938416A826543FC400746980 /* TestData.swift */; };
 		9386AE342552ED63009DEE33 /* PayTheory_ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */; };
 		9386AE362552ED63009DEE33 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9386AE352552ED63009DEE33 /* ContentView.swift */; };
 		9386AE382552ED68009DEE33 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9386AE372552ED68009DEE33 /* Assets.xcassets */; };
@@ -33,8 +39,14 @@
 		50805897EFEA62C2C6584DF1 /* LICENSE */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		607FACE51AFB9204008FA782 /* PayTheory_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PayTheory_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACEA1AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		607FACEB1AFB9204008FA782 /* Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Tests.swift; path = ../../Tests.swift; sourceTree = "<group>"; };
 		662216D0F4A82C6F2C164E3D /* Pods_PayTheory_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PayTheory_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		9384169A2652DF1A00746980 /* DataModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModelTests.swift; sourceTree = "<group>"; };
+		9384169C2652E13400746980 /* NetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTests.swift; sourceTree = "<group>"; };
+		9384169E2652E86600746980 /* ViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewTests.swift; sourceTree = "<group>"; };
+		938416A02652E9AE00746980 /* PayTheoryClassTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayTheoryClassTests.swift; sourceTree = "<group>"; };
+		938416A42652F76900746980 /* EncryptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncryptionTests.swift; sourceTree = "<group>"; };
+		938416A62652F86400746980 /* FunctionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FunctionTests.swift; sourceTree = "<group>"; };
+		938416A826543FC400746980 /* TestData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestData.swift; sourceTree = "<group>"; };
 		9386AE312552ED63009DEE33 /* PayTheory Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "PayTheory Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PayTheory_ExampleApp.swift; path = ../../PayTheory_ExampleApp.swift; sourceTree = "<group>"; };
 		9386AE352552ED63009DEE33 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -100,8 +112,14 @@
 		607FACE81AFB9204008FA782 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				607FACEB1AFB9204008FA782 /* Tests.swift */,
+				9384169A2652DF1A00746980 /* DataModelTests.swift */,
+				938416A42652F76900746980 /* EncryptionTests.swift */,
+				938416A62652F86400746980 /* FunctionTests.swift */,
+				9384169C2652E13400746980 /* NetworkTests.swift */,
+				938416A02652E9AE00746980 /* PayTheoryClassTests.swift */,
+				9384169E2652E86600746980 /* ViewTests.swift */,
 				607FACE91AFB9204008FA782 /* Supporting Files */,
+				938416A826543FC400746980 /* TestData.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -209,6 +227,7 @@
 				TargetAttributes = {
 					607FACE41AFB9204008FA782 = {
 						CreatedOnToolsVersion = 6.3.1;
+						DevelopmentTeam = SFM8A4Z9K3;
 						LastSwiftMigration = 1210;
 						TestTargetID = 9386AE302552ED63009DEE33;
 					};
@@ -349,7 +368,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				607FACEC1AFB9204008FA782 /* Tests.swift in Sources */,
+				9384169D2652E13400746980 /* NetworkTests.swift in Sources */,
+				938416A72652F86400746980 /* FunctionTests.swift in Sources */,
+				938416A52652F76900746980 /* EncryptionTests.swift in Sources */,
+				9384169B2652DF1A00746980 /* DataModelTests.swift in Sources */,
+				938416A12652E9AE00746980 /* PayTheoryClassTests.swift in Sources */,
+				938416A926543FC400746980 /* TestData.swift in Sources */,
+				9384169F2652E86700746980 /* ViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,6 +509,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2346F69CE2A2F650709B18CE /* Pods-PayTheory_Tests.debug.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = SFM8A4Z9K3;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 					"$(inherited)",

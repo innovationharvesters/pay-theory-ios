@@ -93,10 +93,9 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let ptObject = PayTheory(apiKey: "pt-sandbox",
+    let ptObject = PayTheory(apiKey: "pt",
                                          tags: ["Test Tag": "Test Value"],
-                                         fee_mode: .SERVICE_FEE,
-                                         dev: "")
+                                         fee_mode: .SERVICE_FEE)
 
     let buyer = Buyer(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
     @State private var type = 0
@@ -169,20 +168,27 @@ struct ContentView: View {
                 
                 if type == 0 {
                     PTForm {
-                    PTCardName().textFieldStyle()
-                    HStack{
-                        PTCardNumber().combinedStyle()
-                            .frame(minWidth: 190)
-                        PTExp().combinedStyle()
-                            .frame(minWidth: 90)
-                        PTCvv().combinedStyle()
-                            .frame(maxWidth: 50)
-                    }.padding(.leading, 12)
-                    .padding(.top, 12)
-                    .padding(.bottom, 12)
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))
+                        PTCardName().textFieldStyle()
+                        HStack{
+                            PTCardNumber().combinedStyle()
+                                .frame(minWidth: 190)
+                            PTExp().combinedStyle()
+                                .frame(minWidth: 90)
+                            PTCvv().combinedStyle()
+                                .frame(maxWidth: 50)
+                        }.padding(.leading, 12)
+                        .padding(.top, 12)
+                        .padding(.bottom, 12)
+                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))
+                        PTCardLineOne().textFieldStyle()
+                        PTCardLineTwo().textFieldStyle()
+                        PTCardCity().textFieldStyle()
+                        PTCardState().textFieldStyle()
+                        PTCardZip().textFieldStyle()
+                        PTCardCountry().textFieldStyle()
+
                     Spacer().frame(height: 25)
-                        PTButton(amount: 200, text: "PAY $54.20", completion: completion).buttonStyle()
+                        PTButton(amount: 1000, text: "PAY $54.20", completion: completion).buttonStyle()
                     }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
@@ -191,7 +197,7 @@ struct ContentView: View {
                     PTAchRoutingNumber().textFieldStyle()
                     PTAchAccountType()
                     Spacer().frame(height: 25)
-                    PTButton(amount: 200, text: "PAY $54.20", completion: completion).buttonStyle()
+                    PTButton(amount: 1000, text: "PAY $54.20", completion: completion).buttonStyle()
                         .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
                     }.environmentObject(ptObject)
                 }
