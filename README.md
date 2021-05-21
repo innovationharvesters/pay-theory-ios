@@ -33,7 +33,6 @@ development versions, to use a specific or development version add it to the lin
 
 ```ruby
 pod 'PayTheory', '~> RELEASE'
-
 ```
 
 _replace RELEASE with the number below_
@@ -64,16 +63,6 @@ let apiKey = 'your-api-key'
 let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
 
 let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE)
-```
-
-### Wrapping the content view
-
-The content view in which the PayTheory object will be used needs to be wrapped with the PTForm component. You should pass the PayTheory object as an `environmentObject` to the PTForm.
-
-```swift
-PTForm{
-    ContentView()
-}.environmentObject(pt)
 ```
 
 ### Credit Card Text Fields
@@ -151,7 +140,20 @@ func completion(result: Result<[String: Any], FailureResponse>){
 }
 
 ...
-PTButton(amount: 5000, completion: completion)
+PTButton(amount: amount, completion: completion)
+```
+
+### Wrapping your PayTheory Fields and Button
+
+The PayTheory Fields and Button you will be using need to be wrapped with the PTForm component. You should pass the PayTheory object as an `environmentObject` to the PTForm.
+
+```swift
+PTForm{
+    PTCardNumber()
+    PTExp()
+    PTCvv()
+    PTButton(amount: amount, completion: completion)
+}.environmentObject(pt)
 ```
 
 ### Capture or Cancel an Authorization
