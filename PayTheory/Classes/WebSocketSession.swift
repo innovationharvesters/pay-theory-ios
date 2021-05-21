@@ -24,7 +24,7 @@ public class WebSocketSession: NSObject {
         self.listener?.prepare(_session: self)
     }
     
-    func open(ptToken: String, environment: String = "finix") {
+    func open(ptToken: String, environment: String) {
 
         self.provider!.startSocket(environment: environment, ptToken: ptToken, listener: self.listener!, _handler: self.handler!)
         

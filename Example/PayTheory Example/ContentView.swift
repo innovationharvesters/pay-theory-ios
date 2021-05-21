@@ -81,7 +81,6 @@ extension View {
 }
 
 func makePt(payTheory: PayTheory) -> PayTheory {
-    payTheory.environment = "finix"
     return payTheory
 }
 

@@ -342,7 +342,7 @@ public struct PTButton: View {
                     }
                 }
         }
-        .disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
+        //.disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
     }
 }
 
