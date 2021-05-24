@@ -81,7 +81,6 @@ extension View {
 }
 
 func makePt(payTheory: PayTheory) -> PayTheory {
-    payTheory.environment = "finix"
     return payTheory
 }
 
@@ -94,8 +93,9 @@ struct ContentView: View {
     @State private var showingConfirmation = false
     @State private var showingMessage = false
     let ptObject = PayTheory(apiKey: "pt",
-                                         tags: ["Test Tag": "Test Value"],
-                                         fee_mode: .SERVICE_FEE)
+                            tags: ["Test Tag": "Test Value"],
+                            fee_mode: .SERVICE_FEE)
+
 
     let buyer = Buyer(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
     @State private var type = 0
