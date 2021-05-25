@@ -115,7 +115,8 @@
       buildConfiguration = "Debug">
    </AnalyzeAction>
    <ArchiveAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
+      customArchiveName = "PayTheory-Example"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>

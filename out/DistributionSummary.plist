@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayTheory Example.ipa</key>
+	<array>
+		<dict>
+			<key>architectures</key>
+			<array>
+				<string>arm64</string>
+			</array>
+			<key>certificate</key>
+			<dict>
+				<key>SHA1</key>
+				<string>81D7D672EF38A76B584DB8C78EDEF61B8A07645F</string>
+				<key>dateExpires</key>
+				<string>2/18/22</string>
+				<key>type</key>
+				<string>Apple Development</string>
+			</dict>
+			<key>embeddedBinaries</key>
+			<array>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>81D7D672EF38A76B584DB8C78EDEF61B8A07645F</string>
+						<key>dateExpires</key>
+						<string>2/18/22</string>
+						<key>type</key>
+						<string>Apple Development</string>
+					</dict>
+					<key>name</key>
+					<string>Alamofire.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>SFM8A4Z9K3</string>
+						<key>name</key>
+						<string></string>
+					</dict>
+				</dict>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>81D7D672EF38A76B584DB8C78EDEF61B8A07645F</string>
+						<key>dateExpires</key>
+						<string>2/18/22</string>
+						<key>type</key>
+						<string>Apple Development</string>
+					</dict>
+					<key>name</key>
+					<string>PayTheory.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>SFM8A4Z9K3</string>
+						<key>name</key>
+						<string></string>
+					</dict>
+				</dict>
+				<dict>
+					<key>architectures</key>
+					<array>
+						<string>arm64</string>
+					</array>
+					<key>certificate</key>
+					<dict>
+						<key>SHA1</key>
+						<string>81D7D672EF38A76B584DB8C78EDEF61B8A07645F</string>
+						<key>dateExpires</key>
+						<string>2/18/22</string>
+						<key>type</key>
+						<string>Apple Development</string>
+					</dict>
+					<key>name</key>
+					<string>Sodium.framework</string>
+					<key>team</key>
+					<dict>
+						<key>id</key>
+						<string>SFM8A4Z9K3</string>
+						<key>name</key>
+						<string></string>
+					</dict>
+				</dict>
+			</array>
+			<key>entitlements</key>
+			<dict>
+				<key>application-identifier</key>
+				<string>SFM8A4Z9K3.com.austinzani.PayTheory-Example</string>
+				<key>com.apple.developer.team-identifier</key>
+				<string>SFM8A4Z9K3</string>
+				<key>get-task-allow</key>
+				<true/>
+				<key>keychain-access-groups</key>
+				<array>
+					<string>SFM8A4Z9K3.com.austinzani.PayTheory-Example</string>
+				</array>
+			</dict>
+			<key>name</key>
+			<string>PayTheory Example.app</string>
+			<key>profile</key>
+			<dict>
+				<key>UUID</key>
+				<string>7f4d0b43-d0be-4b2c-937f-5ce90a208ab6</string>
+				<key>name</key>
+				<string>iOS Team Provisioning Profile: com.austinzani.PayTheory-Example</string>
+			</dict>
+			<key>team</key>
+			<dict>
+				<key>id</key>
+				<string>SFM8A4Z9K3</string>
+				<key>name</key>
+				<string></string>
+			</dict>
+		</dict>
+	</array>
+</dict>
+</plist>
