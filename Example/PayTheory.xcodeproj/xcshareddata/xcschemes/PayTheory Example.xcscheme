@@ -116,7 +116,7 @@
    </AnalyzeAction>
    <ArchiveAction
       buildConfiguration = "Debug"
-      customArchiveName = "PayTheory-Example"
+      customArchiveName = "PayTheory"
       revealArchiveInOrganizer = "YES">
    </ArchiveAction>
 </Scheme>
