@@ -312,7 +312,7 @@ public struct PTButton: View {
     }
     
     public var body: some View {
-        Button(text) {
+        Button {
                 onClick()
                 if let identity = buyer {
                     if card.isValid {
@@ -339,8 +339,14 @@ public struct PTButton: View {
                                                completion: completion)
                     }
                 }
+        } label: {
+            HStack {
+                Spacer()
+                Text(text)
+                Spacer()
+            }
         }
-        //.disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
+        .disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
     }
 }
 
