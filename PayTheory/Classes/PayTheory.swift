@@ -314,7 +314,7 @@ public struct PTButton: View {
     }
     
     public var body: some View {
-        Button(text) {
+        Button {
                 print("Clicked")
                 onClick()
                 if let identity = buyer {
@@ -342,8 +342,14 @@ public struct PTButton: View {
                                                completion: completion)
                     }
                 }
+        } label: {
+            HStack {
+                Spacer()
+                Text(text)
+                Spacer()
+            }
         }
-        //.disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
+        .disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
     }
 }
 
