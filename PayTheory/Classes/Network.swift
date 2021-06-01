@@ -15,7 +15,6 @@ enum ResponseError: String, Error {
 }
 
 func handleMapResponse(response: AFDataResponse<Any>, completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
-    print(response)
                         guard response.error == nil else {
                                 print("Call failed")
                                 if let value = response.value as? [String: AnyObject] {
