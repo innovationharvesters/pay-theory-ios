@@ -35,3 +35,5 @@ Carthage/Build
 #
 Pods/
 Example/Pods/
+cobertura.xml
+get.sh
