@@ -3,3 +3,4 @@ xcodebuild test -workspace ./Example/PayTheory.xcworkspace -scheme PayTheory-Exa
 slather coverage --binary-basename PayTheory -x --scheme PayTheory-Example --workspace ./Example/PayTheory.xcworkspace ./Example/PayTheory.xcodeproj
 curl -Ls https://coverage.codacy.com/get.sh > get.sh && chmod +x get.sh
 bash get.sh report -r cobertura.xml
+git push

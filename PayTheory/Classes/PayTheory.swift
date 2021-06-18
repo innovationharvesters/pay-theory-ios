@@ -60,7 +60,8 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     let service = DCAppAttestService.shared
     var apiKey: String
-    public var environment: String
+    var environment: String
+    var stage: String
     var fee_mode: FEE_MODE
     var tags: [String: Any]
     var buttonClicked = false
@@ -69,7 +70,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     private var encodedChallenge: String = ""
     private var isConnected = false
     private var passedBuyer: Buyer?
-    private var socket: URLSessionWebSocketTask!
+//    private var socket: URLSessionWebSocketTask!
     private var ptToken: String?
     private var session: WebSocketSession?
     private var attestationString: String?{
@@ -77,7 +78,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             let provider = WebSocketProvider()
             session = WebSocketSession()
             session!.prepare(_provider: provider, _handler: self)
-            session!.open(ptToken:ptToken!, environment: environment)
+            session!.open(ptToken:ptToken!, environment: environment, stage: stage)
             let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -110,6 +111,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
 
             } else if let state = dictionary["state"] {
                 transaction.transferToken = dictionary
+                print(dictionary)
                 if state as? String ?? "" == "FAILURE" {
                     transaction.completionHandler?(.failure(transaction.createFailureResponse()))
                     resetTransaction()
@@ -140,7 +142,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     }
     
     @objc func appCameToForeground() {
-        getToken(apiKey: apiKey, endpoint: environment, completion: ptTokenClosure)
+        getToken(apiKey: apiKey, environment: environment, stage: stage, completion: ptTokenClosure)
     }
     
     func ptTokenClosure(response: Result<[String: AnyObject], Error>) {
@@ -177,10 +179,14 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 fee_mode: FEE_MODE = .SERVICE_FEE) {
         
         self.apiKey = apiKey
-        
         let apiParts = apiKey.split{$0 == "-"}.map { String($0) }
-        let environmental = apiParts.count > 2 ? apiParts[2] : "demo"
-        self.environment = environmental
+        
+        if apiParts.count != 3 {
+            fatalError("API Key should be formatted '{partner}-{paytheorystage}-{number}'")
+        }
+
+        self.environment = apiParts[0]
+        self.stage = apiParts[1]
         self.fee_mode = fee_mode
         self.tags = tags
         self.envAch = BankAccount()
@@ -190,7 +196,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         self.transaction.apiKey = apiKey
         self.transaction.tags = tags
         
-        getToken(apiKey: apiKey, endpoint: environmental, completion: ptTokenClosure)
+        getToken(apiKey: apiKey, environment: self.environment, stage: self.stage, completion: ptTokenClosure)
     }
     
     @available(*, deprecated, message: "environment in init is deprecated")
@@ -222,6 +228,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         if buttonClicked == false {
             self.transaction.completionHandler = completion
             self.transaction.amount = amount
+            self.transaction.buyerOptions = buyerOptions
             buttonClicked = true
             if let creditCard = card {
                 let body = transaction.createInstrumentBody(instrument: paymentCardToDictionary(card: creditCard)) ?? ""
@@ -246,7 +253,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     func resetTransaction() {
         buttonClicked = false
         transaction.resetTransaction()
-        getToken(apiKey: apiKey, endpoint: environment, completion: ptTokenClosure)
+        getToken(apiKey: apiKey, environment: environment, stage: stage, completion: ptTokenClosure)
     }
     
     //Public function that will void the authorization and relase any funds that may be held.
@@ -302,6 +309,7 @@ public struct PTButton: View {
     ///   tokenization response once it has been returned from the server.
     public init(amount: Int,
                 text: String = "Confirm",
+                buyerOptions: Buyer?,
                 onClick: @escaping () -> Void = {return},
                 completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
         

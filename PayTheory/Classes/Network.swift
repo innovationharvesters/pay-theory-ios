@@ -50,12 +50,11 @@ func handleMapResponse(response: AFDataResponse<Any>, completion: @escaping (Res
 
 
 func getToken(apiKey: String,
-              endpoint: String,
+              environment: String,
+              stage: String,
               completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
     
-    let url = endpoint == "prod" ?
-        "https://token.service.paytheory.com/token" :
-        "https://\(endpoint).token.service.paytheorystudy.com/token"
+    let url = "https://\(environment).token.service.\(stage).com/\(environment)/token"
     
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,

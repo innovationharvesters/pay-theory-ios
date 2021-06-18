@@ -24,9 +24,9 @@ public class WebSocketSession: NSObject {
         self.listener?.prepare(_session: self)
     }
     
-    func open(ptToken: String, environment: String) {
+    func open(ptToken: String, environment: String, stage: String) {
 
-        self.provider!.startSocket(environment: environment, ptToken: ptToken, listener: self.listener!, _handler: self.handler!)
+        self.provider!.startSocket(environment: environment, stage: stage, ptToken: ptToken, listener: self.listener!, _handler: self.handler!)
         
     }
 
