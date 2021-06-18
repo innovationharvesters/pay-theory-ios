@@ -17,7 +17,6 @@ profile
 *.moved-aside
 DerivedData
 *.hmap
-*.ipa
 
 # Bundler
 .bundle
@@ -36,3 +35,5 @@ Carthage/Build
 #
 Pods/
 Example/Pods/
+cobertura.xml
+get.sh

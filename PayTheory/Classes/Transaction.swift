@@ -24,6 +24,7 @@ class Transaction: ObservableObject {
     var feeMode: FEE_MODE = .SURCHARGE
     var tags: [String: Any] = [:]
     var lastMessage: String?
+    var buyerOptions: Buyer?
     
     init() {
         self.sodium = Sodium()
@@ -51,7 +52,8 @@ class Transaction: ObservableObject {
                 "hostToken": host,
                 "sessionKey": sessionKey,
                 "timing": Date().millisecondsSince1970,
-                "payment": instrument
+                "payment": instrument,
+                "buyerOptions": buyerToDictionary(buyer: buyerOptions ?? Buyer())
             ], action: PT_INSTRUMENT)
         } else {
             return nil

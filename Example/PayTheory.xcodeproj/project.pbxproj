@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		73D983F65CBD5B1350D39F8B /* Pods_PayTheory_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 662216D0F4A82C6F2C164E3D /* Pods_PayTheory_Example.framework */; };
+		936B0566265EE684000857E5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9386AE352552ED63009DEE33 /* ContentView.swift */; };
+		936B0567265EE689000857E5 /* PayTheory_ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */; };
 		9384169B2652DF1A00746980 /* DataModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9384169A2652DF1A00746980 /* DataModelTests.swift */; };
 		9384169D2652E13400746980 /* NetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9384169C2652E13400746980 /* NetworkTests.swift */; };
 		9384169F2652E86700746980 /* ViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9384169E2652E86600746980 /* ViewTests.swift */; };
@@ -370,7 +372,9 @@
 			files = (
 				9384169D2652E13400746980 /* NetworkTests.swift in Sources */,
 				938416A72652F86400746980 /* FunctionTests.swift in Sources */,
+				936B0566265EE684000857E5 /* ContentView.swift in Sources */,
 				938416A52652F76900746980 /* EncryptionTests.swift in Sources */,
+				936B0567265EE689000857E5 /* PayTheory_ExampleApp.swift in Sources */,
 				9384169B2652DF1A00746980 /* DataModelTests.swift in Sources */,
 				938416A12652E9AE00746980 /* PayTheoryClassTests.swift in Sources */,
 				938416A926543FC400746980 /* TestData.swift in Sources */,
@@ -509,6 +513,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 2346F69CE2A2F650709B18CE /* Pods-PayTheory_Tests.debug.xcconfig */;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				DEVELOPMENT_TEAM = SFM8A4Z9K3;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
@@ -558,6 +563,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_ASSET_PATHS = "\"PayTheory Example/Preview Content\"";
@@ -571,6 +577,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.austinzani.PayTheory-Example";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -615,7 +622,7 @@
 				607FACEE1AFB9204008FA782 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		607FACF21AFB9204008FA782 /* Build configuration list for PBXNativeTarget "PayTheory_Tests" */ = {
 			isa = XCConfigurationList;
@@ -624,7 +631,7 @@
 				607FACF41AFB9204008FA782 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		9386AE3F2552ED68009DEE33 /* Build configuration list for PBXNativeTarget "PayTheory Example" */ = {
 			isa = XCConfigurationList;
@@ -633,7 +640,7 @@
 				9386AE3E2552ED68009DEE33 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};

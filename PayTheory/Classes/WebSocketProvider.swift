@@ -18,9 +18,9 @@ public class WebSocketProvider: NSObject {
         super.init()
     }
     
-    func startSocket(environment:String, ptToken:String, listener: WebSocketListener, _handler: WebSocketProtocol) {
+    func startSocket(environment:String, stage: String, ptToken:String, listener: WebSocketListener, _handler: WebSocketProtocol) {
         let urlSession = URLSession(configuration: .default, delegate: listener, delegateQueue: OperationQueue())
-        let socketUrl = "wss://\(environment).secure.socket.paytheorystudy.com/?pt_token=\(ptToken)"
+        let socketUrl = "wss://\(environment).secure.socket.\(stage).com/\(environment)/?pt_token=\(ptToken)"
         handler = _handler
         webSocket = urlSession.webSocketTask(with: URL(string:socketUrl)!)
         print("socket connected")

@@ -167,3 +167,26 @@ public struct PTCardCountry: View {
         TextField("Country", text: $card.address.country ?? "")
     }
 }
+
+/// TextField that can be used to capture the Country for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCombinedCard: View {
+    public init() {
+        
+    }
+    
+    public var body: some View {
+        HStack(spacing: 0) {
+            PTCardNumber()
+                .frame(width: UIScreen.main.bounds.height < UIScreen.main.bounds.width ? UIScreen.main.bounds.height * 0.6 : UIScreen.main.bounds.width * 0.6)
+            Spacer()
+            PTExp()
+                .frame(width: UIScreen.main.bounds.height < UIScreen.main.bounds.width ? UIScreen.main.bounds.height * 0.18 : UIScreen.main.bounds.width * 0.18)
+            Spacer()
+            PTCvv()
+                .frame(width: UIScreen.main.bounds.height < UIScreen.main.bounds.width ? UIScreen.main.bounds.height * 0.18 : UIScreen.main.bounds.width * 0.18)
+        }
+    }
+}
