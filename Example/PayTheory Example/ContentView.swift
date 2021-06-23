@@ -92,8 +92,9 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let ptObject = PayTheory(apiKey: "pt",
-                            tags: ["Test Tag": "Test Value"],
+    let ptObject = PayTheory(apiKey: "",
+//                            tags: ["pay-theory-account-code": "iOS",
+//                                   "pay-theory-reference": "card"],
                             fee_mode: .SERVICE_FEE)
 
 
@@ -180,15 +181,15 @@ struct ContentView: View {
                         .padding(.top, 12)
                         .padding(.bottom, 12)
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))
-                        PTCardLineOne().textFieldStyle()
-                        PTCardLineTwo().textFieldStyle()
-                        PTCardCity().textFieldStyle()
-                        PTCardState().textFieldStyle()
-                        PTCardZip().textFieldStyle()
-                        PTCardCountry().textFieldStyle()
+//                        PTCardLineOne().textFieldStyle()
+//                        PTCardLineTwo().textFieldStyle()
+//                        PTCardCity().textFieldStyle()
+//                        PTCardState().textFieldStyle()
+//                        PTCardZip().textFieldStyle()
+//                        PTCardCountry().textFieldStyle()
 
                     Spacer().frame(height: 25)
-                        PTButton(amount: 1000, text: "PAY $54.20", completion: completion).buttonStyle()
+                        PTButton(amount: 1250, text: "PAY $54.20", buyerOptions: buyer, completion: completion).buttonStyle()
                     }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
