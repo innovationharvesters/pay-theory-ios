@@ -309,7 +309,7 @@ public struct PTButton: View {
     ///   tokenization response once it has been returned from the server.
     public init(amount: Int,
                 text: String = "Confirm",
-                buyerOptions: Buyer?,
+                buyerOptions: Buyer? = nil,
                 onClick: @escaping () -> Void = {return},
                 completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
         
@@ -317,6 +317,7 @@ public struct PTButton: View {
         self.amount = amount
         self.text = text
         self.onClick = onClick
+        self.buyer = buyerOptions
     }
     
     public var body: some View {
