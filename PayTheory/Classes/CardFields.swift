@@ -178,15 +178,17 @@ public struct PTCombinedCard: View {
     }
     
     public var body: some View {
-        HStack(spacing: 0) {
+        HStack() {
             PTCardNumber()
-                .frame(width: UIScreen.main.bounds.height < UIScreen.main.bounds.width ? UIScreen.main.bounds.height * 0.6 : UIScreen.main.bounds.width * 0.6)
+                .frame(minWidth: 200)
             Spacer()
-            PTExp()
-                .frame(width: UIScreen.main.bounds.height < UIScreen.main.bounds.width ? UIScreen.main.bounds.height * 0.18 : UIScreen.main.bounds.width * 0.18)
+            HStack {
+                PTExp()
+                    .frame(maxWidth: 90)
             Spacer()
-            PTCvv()
-                .frame(width: UIScreen.main.bounds.height < UIScreen.main.bounds.width ? UIScreen.main.bounds.height * 0.18 : UIScreen.main.bounds.width * 0.18)
+                PTCvv()
+                    .frame(maxWidth: 60)
+            }
         }
     }
 }

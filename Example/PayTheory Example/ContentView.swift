@@ -170,14 +170,9 @@ struct ContentView: View {
                 if type == 0 {
                     PTForm {
                         PTCardName().textFieldStyle()
-                        HStack{
-                            PTCardNumber().combinedStyle()
-                                .frame(minWidth: 190)
-                            PTExp().combinedStyle()
-                                .frame(minWidth: 90)
-                            PTCvv().combinedStyle()
-                                .frame(maxWidth: 50)
-                        }.padding(.leading, 12)
+                        
+                        PTCombinedCard()
+                        .padding(.leading, 12)
                         .padding(.top, 12)
                         .padding(.bottom, 12)
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))

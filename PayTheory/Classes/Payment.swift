@@ -93,7 +93,9 @@ class PaymentCard: ObservableObject, Equatable {
     @Published var securityCode = ""{
         didSet {
             let filtered = securityCode.filter { $0.isNumber }
-            if securityCode != filtered {
+            if self.securityCode.count > 4 {
+                securityCode = oldValue
+            } else if securityCode != filtered {
                 securityCode = filtered
             }
         }
