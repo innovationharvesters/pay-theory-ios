@@ -28,14 +28,26 @@ struct CombinedTextField: ViewModifier {
 }
 
 struct ButtonField: ViewModifier {
+    var disabled: Bool
+    
     func body(content: Content) -> some View {
-        content
-            .frame(maxWidth: .infinity)
-            .padding(12)
-            .font(Font.custom("Trebuchet MS", size: 15))
-            .background(LinearGradient(gradient: Gradient(colors: [Color(hex: "#7C2CDD"), Color(hex: "#DB367D")]), startPoint: .leading, endPoint: .trailing ))
-            .foregroundColor(.white)
-            .cornerRadius(10)
+        if disabled {
+            content
+                .frame(maxWidth: .infinity)
+                .padding(12)
+                .font(Font.custom("Trebuchet MS", size: 15))
+                .background(Color.gray)
+                .foregroundColor(Color.secondary)
+                .cornerRadius(10)
+        } else {
+            content
+                .frame(maxWidth: .infinity)
+                .padding(12)
+                .font(Font.custom("Trebuchet MS", size: 15))
+                .background(LinearGradient(gradient: Gradient(colors: [Color(hex: "#7C2CDD"), Color(hex: "#DB367D")]), startPoint: .leading, endPoint: .trailing ))
+                .foregroundColor(.white)
+                .cornerRadius(10)
+        }
     }
 }
 
@@ -75,8 +87,8 @@ extension View {
         self.modifier(CombinedTextField())
     }
     
-    func buttonStyle() -> some View {
-        self.modifier(ButtonField())
+    func buttonStyle(disabled: Bool) -> some View {
+        self.modifier(ButtonField(disabled: disabled))
     }
 }
 
@@ -92,7 +104,7 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    let ptObject = PayTheory(apiKey: "",
+    @ObservedObject var ptObject = PayTheory(apiKey: "t-t-t",
 //                            tags: ["pay-theory-account-code": "iOS",
 //                                   "pay-theory-reference": "card"],
                             fee_mode: .SERVICE_FEE)
@@ -184,7 +196,7 @@ struct ContentView: View {
 //                        PTCardCountry().textFieldStyle()
 
                     Spacer().frame(height: 25)
-                        PTButton(amount: 1250, text: "PAY $54.20", buyerOptions: buyer, completion: completion).buttonStyle()
+                        PTButton(amount: 1250, text: "PAY $54.20", buyerOptions: buyer, completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
                     }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
@@ -193,7 +205,7 @@ struct ContentView: View {
                     PTAchRoutingNumber().textFieldStyle()
                     PTAchAccountType()
                     Spacer().frame(height: 25)
-                    PTButton(amount: 1000, text: "PAY $54.20", completion: completion).buttonStyle()
+                        PTButton(amount: 1000, text: "PAY $54.20", completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
                         .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
                     }.environmentObject(ptObject)
                 }

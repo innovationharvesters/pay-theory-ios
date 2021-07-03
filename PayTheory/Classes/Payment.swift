@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 extension String {
 
@@ -101,45 +102,61 @@ class PaymentCard: ObservableObject, Equatable {
         }
     }
     
-    var expirationMonth: String {
-        return String(expirationDate.prefix(2))
+    @Published var isValid: Bool = false
+    private var isValidCancellable: AnyCancellable!
+    
+    var expirationMonth: AnyPublisher<String,Never> {
+        return $expirationDate
+            .map { data in
+               return String(data.prefix(2))
+            }
+            .eraseToAnyPublisher()
     }
 
-    var expirationYear: String {
-        var result = ""
-        if expirationDate.count == 7 {
-            result = "20" + String(expirationDate.suffix(2))
-        } else if expirationDate.count == 9 {
-            result = String(expirationDate.suffix(4))
-        }
-        return result
+    var expirationYear: AnyPublisher<String,Never> {
+        return $expirationDate
+            .map { data in
+                var result = ""
+                if data.count == 7 {
+                    result = "20" + String(data.suffix(2))
+                } else if data.count == 9 {
+                    result = String(data.suffix(4))
+                }
+                return result
+            }
+            .eraseToAnyPublisher()
     }
     
-    var validCardNumber: Bool {
-        if spacelessCard.count < 13 {
-            return false
-        }
-        
-        var sum = 0
-        let digitStrings = spacelessCard.reversed().map { String($0) }
-
-        for tuple in digitStrings.enumerated() {
-            if let digit = Int(tuple.element) {
-                let odd = tuple.offset % 2 == 1
-
-                switch (odd, digit) {
-                case (true, 9):
-                    sum += 9
-                case (true, 0...8):
-                    sum += (digit * 2) % 9
-                default:
-                    sum += digit
+    var validCardNumber: AnyPublisher<Bool,Never> {
+        return $number
+            .map { data in
+                let noSpaces = String(data.filter { !" \n\t\r".contains($0) })
+                if noSpaces.count < 13 {
+                    return false
                 }
-            } else {
-                return false
+                
+                var sum = 0
+                let digitStrings = noSpaces.reversed().map { String($0) }
+
+                for tuple in digitStrings.enumerated() {
+                    if let digit = Int(tuple.element) {
+                        let odd = tuple.offset % 2 == 1
+
+                        switch (odd, digit) {
+                        case (true, 9):
+                            sum += 9
+                        case (true, 0...8):
+                            sum += (digit * 2) % 9
+                        default:
+                            sum += digit
+                        }
+                    } else {
+                        return false
+                    }
+                }
+                return sum % 10 == 0
             }
-        }
-        return sum % 10 == 0
+            .eraseToAnyPublisher()
     }
     
     var firstSix: String {
@@ -184,47 +201,62 @@ class PaymentCard: ObservableObject, Equatable {
         return ""
     }
     
-    var validExpirationDate: Bool {
-        if expirationYear.count != 4 {
-            return false
-        }
-        
-        let currentDate = Date()
-        let calendar = Calendar.current
-        let currentYear = calendar.component(.year, from: currentDate)
-        
-        if let month = Int(expirationMonth) {
-            if month <= 0 || month > 12 {
-                return false
+    var validExpirationDate: AnyPublisher<Bool,Never> {
+        return Publishers.CombineLatest(expirationYear, expirationMonth)
+            .map { year, month in
+                if year.count != 4 {
+                    return false
+                }
+
+                let currentDate = Date()
+                let calendar = Calendar.current
+                let currentYear = calendar.component(.year, from: currentDate)
+
+                if let monthed = Int(month) {
+                    if monthed <= 0 || monthed > 12 {
+                        return false
+                    }
+                } else {
+                    return false
+                }
+
+                if let yeared = Int(year) {
+                    if yeared < currentYear {
+                        return false
+                    }
+                } else {
+                    return false
+                }
+
+                return true
             }
-        } else {
-            return false
-        }
-        
-        if let year = Int(expirationYear) {
-            if year < currentYear {
-                return false
-            }
-        } else {
-            return false
-        }
-        
-        return true
+            .eraseToAnyPublisher()
     }
     
-    var validSecurityCode: Bool {
-        let num = Int(securityCode)
-        return num != nil && securityCode.length > 2 && securityCode.length < 5
+    var validSecurityCode: AnyPublisher<Bool,Never> {
+        return $securityCode
+            .map { input in
+                let num = Int(input)
+                return num != nil && input.length > 2 && input.length < 5
+              }
+            .eraseToAnyPublisher()
     }
     
-    var isValid: Bool {
-        if validExpirationDate == false || validCardNumber == false || validSecurityCode == false {
-            return false
-        }
-        return true
+    var isValidPublisher: AnyPublisher<Bool,Never> {
+        return Publishers.CombineLatest3(validCardNumber, validSecurityCode, validExpirationDate)
+            .map { validNumber, validCode, validDate in
+                if validNumber == false || validCode == false || validDate == false {
+                    return false
+                }
+                return true
+            }
+            .eraseToAnyPublisher()
     }
     
     init() {
+        isValidCancellable = isValidPublisher.sink { isValid in
+                    self.isValid = isValid
+                }
     }
     
     func clear() {
@@ -259,51 +291,61 @@ class BankAccount: ObservableObject, Equatable {
     @Published var bankCode = ""
     @Published var country: String?
     @Published var identity = ""
+    @Published var isValid: Bool = false
+    private var isValidCancellable: AnyCancellable!
     private var type = "BANK_ACCOUNT"
     
-    var validAccountType: Bool {
-        return accountType < 2
+    var validBankCode: AnyPublisher<Bool,Never> {
+        return $bankCode
+            .map { code in
+                if code.count != 9 {
+                    return false
+                }
+                
+                var number = 0
+                for num in stride(from: 0, to: code.count, by: 3) {
+                    if let first = Int(code[num]) {
+                        number += (first * 3)
+                    } else {
+                        return false
+                    }
+                    
+                    if let second = Int(code[num + 1]) {
+                        number += (second * 7)
+                    } else {
+                        return false
+                    }
+                    
+                    if let third = Int(code[num + 2]) {
+                        number += (third * 1)
+                    } else {
+                        return false
+                    }
+                }
+                
+                return number > 0 && number % 10 == 0
+            }
+            .eraseToAnyPublisher()
     }
     
-    var validBankCode: Bool {
-        if bankCode.count != 9 {
-            return false
-        }
-        
-        var number = 0
-        for num in stride(from: 0, to: bankCode.count, by: 3) {
-            if let first = Int(bankCode[num]) {
-                number += (first * 3)
-            } else {
-                return false
+    var validAccountNumber: AnyPublisher<Bool,Never> {
+        return $accountNumber
+            .map { number in
+                let num = Int(number)
+                return num != nil && number.isEmpty == false
             }
-            
-            if let second = Int(bankCode[num + 1]) {
-                number += (second * 7)
-            } else {
-                return false
-            }
-            
-            if let third = Int(bankCode[num + 2]) {
-                number += (third * 1)
-            } else {
-                return false
-            }
-        }
-        
-        return number > 0 && number % 10 == 0
+            .eraseToAnyPublisher()
     }
     
-    var validAccountNumber: Bool {
-        let num = Int(accountNumber)
-        return num != nil && accountNumber.isEmpty == false
-    }
-    
-    var isValid: Bool {
-        if validAccountNumber == false || validBankCode == false || name.isEmpty || validAccountType == false {
-            return false
-        }
-        return true
+    var isValidPublisher: AnyPublisher<Bool,Never> {
+        return Publishers.CombineLatest4($name, $accountType, validBankCode, validAccountNumber)
+            .map { name, type, validCode, validNumber in
+                if validCode == false || validNumber == false || name.isEmpty || type < 2 {
+                    return false
+                }
+                return true
+            }
+            .eraseToAnyPublisher()
     }
     
     var lastFour: String {
@@ -311,6 +353,9 @@ class BankAccount: ObservableObject, Equatable {
     }
     
     init() {
+        isValidCancellable = isValidPublisher.sink { isValid in
+                    self.isValid = isValid
+                }
     }
     
     func clear() {

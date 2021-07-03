@@ -184,10 +184,8 @@ public struct PTCombinedCard: View {
             Spacer()
             HStack {
                 PTExp()
-                    .frame(maxWidth: 90)
             Spacer()
                 PTCvv()
-                    .frame(maxWidth: 60)
             }
         }
     }

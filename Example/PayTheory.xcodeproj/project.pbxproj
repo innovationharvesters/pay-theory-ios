@@ -148,8 +148,8 @@
 			isa = PBXGroup;
 			children = (
 				9386AE332552ED63009DEE33 /* PayTheory_ExampleApp.swift */,
-				9386AE352552ED63009DEE33 /* ContentView.swift */,
 				9386AE372552ED68009DEE33 /* Assets.xcassets */,
+				9386AE352552ED63009DEE33 /* ContentView.swift */,
 				9386AE3C2552ED68009DEE33 /* Info.plist */,
 				9386AE392552ED68009DEE33 /* Preview Content */,
 			);

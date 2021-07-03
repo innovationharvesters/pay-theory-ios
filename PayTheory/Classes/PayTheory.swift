@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Foundation
+import Combine
 
 import DeviceCheck
 import CryptoKit
@@ -65,12 +66,13 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var fee_mode: FEE_MODE
     var tags: [String: Any]
     var buttonClicked = false
-    var transaction = Transaction()
+    @ObservedObject var transaction = Transaction()
+    @Published public var buttonDisabled = true
+    private var buttonDisabledCancellable: AnyCancellable!
     
     private var encodedChallenge: String = ""
     private var isConnected = false
     private var passedBuyer: Buyer?
-//    private var socket: URLSessionWebSocketTask!
     private var ptToken: String?
     private var session: WebSocketSession?
     private var attestationString: String?{
@@ -195,6 +197,10 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         self.transaction.feeMode = fee_mode
         self.transaction.apiKey = apiKey
         self.transaction.tags = tags
+        buttonDisabledCancellable = buttonDisabledPublisher.sink { buttonDisabled in
+            self.buttonDisabled = buttonDisabled
+        }
+        
         
         getToken(apiKey: apiKey, environment: self.environment, stage: self.stage, completion: ptTokenClosure)
     }
@@ -218,6 +224,14 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     let envCard: PaymentCard
     let envBuyer: Buyer
     let envAch: BankAccount
+    
+    var buttonDisabledPublisher: AnyPublisher<Bool,Never> {
+        return Publishers.CombineLatest3(envCard.$isValid, envAch.$isValid, transaction.$hostToken)
+            .map { validCard, validAch, hostToken in
+                return !((validCard || validAch) && hostToken != nil)
+            }
+            .eraseToAnyPublisher()
+    }
 
     
     func tokenize(card: PaymentCard? = nil,
@@ -292,6 +306,7 @@ public struct PTButton: View {
     @EnvironmentObject var payTheory: PayTheory
     @EnvironmentObject var bank: BankAccount
     @EnvironmentObject var transaction: Transaction
+    @State var disabled = true
     
     var completion: (Result<[String: Any], FailureResponse>) -> Void
     var amount: Int
@@ -355,7 +370,7 @@ public struct PTButton: View {
                 Spacer()
             }
         }
-        .disabled((card.isValid == false && bank.isValid == false) || transaction.hostToken == nil)
+        .disabled(payTheory.buttonDisabled)
     }
 }
 
