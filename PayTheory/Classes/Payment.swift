@@ -105,7 +105,13 @@ class PaymentCard: ObservableObject, Equatable {
     @Published var isValid: Bool = false
     private var isValidCancellable: AnyCancellable!
     
-    var expirationMonth: AnyPublisher<String,Never> {
+    @Published var expirationMonth: String = ""
+    private var expirationMonthCancellable: AnyCancellable!
+    
+    @Published var expirationYear: String = ""
+    private var expirationYearCancellable: AnyCancellable!
+    
+    var expirationMonthPublisher: AnyPublisher<String,Never> {
         return $expirationDate
             .map { data in
                return String(data.prefix(2))
@@ -113,7 +119,7 @@ class PaymentCard: ObservableObject, Equatable {
             .eraseToAnyPublisher()
     }
 
-    var expirationYear: AnyPublisher<String,Never> {
+    var expirationYearPublisher: AnyPublisher<String,Never> {
         return $expirationDate
             .map { data in
                 var result = ""
@@ -202,7 +208,7 @@ class PaymentCard: ObservableObject, Equatable {
     }
     
     var validExpirationDate: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest(expirationYear, expirationMonth)
+        return Publishers.CombineLatest(expirationYearPublisher, expirationMonthPublisher)
             .map { year, month in
                 if year.count != 4 {
                     return false
@@ -254,9 +260,16 @@ class PaymentCard: ObservableObject, Equatable {
     }
     
     init() {
-        isValidCancellable = isValidPublisher.sink { isValid in
-                    self.isValid = isValid
+        isValidCancellable = isValidPublisher.sink { valid in
+            self.isValid = valid
                 }
+        expirationMonthCancellable = expirationMonthPublisher.sink { month in
+            self.expirationMonth = month
+        }
+        
+        expirationYearCancellable = expirationYearPublisher.sink { year in
+            self.expirationYear = year
+        }
     }
     
     func clear() {
@@ -340,7 +353,7 @@ class BankAccount: ObservableObject, Equatable {
     var isValidPublisher: AnyPublisher<Bool,Never> {
         return Publishers.CombineLatest4($name, $accountType, validBankCode, validAccountNumber)
             .map { name, type, validCode, validNumber in
-                if validCode == false || validNumber == false || name.isEmpty || type < 2 {
+                if validCode == false || validNumber == false || name.isEmpty || type > 1 {
                     return false
                 }
                 return true
