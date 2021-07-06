@@ -178,7 +178,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     public init(apiKey: String,
                 tags: [String: Any] = [:],
-                fee_mode: FEE_MODE = .SERVICE_FEE) {
+                fee_mode: FEE_MODE = .SURCHARGE) {
         
         self.apiKey = apiKey
         let apiParts = apiKey.split{$0 == "-"}.map { String($0) }
@@ -209,14 +209,14 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     public convenience init(apiKey: String,
                 tags: [String: Any] = [:],
                 environment: Environment,
-                fee_mode: FEE_MODE = .SERVICE_FEE) {
+                fee_mode: FEE_MODE = .SURCHARGE) {
         self.init(apiKey: apiKey,tags: tags,fee_mode: fee_mode)
     }
     
     @available(*, deprecated, message: "dev in init is deprecated")
     public convenience init(apiKey: String,
                 tags: [String: Any] = [:],
-                fee_mode: FEE_MODE = .SERVICE_FEE,
+                fee_mode: FEE_MODE = .SURCHARGE,
                 dev:String) {
         self.init(apiKey: apiKey,tags: tags,fee_mode: fee_mode)
     }
