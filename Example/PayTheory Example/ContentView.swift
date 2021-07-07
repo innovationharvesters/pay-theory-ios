@@ -104,7 +104,7 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    @ObservedObject var ptObject = PayTheory(apiKey: "learn-paytheorystudy-821808699cc4fbbe93fc63b43c33c378",
+    @ObservedObject var ptObject = PayTheory(apiKey: "t-t-t",
 //                            tags: ["pay-theory-account-code": "iOS",
 //                                   "pay-theory-reference": "card"],
                             fee_mode: .SERVICE_FEE)
