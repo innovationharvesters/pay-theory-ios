@@ -88,6 +88,7 @@ let HOST_TOKEN = "host:hostToken"
 let PT_INSTRUMENT = "host:ptInstrument"
 let IDEMPOTENCY = "host:idempotency"
 let TRANSFER = "host:transfer"
+let CASH = "host:barcode"
 
 public enum FEE_MODE: String, Codable {
     case SURCHARGE = "surcharge"

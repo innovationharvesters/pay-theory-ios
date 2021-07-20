@@ -83,6 +83,10 @@ func addressToDictionary(address: Address) -> [String: String] {
     return result
 }
 
+func cashToDictionary(cash: Cash) -> [String: String] {
+    return ["buyer" : cash.name, "buyer_contact": cash.contact]
+}
+
 func convertStringToDictionary(text: String) -> [String: AnyObject]? {
     if let data = text.data(using: .utf8) {
         do {
@@ -129,3 +133,17 @@ func parseError(errors: [String: AnyObject]) -> String {
     
     return "\(type) \(message)"
 }
+
+func isValidEmail(value: String) -> Bool {
+            let EMAIL_REGEX = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+            let emailTest = NSPredicate(format:"SELF MATCHES %@", EMAIL_REGEX)
+            let result = emailTest.evaluate(with: value)
+            return result
+        }
+
+func isValidPhone(value: String) -> Bool {
+            let PHONE_REGEX = "^\\d{3}-\\d{3}-\\d{4}$"
+            let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
+            let result = phoneTest.evaluate(with: value)
+            return result
+        }

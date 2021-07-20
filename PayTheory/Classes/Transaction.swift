@@ -46,6 +46,23 @@ class Transaction: ObservableObject {
         return stringify(jsonDictionary: message)
     }
     
+    func createCashBody(payment: [String: Any]) -> String? {
+        if let host = hostToken {
+            var newPayment = payment
+            newPayment["amount"] = amount
+            return encryptBody(body: [
+                "hostToken": host,
+                "sessionKey": sessionKey,
+                "timing": Date().millisecondsSince1970,
+                "payment": payment,
+                "buyerOptions": buyerToDictionary(buyer: buyerOptions ?? Buyer()),
+                "tags": tags
+            ], action: CASH)
+        } else {
+            return nil
+        }
+    }
+    
     func createInstrumentBody(instrument: [String: Any]) -> String? {
         if let host = hostToken {
             return encryptBody(body: [

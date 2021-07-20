@@ -59,6 +59,11 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         print("handle disconnected")
     }
     
+    let envCard: PaymentCard
+    let envBuyer: Buyer
+    let envAch: BankAccount
+    let envCash: Cash
+    
     let service = DCAppAttestService.shared
     var apiKey: String
     var environment: String
@@ -174,8 +179,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         }
     }
     
-
-    
     public init(apiKey: String,
                 tags: [String: Any] = [:],
                 fee_mode: FEE_MODE = .SURCHARGE) {
@@ -194,6 +197,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         self.envAch = BankAccount()
         self.envCard = PaymentCard()
         self.envBuyer = Buyer()
+        self.envCash = Cash()
         self.transaction.feeMode = fee_mode
         self.transaction.apiKey = apiKey
         self.transaction.tags = tags
@@ -221,10 +225,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         self.init(apiKey: apiKey,tags: tags,fee_mode: fee_mode)
     }
     
-    let envCard: PaymentCard
-    let envBuyer: Buyer
-    let envAch: BankAccount
-    
     var buttonDisabledPublisher: AnyPublisher<Bool,Never> {
         return Publishers.CombineLatest3(envCard.$isValid, envAch.$isValid, transaction.$hostToken)
             .map { validCard, validAch, hostToken in
@@ -232,10 +232,10 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             }
             .eraseToAnyPublisher()
     }
-
     
     func tokenize(card: PaymentCard? = nil,
                   bank: BankAccount? = nil,
+                  cash: Cash? = nil,
                   amount: Int,
                   buyerOptions: Buyer,
                   completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
@@ -249,6 +249,9 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             } else if let bankAccount = bank {
                 let body = transaction.createInstrumentBody(instrument: bankAccountToDictionary(account: bankAccount)) ?? ""
+                session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
+            } else if let cashObject = cash {
+                let body = transaction.createCashBody(payment: cashToDictionary(cash: cashObject)) ?? ""
                 session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             }
         }
@@ -403,5 +406,6 @@ public struct PTForm<Content>: View where Content: View {
         .environmentObject(payTheory.envBuyer)
         .environmentObject(payTheory.envAch)
         .environmentObject(payTheory.transaction)
+        .environmentObject(payTheory.envCash)
     }
 }
