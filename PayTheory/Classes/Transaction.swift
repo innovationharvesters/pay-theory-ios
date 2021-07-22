@@ -54,7 +54,7 @@ class Transaction: ObservableObject {
                 "hostToken": host,
                 "sessionKey": sessionKey,
                 "timing": Date().millisecondsSince1970,
-                "payment": payment,
+                "payment": newPayment,
                 "buyerOptions": buyerToDictionary(buyer: buyerOptions ?? Buyer()),
                 "tags": tags
             ], action: CASH)

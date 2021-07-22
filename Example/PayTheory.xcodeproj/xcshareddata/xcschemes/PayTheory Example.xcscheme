@@ -73,8 +73,8 @@
       </BuildableProductRunnable>
       <EnvironmentVariables>
          <EnvironmentVariable
-            key = "demo_api_key"
-            value = "pt-sandbox-demo-165f0d8fafc73a2f8f6a82d79c589007"
+            key = "api_key"
+            value = "learn-paytheorylab-653b8fa6baca2d1584b7e79f5bc399df"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable

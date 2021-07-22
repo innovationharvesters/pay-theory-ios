@@ -84,6 +84,7 @@ public class Address: ObservableObject, Codable, Equatable {
     }
 }
 
+//Actions for webhook messages
 let HOST_TOKEN = "host:hostToken"
 let PT_INSTRUMENT = "host:ptInstrument"
 let IDEMPOTENCY = "host:idempotency"
@@ -95,6 +96,7 @@ public enum FEE_MODE: String, Codable {
     case SERVICE_FEE = "service_fee"
 }
 
+//Extensions to swift foundational 
 extension Date {
     var millisecondsSince1970:Int64 {
         return Int64((self.timeIntervalSince1970 * 1000.0).rounded())
@@ -102,5 +104,24 @@ extension Date {
 
     init(milliseconds:Int64) {
         self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
+    }
+}
+
+extension String {
+
+    var length: Int {
+        return count
+    }
+
+    subscript (int: Int) -> String {
+        return self[int ..< int + 1]
+    }
+
+    subscript (section: Range<Int>) -> String {
+        let range = Range(uncheckedBounds: (lower: max(0, min(length, section.lowerBound)),
+                                            upper: min(length, max(0, section.upperBound))))
+        let start = index(startIndex, offsetBy: range.lowerBound)
+        let end = index(start, offsetBy: range.upperBound - range.lowerBound)
+        return String(self[start ..< end])
     }
 }

@@ -33,7 +33,6 @@ public enum Environment {
 public class PayTheory: ObservableObject, WebSocketProtocol {
     func receiveMessage(message: String) {
         print("handle receiveMessage")
-        print(message)
         onMessage(response: message)
     }
     
@@ -118,21 +117,15 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
 
             } else if let state = dictionary["state"] {
                 transaction.transferToken = dictionary
-                print(dictionary)
                 if state as? String ?? "" == "FAILURE" {
                     transaction.completionHandler?(.failure(transaction.createFailureResponse()))
                     resetTransaction()
                 } else {
-                    if transaction.feeMode == .SURCHARGE {
-                        transaction.completionHandler?(.success(transaction.createCompletionResponse()!))
-                        transaction.resetTransaction()
-                        
-                    } else {
-                        transaction.completionHandler?(.success(transaction.createCompletionResponse()!))
-                        transaction.resetTransaction()
-                    }
+                    transaction.completionHandler?(.success(transaction.createCompletionResponse()!))
+                    transaction.resetTransaction()
                 }
-
+            } else if let _ = dictionary["barcode"] {
+                transaction.completionHandler?(.success(dictionary))
             } else if let error = dictionary["error"] {
                 print(error)
                 transaction.completionHandler?(.failure(FailureResponse(type: error as? String ?? "")))
@@ -226,9 +219,9 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     }
     
     var buttonDisabledPublisher: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest3(envCard.$isValid, envAch.$isValid, transaction.$hostToken)
-            .map { validCard, validAch, hostToken in
-                return !((validCard || validAch) && hostToken != nil)
+        return Publishers.CombineLatest4(envCard.$isValid, envAch.$isValid, transaction.$hostToken, envCash.$isValid)
+            .map { validCard, validAch, hostToken, validCash in
+                return !((validCard || validAch || validCash) && hostToken != nil)
             }
             .eraseToAnyPublisher()
     }
@@ -309,7 +302,7 @@ public struct PTButton: View {
     @EnvironmentObject var payTheory: PayTheory
     @EnvironmentObject var bank: BankAccount
     @EnvironmentObject var transaction: Transaction
-    @State var disabled = true
+    @EnvironmentObject var cash: Cash
     
     var completion: (Result<[String: Any], FailureResponse>) -> Void
     var amount: Int
@@ -341,30 +334,21 @@ public struct PTButton: View {
     public var body: some View {
         Button {
                 onClick()
-                if let identity = buyer {
-                    if card.isValid {
-                            payTheory.tokenize(card: card,
-                                               amount: amount,
-                                               buyerOptions: identity,
-                                               completion: completion)
-                    } else if bank.isValid {
-                            payTheory.tokenize(bank: bank,
-                                               amount: amount,
-                                               buyerOptions: identity,
-                                               completion: completion)
-                    }
-                } else {
-                    if card.isValid {
-                            payTheory.tokenize(card: card,
-                                               amount: amount,
-                                               buyerOptions: envBuyer,
-                                               completion: completion)
-                    } else if bank.isValid {
-                            payTheory.tokenize(bank: bank,
-                                               amount: amount,
-                                               buyerOptions: envBuyer,
-                                               completion: completion)
-                    }
+                if card.isValid {
+                        payTheory.tokenize(card: card,
+                                           amount: amount,
+                                           buyerOptions: buyer ?? envBuyer,
+                                           completion: completion)
+                } else if bank.isValid {
+                        payTheory.tokenize(bank: bank,
+                                           amount: amount,
+                                           buyerOptions: buyer ?? envBuyer,
+                                           completion: completion)
+                } else if cash.isValid {
+                        payTheory.tokenize(cash: cash,
+                                           amount: amount,
+                                           buyerOptions: buyer ?? envBuyer,
+                                           completion: completion)
                 }
         } label: {
             HStack {

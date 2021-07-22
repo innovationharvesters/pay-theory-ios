@@ -135,15 +135,78 @@ func parseError(errors: [String: AnyObject]) -> String {
 }
 
 func isValidEmail(value: String) -> Bool {
-            let EMAIL_REGEX = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+            let EMAIL_REGEX = "(?:[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}~-]+(?:\\.[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}" +
+                "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\" +
+                "x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[\\p{L}0-9](?:[a-" +
+                "z0-9-]*[\\p{L}0-9])?\\.)+[\\p{L}0-9](?:[\\p{L}0-9-]*[\\p{L}0-9])?|\\[(?:(?:25[0-5" +
+                "]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-" +
+                "9][0-9]?|[\\p{L}0-9-]*[\\p{L}0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21" +
+                "-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
             let emailTest = NSPredicate(format:"SELF MATCHES %@", EMAIL_REGEX)
             let result = emailTest.evaluate(with: value)
             return result
         }
 
 func isValidPhone(value: String) -> Bool {
-            let PHONE_REGEX = "^\\d{3}-\\d{3}-\\d{4}$"
+            let PHONE_REGEX = "^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$"
             let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
             let result = phoneTest.evaluate(with: value)
             return result
         }
+
+
+func isValidExpDate(month: String, year: String) -> Bool {
+    if year.count != 4 {
+        return false
+    }
+
+    let currentDate = Date()
+    let calendar = Calendar.current
+    let currentYear = calendar.component(.year, from: currentDate)
+
+    if let monthed = Int(month) {
+        if monthed <= 0 || monthed > 12 {
+            return false
+        }
+    } else {
+        return false
+    }
+
+    if let yeared = Int(year) {
+        if yeared < currentYear {
+            return false
+        }
+    } else {
+        return false
+    }
+
+    return true
+}
+
+func isValidCardNumber(cardString: String) -> Bool {
+    let noSpaces = String(cardString.filter { !" \n\t\r".contains($0) })
+    if noSpaces.count < 13 {
+        return false
+    }
+    
+    var sum = 0
+    let digitStrings = noSpaces.reversed().map { String($0) }
+
+    for tuple in digitStrings.enumerated() {
+        if let digit = Int(tuple.element) {
+            let odd = tuple.offset % 2 == 1
+
+            switch (odd, digit) {
+            case (true, 9):
+                sum += 9
+            case (true, 0...8):
+                sum += (digit * 2) % 9
+            default:
+                sum += digit
+            }
+        } else {
+            return false
+        }
+    }
+    return sum % 10 == 0
+}

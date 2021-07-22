@@ -36,7 +36,6 @@ public class WebSocketSession: NSObject {
 
     
     func sendMessage(messageBody: String, requiresResponse: Bool = false) {
-
         self.provider!.sendMessage(message: .string(messageBody), handler: self.handler!)
         
         if (requiresResponse) {

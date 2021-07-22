@@ -1,31 +1,12 @@
 //
-//  PayTheory.swift
+//  CardFields.swift
 //  PayTheory
 //
-//  Created by Austin Zani on 11/3/20.
+//  Created by Austin Zani on 3/15/21.
 //
-
+import SwiftUI
 import Foundation
 import Combine
-
-extension String {
-
-    var length: Int {
-        return count
-    }
-
-    subscript (int: Int) -> String {
-        return self[int ..< int + 1]
-    }
-
-    subscript (section: Range<Int>) -> String {
-        let range = Range(uncheckedBounds: (lower: max(0, min(length, section.lowerBound)),
-                                            upper: min(length, max(0, section.upperBound))))
-        let start = index(startIndex, offsetBy: range.lowerBound)
-        let end = index(start, offsetBy: range.upperBound - range.lowerBound)
-        return String(self[start ..< end])
-    }
-}
 
 class PaymentCard: ObservableObject, Equatable {
     static func == (lhs: PaymentCard, rhs: PaymentCard) -> Bool {
@@ -41,7 +22,10 @@ class PaymentCard: ObservableObject, Equatable {
         return false
     }
 
+    private var type = "PAYMENT_CARD"
     @Published var name: String?
+    @Published var identity = ""
+    @Published var address = Address()
     @Published var expirationDate = ""{
         didSet {
             if let month = Int(self.expirationDate) {
@@ -63,8 +47,6 @@ class PaymentCard: ObservableObject, Equatable {
             }
         }
     }
-    @Published var identity = ""
-    @Published var address = Address()
     @Published var number = ""{
         didSet {
             if (self.number.prefix(2) == "34" || self.number.prefix(2) == "37") &&
@@ -90,7 +72,6 @@ class PaymentCard: ObservableObject, Equatable {
             }
         }
     }
-    private var type = "PAYMENT_CARD"
     @Published var securityCode = ""{
         didSet {
             let filtered = securityCode.filter { $0.isNumber }
@@ -136,31 +117,7 @@ class PaymentCard: ObservableObject, Equatable {
     var validCardNumber: AnyPublisher<Bool,Never> {
         return $number
             .map { data in
-                let noSpaces = String(data.filter { !" \n\t\r".contains($0) })
-                if noSpaces.count < 13 {
-                    return false
-                }
-                
-                var sum = 0
-                let digitStrings = noSpaces.reversed().map { String($0) }
-
-                for tuple in digitStrings.enumerated() {
-                    if let digit = Int(tuple.element) {
-                        let odd = tuple.offset % 2 == 1
-
-                        switch (odd, digit) {
-                        case (true, 9):
-                            sum += 9
-                        case (true, 0...8):
-                            sum += (digit * 2) % 9
-                        default:
-                            sum += digit
-                        }
-                    } else {
-                        return false
-                    }
-                }
-                return sum % 10 == 0
+                return isValidCardNumber(cardString: data)
             }
             .eraseToAnyPublisher()
     }
@@ -210,31 +167,7 @@ class PaymentCard: ObservableObject, Equatable {
     var validExpirationDate: AnyPublisher<Bool,Never> {
         return Publishers.CombineLatest(expirationYearPublisher, expirationMonthPublisher)
             .map { year, month in
-                if year.count != 4 {
-                    return false
-                }
-
-                let currentDate = Date()
-                let calendar = Calendar.current
-                let currentYear = calendar.component(.year, from: currentDate)
-
-                if let monthed = Int(month) {
-                    if monthed <= 0 || monthed > 12 {
-                        return false
-                    }
-                } else {
-                    return false
-                }
-
-                if let yeared = Int(year) {
-                    if yeared < currentYear {
-                        return false
-                    }
-                } else {
-                    return false
-                }
-
-                return true
+                return isValidExpDate(month: month, year: year)
             }
             .eraseToAnyPublisher()
     }
@@ -283,147 +216,186 @@ class PaymentCard: ObservableObject, Equatable {
     
 }
 
-class BankAccount: ObservableObject, Equatable {
-    static func == (lhs: BankAccount, rhs: BankAccount) -> Bool {
-        if lhs.name == rhs.name &&
-        lhs.accountNumber == rhs.accountNumber &&
-        lhs.accountType == rhs.accountType &&
-        lhs.bankCode == rhs.bankCode &&
-        lhs.country == rhs.country &&
-        lhs.identity == rhs.identity &&
-            lhs.type == rhs.type {
-            return true
-        }
-        
-        return false
+/// TextField that can be used to capture the Name for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCardName: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
     }
-    
-    @Published var name = ""
-    @Published var accountNumber = ""
-    @Published var accountType = 0
-    @Published var bankCode = ""
-    @Published var country: String?
-    @Published var identity = ""
-    @Published var isValid: Bool = false
-    private var isValidCancellable: AnyCancellable!
-    private var type = "BANK_ACCOUNT"
-    
-    var validBankCode: AnyPublisher<Bool,Never> {
-        return $bankCode
-            .map { code in
-                if code.count != 9 {
-                    return false
-                }
-                
-                var number = 0
-                for num in stride(from: 0, to: code.count, by: 3) {
-                    if let first = Int(code[num]) {
-                        number += (first * 3)
-                    } else {
-                        return false
-                    }
-                    
-                    if let second = Int(code[num + 1]) {
-                        number += (second * 7)
-                    } else {
-                        return false
-                    }
-                    
-                    if let third = Int(code[num + 2]) {
-                        number += (third * 1)
-                    } else {
-                        return false
-                    }
-                }
-                
-                return number > 0 && number % 10 == 0
-            }
-            .eraseToAnyPublisher()
+
+    public var body: some View {
+        TextField("Name on Card", text: $card.name ?? "")
+            .autocapitalization(UITextAutocapitalizationType.words)
     }
-    
-    var validAccountNumber: AnyPublisher<Bool,Never> {
-        return $accountNumber
-            .map { number in
-                let num = Int(number)
-                return num != nil && number.isEmpty == false
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    var isValidPublisher: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest4($name, $accountType, validBankCode, validAccountNumber)
-            .map { name, type, validCode, validNumber in
-                if validCode == false || validNumber == false || name.isEmpty || type > 1 {
-                    return false
-                }
-                return true
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    var lastFour: String {
-        return String(accountNumber.suffix(4))
-    }
-    
-    init() {
-        isValidCancellable = isValidPublisher.sink { isValid in
-                    self.isValid = isValid
-                }
-    }
-    
-    func clear() {
-        self.name = ""
-        self.accountType = 0
-        self.accountNumber = ""
-        self.bankCode = ""
-    }
-    
 }
 
+/// TextField that can be used to capture the Card Number for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+///  - Important: This is required to be able to run a transaction.
+///
+public struct PTCardNumber: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
+    }
+    public var body: some View {
+        TextField("Card Number", text: $card.number)
+            .keyboardType(.decimalPad)
+            
+    }
+}
 
-class Cash: ObservableObject {
-    @Published var name = ""
-    @Published var contact = ""
-    @Published var isValid: Bool = false
-    private var isValidCancellable: AnyCancellable!
-    
-    var validName: AnyPublisher<Bool,Never> {
-        return $name
-            .map { name in
-                return name.length > 0
-              }
-            .eraseToAnyPublisher()
+/// TextField that can be used to capture the Expiration Year for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+///  - Important: This is required to be able to run a transaction.
+///
+public struct PTExp: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
+    }
+    public var body: some View {
+        TextField("MM / YY", text: $card.expirationDate)
+            .keyboardType(.decimalPad)
+    }
+}
+
+/// TextField that can be used to capture the CVV for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+///  - Important: This is required to be able to run a transaction.
+///
+public struct PTCvv: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
+    }
+    public var body: some View {
+        TextField("CVV", text: $card.securityCode)
+            .keyboardType(.decimalPad)
+    }
+}
+
+/// TextField that can be used to capture the Address Line 1 for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCardLineOne: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
     }
     
-    var validContact: AnyPublisher<Bool,Never> {
-        return $contact
-            .map { contact in
-                let validEmail = isValidEmail(value: contact)
-                let validPhone = isValidPhone(value: contact)
-                return validPhone || validEmail
-              }
-            .eraseToAnyPublisher()
+    public var body: some View {
+        TextField("Address Line 1", text: $card.address.line1 ?? "")
+            .autocapitalization(UITextAutocapitalizationType.words)
+    }
+}
+
+/// TextField that can be used to capture the Address Line 2 for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCardLineTwo: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
     }
     
-    var isValidPublisher: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest(validName, validContact)
-            .map { name, contact in
-                if name == false || contact == false {
-                    return false
-                }
-                return true
+    public var body: some View {
+        TextField("Address Line 2", text: $card.address.line2 ?? "")
+    }
+}
+
+/// TextField that can be used to capture the City for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCardCity: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
+    }
+    
+    public var body: some View {
+        TextField("City", text: $card.address.city ?? "")
+    }
+}
+
+/// TextField that can be used to capture the State for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCardState: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
+    }
+    
+    public var body: some View {
+        TextField("State", text: $card.address.region ?? "")
+            .autocapitalization(UITextAutocapitalizationType.allCharacters)
+            .disableAutocorrection(true)
+    }
+}
+
+/// TextField that can be used to capture the Zip for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCardZip: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
+    }
+    
+    public var body: some View {
+        TextField("Zip", text: $card.address.postalCode ?? "")
+            .keyboardType(.decimalPad)
+    }
+}
+
+/// TextField that can be used to capture the Country for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCardCountry: View {
+    @EnvironmentObject var card: PaymentCard
+    public init() {
+        
+    }
+    
+    public var body: some View {
+        TextField("Country", text: $card.address.country ?? "")
+    }
+}
+
+/// TextField that can be used to capture the Country for a card object to be used in a Pay Theory payment
+///
+///  - Requires: Ancestor view must be wrapped in a PTForm
+///
+public struct PTCombinedCard: View {
+    public init() {
+        
+    }
+    
+    public var body: some View {
+        HStack() {
+            PTCardNumber()
+                .frame(minWidth: 200)
+            Spacer()
+            HStack {
+                PTExp()
+            Spacer()
+                PTCvv()
             }
-            .eraseToAnyPublisher()
-    }
-    
-    init() {
-        isValidCancellable = isValidPublisher.sink { isValid in
-                    self.isValid = isValid
-                }
-    }
-    
-    func clear() {
-        self.name = ""
-        self.contact = ""
+        }
     }
 }

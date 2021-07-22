@@ -104,16 +104,14 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    @ObservedObject var ptObject = PayTheory(apiKey: "t-t-t",
-//                            tags: ["pay-theory-account-code": "iOS",
-//                                   "pay-theory-reference": "card"],
-                            fee_mode: .SERVICE_FEE)
+    @ObservedObject var ptObject = PayTheory(apiKey: ProcessInfo.processInfo.environment["api_key"] ?? "",
+                                             fee_mode: .SERVICE_FEE)
 
 
     let buyer = Buyer(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
     @State private var type = 0
     @State private var amount = 0
-    private var types: [String] = ["Card", "ACH"]
+    private var types: [String] = ["Card", "ACH", "Cash"]
     private var amounts: [Double] = [37, 39]
     
     func completion(result: Result<[String: Any], FailureResponse>) {
@@ -149,6 +147,9 @@ struct ContentView: View {
                                             (Double(token["amount"] as? Int ?? 0) / 100)))
                                             to \(brand) card ending in \(token["last_four"] ?? "")
                                             """
+            } else if let barcode = token["barcode"] {
+                print(token)
+                self.confirmationMessage = barcode as? String ?? "Oops"
             } else {
                 self.confirmationMessage = """
                                             You charged $\(String(format:"%.2f",
@@ -207,6 +208,14 @@ struct ContentView: View {
                     Spacer().frame(height: 25)
                         PTButton(amount: 1000, text: "PAY $54.20", completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
                         .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
+                    }.environmentObject(ptObject)
+                } else if type == 2 {
+                    PTForm {
+                    PTCashName().textFieldStyle()
+                    PTCashContact().textFieldStyle()
+                    Spacer().frame(height: 25)
+                    PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
+                    .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
                     }.environmentObject(ptObject)
                 }
             }
