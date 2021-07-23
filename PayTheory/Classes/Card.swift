@@ -114,14 +114,6 @@ class PaymentCard: ObservableObject, Equatable {
             .eraseToAnyPublisher()
     }
     
-    var validCardNumber: AnyPublisher<Bool,Never> {
-        return $number
-            .map { data in
-                return isValidCardNumber(cardString: data)
-            }
-            .eraseToAnyPublisher()
-    }
-    
     var firstSix: String {
         return String(spacelessCard.prefix(6))
     }
@@ -164,10 +156,34 @@ class PaymentCard: ObservableObject, Equatable {
         return ""
     }
     
+    var validCardNumber: AnyPublisher<Bool,Never> {
+        return $number
+            .map { data in
+                return isValidCardNumber(cardString: data)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    var publicValidCardNumber: AnyPublisher<Bool,Never> {
+        return $number
+            .map { data in
+                return isValidCardNumber(cardString: data) && data.isEmpty
+            }
+            .eraseToAnyPublisher()
+    }
+    
     var validExpirationDate: AnyPublisher<Bool,Never> {
         return Publishers.CombineLatest(expirationYearPublisher, expirationMonthPublisher)
             .map { year, month in
                 return isValidExpDate(month: month, year: year)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    var publicValidExpirationDate: AnyPublisher<Bool,Never> {
+        return Publishers.CombineLatest(expirationYearPublisher, expirationMonthPublisher)
+            .map { year, month in
+                return isValidExpDate(month: month, year: year) && self.expirationDate.isEmpty
             }
             .eraseToAnyPublisher()
     }
@@ -177,6 +193,15 @@ class PaymentCard: ObservableObject, Equatable {
             .map { input in
                 let num = Int(input)
                 return num != nil && input.length > 2 && input.length < 5
+              }
+            .eraseToAnyPublisher()
+    }
+    
+    var publicValidSecurityCode: AnyPublisher<Bool,Never> {
+        return $securityCode
+            .map { input in
+                let num = Int(input)
+                return num != nil && input.length > 2 && input.length < 5 && input.isEmpty
               }
             .eraseToAnyPublisher()
     }

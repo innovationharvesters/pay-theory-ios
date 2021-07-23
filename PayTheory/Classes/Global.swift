@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 public class Address: ObservableObject, Codable, Equatable {
     public static func == (lhs: Address, rhs: Address) -> Bool {
@@ -123,5 +124,24 @@ extension String {
         let start = index(startIndex, offsetBy: range.lowerBound)
         let end = index(start, offsetBy: range.upperBound - range.lowerBound)
         return String(self[start ..< end])
+    }
+}
+
+public func ?? <T>(lhs: Binding<T?>, rhs: T) -> Binding<T> {
+    Binding(
+        get: { lhs.wrappedValue ?? rhs },
+        set: { lhs.wrappedValue = $0 }
+    )
+}
+public enum Environment {
+    case DEMO, PROD
+
+    var value: String {
+        switch self {
+        case .DEMO:
+            return "demo"
+        case .PROD:
+            return "prod"
+    }
     }
 }

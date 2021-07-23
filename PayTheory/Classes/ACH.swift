@@ -36,32 +36,7 @@ class BankAccount: ObservableObject, Equatable {
     var validBankCode: AnyPublisher<Bool,Never> {
         return $bankCode
             .map { code in
-                if code.count != 9 {
-                    return false
-                }
-                
-                var number = 0
-                for num in stride(from: 0, to: code.count, by: 3) {
-                    if let first = Int(code[num]) {
-                        number += (first * 3)
-                    } else {
-                        return false
-                    }
-                    
-                    if let second = Int(code[num + 1]) {
-                        number += (second * 7)
-                    } else {
-                        return false
-                    }
-                    
-                    if let third = Int(code[num + 2]) {
-                        number += (third * 1)
-                    } else {
-                        return false
-                    }
-                }
-                
-                return number > 0 && number % 10 == 0
+                return isValidRoutingNumber(code: code)
             }
             .eraseToAnyPublisher()
     }
@@ -75,10 +50,18 @@ class BankAccount: ObservableObject, Equatable {
             .eraseToAnyPublisher()
     }
     
+    var validAccountName: AnyPublisher<Bool,Never> {
+        return $name
+            .map { name in
+                return !name.isEmpty
+            }
+            .eraseToAnyPublisher()
+    }
+    
     var isValidPublisher: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest4($name, $accountType, validBankCode, validAccountNumber)
+        return Publishers.CombineLatest4(validAccountName, $accountType, validBankCode, validAccountNumber)
             .map { name, type, validCode, validNumber in
-                if validCode == false || validNumber == false || name.isEmpty || type > 1 {
+                if validCode == false || validNumber == false || name || type > 1 {
                     return false
                 }
                 return true

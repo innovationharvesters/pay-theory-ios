@@ -210,3 +210,32 @@ func isValidCardNumber(cardString: String) -> Bool {
     }
     return sum % 10 == 0
 }
+
+func isValidRoutingNumber(code: String) -> Bool {
+    if code.count != 9 {
+        return false
+    }
+    
+    var number = 0
+    for num in stride(from: 0, to: code.count, by: 3) {
+        if let first = Int(code[num]) {
+            number += (first * 3)
+        } else {
+            return false
+        }
+        
+        if let second = Int(code[num + 1]) {
+            number += (second * 7)
+        } else {
+            return false
+        }
+        
+        if let third = Int(code[num + 2]) {
+            number += (third * 1)
+        } else {
+            return false
+        }
+    }
+    
+    return number > 0 && number % 10 == 0
+}

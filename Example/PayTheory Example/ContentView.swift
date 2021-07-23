@@ -10,12 +10,13 @@ import SwiftUI
 import PayTheory
 
 struct TextField: ViewModifier {
+    var valid: Bool
     func body(content: Content) -> some View {
         content
             .font(Font.custom("Trebuchet MS Bold", size: 15))
             .foregroundColor(Color(hex: "8E868F"))
             .padding(12)
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: valid ? "#8E868F" : "#FF0000"), lineWidth: 1))
     }
 }
 
@@ -79,8 +80,8 @@ extension Color {
 }
 
 extension View {
-    func textFieldStyle() -> some View {
-        self.modifier(TextField())
+    func textFieldStyle(valid: Bool = true) -> some View {
+        self.modifier(TextField(valid: valid))
     }
     
     func combinedStyle() -> some View {
@@ -184,35 +185,27 @@ struct ContentView: View {
                     PTForm {
                         PTCardName().textFieldStyle()
                         
-                        PTCombinedCard()
-                        .padding(.leading, 12)
-                        .padding(.top, 12)
-                        .padding(.bottom, 12)
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(hex: "#8E868F"), lineWidth: 1))
-//                        PTCardLineOne().textFieldStyle()
-//                        PTCardLineTwo().textFieldStyle()
-//                        PTCardCity().textFieldStyle()
-//                        PTCardState().textFieldStyle()
-//                        PTCardZip().textFieldStyle()
-//                        PTCardCountry().textFieldStyle()
+                        PTCombinedCard().textFieldStyle(valid: (ptObject.cardNumber.isValid || ptObject.cardNumber.isEmpty) &&
+                                                            (ptObject.exp.isValid || ptObject.exp.isEmpty) &&
+                                                            (ptObject.cvv.isValid || ptObject.cvv.isEmpty))
 
                     Spacer().frame(height: 25)
                         PTButton(amount: 1250, text: "PAY $54.20", buyerOptions: buyer, completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
                     }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
-                    PTAchAccountName().textFieldStyle()
-                    PTAchAccountNumber().textFieldStyle()
-                    PTAchRoutingNumber().textFieldStyle()
-                    PTAchAccountType()
-                    Spacer().frame(height: 25)
+                        PTAchAccountName().textFieldStyle(valid: ptObject.achAccountName.isValid || ptObject.achAccountName.isEmpty)
+                        PTAchAccountNumber().textFieldStyle(valid: ptObject.achAccountNumber.isValid || ptObject.achAccountNumber.isEmpty)
+                        PTAchRoutingNumber().textFieldStyle(valid: ptObject.achRoutingNumber.isValid || ptObject.achRoutingNumber.isEmpty)
+                        PTAchAccountType()
+                        Spacer().frame(height: 25)
                         PTButton(amount: 1000, text: "PAY $54.20", completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
                         .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
                     }.environmentObject(ptObject)
                 } else if type == 2 {
                     PTForm {
-                    PTCashName().textFieldStyle()
-                    PTCashContact().textFieldStyle()
+                    PTCashName().textFieldStyle(valid: ptObject.cashName.isValid || ptObject.cashName.isEmpty)
+                    PTCashContact().textFieldStyle(valid: ptObject.cashContact.isValid || ptObject.cashContact.isEmpty)
                     Spacer().frame(height: 25)
                     PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
                     .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)

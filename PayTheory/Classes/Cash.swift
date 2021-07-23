@@ -32,6 +32,16 @@ class Cash: ObservableObject {
             .eraseToAnyPublisher()
     }
     
+    var publicValidContact: AnyPublisher<Bool,Never> {
+        return $contact
+            .map { contact in
+                let validEmail = isValidEmail(value: contact)
+                let validPhone = isValidPhone(value: contact)
+                return (validPhone || validEmail) && contact.isEmpty
+              }
+            .eraseToAnyPublisher()
+    }
+    
     var isValidPublisher: AnyPublisher<Bool,Never> {
         return Publishers.CombineLatest(validName, validContact)
             .map { name, contact in
