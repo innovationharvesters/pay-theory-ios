@@ -276,7 +276,8 @@ If a failure or decline occurs during the transaction, a FailureResponse object 
 class FailureResponse {
     var receipt_number: String
     var last_four: String
-    var brand: String? //Will not include the brand if it is an ACH transaction
+    var brand: String? 
+    //Will not include the brand if it is an ACH transaction
     var state = "FAILURE"
     var type: String
 }
