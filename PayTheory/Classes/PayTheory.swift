@@ -83,7 +83,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     }
     
     func onMessage(response: String) {
-        if let dictionary = convertStringToDictionary(text: response) {
+        if var dictionary = convertStringToDictionary(text: response) {
 
             if let hostToken = dictionary["hostToken"] {
                 DispatchQueue.main.async {
@@ -115,6 +115,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                     transaction.resetTransaction()
                 }
             } else if let _ = dictionary["barcode"] {
+                dictionary["mapUrl"] = "https://pay.vanilladirect.com/pages/locations" as AnyObject
                 transaction.completionHandler?(.success(dictionary))
             } else if let error = dictionary["error"] {
                 print(error)
