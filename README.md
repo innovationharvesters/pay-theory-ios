@@ -60,7 +60,10 @@ Initialize a PayTheory element for handling state. It accepts the following argu
 
 ```swift
 let apiKey = 'your-api-key'
-let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
+let TAGS: [String: String] = [
+        "pay-theory-account-code": "code-123456789",
+        "pay-theory-reference": "field-trip"
+      ];
 
 let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE)
 ```
@@ -182,6 +185,21 @@ PTForm{
     PTCvv()
     PTButton(amount: amount, completion: completion)
 }.environmentObject(pt)
+```
+
+## Custom Tags
+
+To track payments with custom tags simply add the following when initializing the SDK:
+
+-   **pay-theory-account-code**: Code that will be used to track the payment and can be filtered by.
+-   **pay-theory-reference**: Custom description assigned to a payment that can later be filtered by.
+
+
+```swift
+let TAGS: [String: String] = [
+        "pay-theory-account-code": "code-123456789",
+        "pay-theory-reference": "field-trip"
+      ];
 ```
 
 ### Capture or Cancel an Authorization
