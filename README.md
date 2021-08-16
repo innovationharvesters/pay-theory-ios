@@ -292,12 +292,13 @@ If a failure or decline occurs during the transaction, a FailureResponse object 
 
 ```swift 
 class FailureResponse {
-    var receipt_number: String
-    var last_four: String
+    var receipt_number: String?
+    var last_four: String?
     var brand: String? 
-    //Will not include the brand if it is an ACH transaction
+    //Will not include the brand if it is an ACH or Cash transaction
     var state = "FAILURE"
     var type: String
+    //Type will be the specific details of the failure
 }
 ```
 
@@ -316,7 +317,7 @@ Once the PTButton is clicked and a cash barcode is generated, a dictionary will 
 ]
 ```
 
-It is reccomend to provide both the Barcode URL and Map URL as links that open in their default browser to the payee.
+It is reccomended to provide both the Barcode URL and Map URL as links that open in their default browser to the payee.
 
 ## Buyer Class
 
