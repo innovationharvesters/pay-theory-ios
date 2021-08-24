@@ -50,7 +50,10 @@ Initialize a PayTheory element for handling state. It accepts the following argu
 
 ```swift
 let apiKey = 'your-api-key'
-let tags: [String: Any] = ["YOUR_TAG_KEY": "YOUR_TAG_VALUE"]
+let TAGS: [String: String] = [
+        "pay-theory-account-code": "code-123456789",
+        "pay-theory-reference": "field-trip"
+      ];
 
 let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE)
 ```
@@ -69,6 +72,12 @@ There are three required text fields to capture the info needed to initialize a 
 PTCardNumber()
 PTExp()
 PTCvv()
+```
+
+There is also a combined text field available if you wanted all three required fields in one text field
+
+```swift
+PTCombinedCard()
 ```
 
 There are optional fields for capturing Billing Address and Name On Card
@@ -96,7 +105,7 @@ PTCardZip()
 
 These custom text fields are what will be used to collect the ACH information for the transaction.
 
-All four text fields are required to capture the info needed to initialize an ACH transaction
+All four fields are required to capture the info needed to initialize an ACH transaction
 
 *   ACH Account Number
 *   ACH Account Type
@@ -110,12 +119,34 @@ PTAchAccountNumber()
 PTAchRoutingNumber()
 ```
 
+### Cash Text Fields
+
+These custom text fields are what will be used to collect the Cash information for generating a cash barcode.
+
+Both text fields are required to capture the info needed to generate a Cash barcode
+
+*   ACH Account Number
+*   ACH Account Type
+
+```swift
+PTCashContact()
+PTCashName()
+```
+
 ### Pay Theory Button
 
 This button component allows a transaction to be initialized. It will be disabled until it has the required data needed to initialize a transaction. It accepts a few arguments needed to initialize the payment.
 
+**Required**
 *   **amount**: Payment amount that should be charged to the card in cents
 *   **completion**: Function that will handle the result of the call returning a dictionary or **FailureResponse**
+
+**Optional**
+*   **text**: Text that shows in the button
+    *   *default*:  Confirm
+*   **buyerOptions**: *Buyer* object that will pass details about buyer into the payment that will be tied to the payment
+
+
 
 ```swift
 let amount = 1000
@@ -144,6 +175,21 @@ PTForm{
     PTCvv()
     PTButton(amount: amount, completion: completion)
 }.environmentObject(pt)
+```
+
+## Custom Tags
+
+To track payments with custom tags simply add the following when initializing the SDK:
+
+-   **pay-theory-account-code**: Code that will be used to track the payment and can be filtered by.
+-   **pay-theory-reference**: Custom description assigned to a payment that can later be filtered by.
+
+
+```swift
+let TAGS: [String: String] = [
+        "pay-theory-account-code": "code-123456789",
+        "pay-theory-reference": "field-trip"
+      ];
 ```
 
 ### Capture or Cancel an Authorization
@@ -236,13 +282,107 @@ If a failure or decline occurs during the transaction, a FailureResponse object 
 
 ```swift 
 class FailureResponse {
-    var receipt_number: String
-    var last_four: String
-    var brand: String? //Will not include the brand if it is an ACH transaction
+    var receipt_number: String?
+    var last_four: String?
+    var brand: String? 
+    //Will not include the brand if it is an ACH or Cash transaction
     var state = "FAILURE"
     var type: String
+    //Type will be the specific details of the failure
 }
 ```
+
+## Cash Response
+
+Once the PTButton is clicked and a cash barcode is generated, a dictionary will be returned with the following info:
+
+```swift 
+[
+    "BarcodeUid":"XXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX@partner",
+    "Merchant":"XXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXX",
+    "barcode":"12345678901234567890",
+    "barcodeFee":"2.0",
+    "barcodeUrl":"https://partner.env.ptbar.codes/XXXXXX",
+    "mapUrl":"https://pay.vanilladirect.com/pages/locations",
+]
+```
+
+It is reccomended to provide both the Barcode URL and Map URL as links that open in their default browser to the payee.
+
+## Buyer Class
+
+The buyer class can be used to pass buyer options into the PTButton to assosciate buyer details with a payment
+
+```swift 
+class Buyer {
+    var phone: String?
+    var firstName: String?
+    var lastName: String?
+    var email: String?
+    var personalAddress: Address
+}
+
+
+class Address {
+    var city: String?
+    var country: String?
+    //Region would be the state and should be the 2 character abbreviation
+    var region: String?
+    var line1: String?
+    var line2: String?
+    //Postal code will only accept a 5 character zip
+    var postalCode: String?
+}
+```
+## Valid State
+
+There are eight fields that require validation. 
+
+-   Card
+    -   cardNumber
+    -   cvv
+    -   exp
+-   ACH
+    -   achAccountNumber
+    -   achAccountName
+    -   achRoutingNumber
+-   Cash
+    -   cashName
+    -   cashContact
+
+For each of these fields we have access to two pieces of state
+
+-   **isEmpty**: *Bool*: has there been anything input into the text field
+-   **isValid**: *Bool*: does the text entered pass validation
+
+These can be accessed from the PayTheory object like so
+
+```swift
+let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE)
+
+//Card details
+pt.cardNumber.isValid
+pt.cardNumber.isEmpty
+pt.cvv.isValid
+pt.cvv.isEmpty
+pt.exp.isValid
+pt.exp.isEmpty
+
+//ACH details
+pt.achAccountNumber.isValid
+pt.achAccountNumber.isEmpty
+pt.achAccountName.isValid
+pt.achAccountName.isEmpty
+pt.achRoutingNumber.isValid
+pt.achRoutingNumber.isEmpty
+
+//Cash Details
+pt.cashName.isValid
+pt.cashName.isEmpty
+pt.cashContact.isValid
+pt.cashContact.isEmpty
+```
+
 
 ## Styling the text fields and button
 
