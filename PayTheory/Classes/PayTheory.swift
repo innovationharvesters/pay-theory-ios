@@ -84,8 +84,12 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     func onMessage(response: String) {
         if var dictionary = convertStringToDictionary(text: response) {
-
-            if let hostToken = dictionary["hostToken"] {
+            print(dictionary)
+            if let error = dictionary["error"] {
+                print(error)
+                transaction.completionHandler?(.failure(FailureResponse(type: error as? String ?? "")))
+                resetTransaction()
+            } else if let hostToken = dictionary["hostToken"] {
                 DispatchQueue.main.async {
                     self.transaction.hostToken = hostToken as? String ?? ""
                 }
@@ -93,18 +97,9 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 let key = dictionary["publicKey"] as? String ?? ""
                 self.transaction.publicKey = convertStringToByte(string: key)
 
-            } else if let instrument = dictionary["pt-instrument"] {
-                transaction.ptInstrument = instrument as? String ?? ""
-                session?.sendMessage(messageBody: transaction.createIdempotencyBody()!, requiresResponse: session!.REQUIRE_RESPONSE)
-
             } else if let _ = dictionary["payment-token"] {
-                transaction.paymentToken = dictionary
-                if transaction.feeMode == .SURCHARGE {
-                session?.sendMessage(messageBody: transaction.createTransferBody()!, requiresResponse: session!.REQUIRE_RESPONSE)
-                } else {
-                    transaction.completionHandler?(.success(transaction.createTokenizationResponse()!))
-                }
-
+                transaction.idempotencyToken = dictionary
+                transaction.completionHandler?(.success(transaction.createTokenizationResponse()!))
             } else if let state = dictionary["state"] {
                 transaction.transferToken = dictionary
                 if state as? String ?? "" == "FAILURE" {
@@ -117,10 +112,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             } else if let _ = dictionary["barcode"] {
                 dictionary["mapUrl"] = "https://pay.vanilladirect.com/pages/locations" as AnyObject
                 transaction.completionHandler?(.success(dictionary))
-            } else if let error = dictionary["error"] {
-                print(error)
-                transaction.completionHandler?(.failure(FailureResponse(type: error as? String ?? "")))
-                resetTransaction()
             }
         } else {
             print("Could not convert the response to a Dictionary")
@@ -237,10 +228,10 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             self.transaction.buyerOptions = buyerOptions
             buttonClicked = true
             if let creditCard = card {
-                let body = transaction.createInstrumentBody(instrument: paymentCardToDictionary(card: creditCard)) ?? ""
+                let body = transaction.createTransferPartOneBody(instrument: paymentCardToDictionary(card: creditCard)) ?? ""
                 session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             } else if let bankAccount = bank {
-                let body = transaction.createInstrumentBody(instrument: bankAccountToDictionary(account: bankAccount)) ?? ""
+                let body = transaction.createTransferPartOneBody(instrument: bankAccountToDictionary(account: bankAccount)) ?? ""
                 session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             } else if let cashObject = cash {
                 let body = transaction.createCashBody(payment: cashToDictionary(cash: cashObject)) ?? ""
@@ -251,7 +242,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     // Calculated value that can allow someone to check if there is an active token
     var isTokenized: Bool {
-        if transaction.paymentToken != nil {
+        if transaction.idempotencyToken != nil {
             return true
         } else {
             return false
@@ -267,7 +258,12 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     //Public function that will void the authorization and relase any funds that may be held.
     public func cancel() {
-       resetTransaction()
+        if isTokenized && fee_mode == .SERVICE_FEE {
+            print("cancel")
+            let body = transaction.createCancelBody() ?? ""
+            session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
+        }
+        resetTransaction()
     }
     
     //Public function that will complete the authorization and send a
@@ -277,7 +273,8 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         
         if isTokenized && fee_mode == .SERVICE_FEE {
             transaction.completionHandler = completion
-            session?.sendMessage(messageBody: transaction.createTransferBody()!, requiresResponse: session!.REQUIRE_RESPONSE)
+            let body = transaction.createTransferPartTwoBody() ?? ""
+            session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
         } else {
             let error = FailureResponse(type: "There is no payment authorization to capture")
             print("The capture function should only be used with the .SERVICE_FEE fee mode")

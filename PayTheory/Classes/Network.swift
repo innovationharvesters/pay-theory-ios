@@ -54,7 +54,7 @@ func getToken(apiKey: String,
               stage: String,
               completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
     
-    let url = "https://\(environment).token.service.\(stage).com/\(environment)/token"
+    let url = "https://\(environment).rest.\(stage).com/token-service/token"
     
     let headers: HTTPHeaders = [
         "X-API-Key": apiKey,

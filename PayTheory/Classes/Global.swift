@@ -87,9 +87,9 @@ public class Address: ObservableObject, Codable, Equatable {
 
 //Actions for webhook messages
 let HOST_TOKEN = "host:hostToken"
-let PT_INSTRUMENT = "host:ptInstrument"
-let IDEMPOTENCY = "host:idempotency"
-let TRANSFER = "host:transfer"
+let TRANSFER_PART1 = "host:transfer_part1"
+let TRANSFER_PART2 = "host:transfer_part2"
+let CANCEL_TRANSFER = "host:cancel_transfer"
 let CASH = "host:barcode"
 
 public enum FEE_MODE: String, Codable {

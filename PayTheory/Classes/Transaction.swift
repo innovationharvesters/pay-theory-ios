@@ -14,7 +14,7 @@ class Transaction: ObservableObject {
     var sessionKey: String = ""
     var publicKey: Bytes = "".bytes
     var ptInstrument: String?
-    var paymentToken: [String: AnyObject]?
+    var idempotencyToken: [String: AnyObject]?
     var transferToken: [String: AnyObject]?
     var keyPair: Box.KeyPair
     var completionHandler: ((Result<[String: Any], FailureResponse>) -> Void)?
@@ -63,48 +63,48 @@ class Transaction: ObservableObject {
         }
     }
     
-    func createInstrumentBody(instrument: [String: Any]) -> String? {
+    func createTransferPartOneBody(instrument: [String: Any]) -> String? {
         if let host = hostToken {
+            let confirmation = feeMode == .SERVICE_FEE ? true : false
             return encryptBody(body: [
                 "hostToken": host,
                 "sessionKey": sessionKey,
                 "timing": Date().millisecondsSince1970,
-                "payment": instrument,
-                "buyerOptions": buyerToDictionary(buyer: buyerOptions ?? Buyer())
-            ], action: PT_INSTRUMENT)
+                "instrument_data": instrument,
+                "payment_data": [
+                    "fee_mode": feeMode.rawValue,
+                    "currency": "USD",
+                    "amount": amount
+                ],
+                "confirmation_needed": confirmation,
+                "buyerOptions": buyerToDictionary(buyer: buyerOptions ?? Buyer()),
+                "tags": tags
+            ], action: TRANSFER_PART1)
         } else {
             return nil
         }
     }
     
-    func createIdempotencyBody() -> String? {
-        if let instrument = ptInstrument {
-            var body: [String: Any] = [:]
-            body["apiKey"] = apiKey
-            body["hostToken"] = hostToken
-            body["sessionKey"] = sessionKey
-            body["timing"] = Date().millisecondsSince1970
-            body["payment"] = [
-                "amount": amount,
-                "currency": "USD",
-                "pt-instrument": instrument,
-                "fee_mode": feeMode.rawValue
-            ]
-            
-            return encryptBody(body: body, action: IDEMPOTENCY)
+    func createTransferPartTwoBody() -> String? {
+        if let transfer = idempotencyToken {
+            return encryptBody(body: [
+                "transfer": transfer,
+                "sessionKey": sessionKey,
+                "timing": Date().millisecondsSince1970,
+                "tags": tags
+            ], action: TRANSFER_PART2)
         } else {
             return nil
         }
     }
     
-    func createTransferBody() -> String? {
-        if let payment = paymentToken {
-            var body: [String: Any] = [:]
-            body["transfer"] = payment
-            body["sessionKey"] = sessionKey
-            body["timing"] = Date().millisecondsSince1970
-            body["tags"] = tags
-            return encryptBody(body: body, action: TRANSFER)
+    func createCancelBody() -> String? {
+        if let payment_intent = idempotencyToken?["payment_intent_id"] as? String {
+            return encryptBody(body: [
+                "payment_intent_id": payment_intent,
+                "sessionKey": sessionKey,
+                "timing": Date().millisecondsSince1970
+            ], action: CANCEL_TRANSFER)
         } else {
             return nil
         }
@@ -113,7 +113,7 @@ class Transaction: ObservableObject {
     func createCompletionResponse() -> [String: Any]? {
         if let transfer = transferToken {
             var result: [String: Any] = [
-              "receipt_number": paymentToken?["idempotency"] as? String ?? "",
+              "receipt_number": idempotencyToken?["idempotency"] as? String ?? "",
               "last_four": transfer["last_four"] as? String ?? "",
               "created_at": transfer["created_at"] as? String ?? "",
               "amount": transfer["amount"] as? Int ?? 0,
@@ -132,7 +132,7 @@ class Transaction: ObservableObject {
     }
     
     func createTokenizationResponse() -> [String: Any]? {
-        if let payment = paymentToken {
+        if let payment = idempotencyToken {
             var result: [String: Any] = [
                 "receipt_number": payment["idempotency"] as? String ?? "",
                 "amount": payment["payment"]?["amount"] as? Int ?? 0,
@@ -165,7 +165,7 @@ class Transaction: ObservableObject {
         }
         sessionKey = ""
         ptInstrument = nil
-        paymentToken = nil
+        idempotencyToken = nil
         transferToken = nil
         completionHandler = nil
         amount = 0

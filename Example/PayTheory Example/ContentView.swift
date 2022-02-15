@@ -105,7 +105,7 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    @ObservedObject var ptObject = PayTheory(apiKey: ProcessInfo.processInfo.environment["api_key"] ?? "",
+    @ObservedObject var ptObject = PayTheory(apiKey: "learn-paytheorylab-67ae7514070c9fe21f9ba4e9d3ad529a",
                                              fee_mode: .SERVICE_FEE)
 
 
@@ -199,7 +199,7 @@ struct ContentView: View {
                         PTAchRoutingNumber().textFieldStyle(valid: ptObject.achRoutingNumber.isValid || ptObject.achRoutingNumber.isEmpty)
                         PTAchAccountType()
                         Spacer().frame(height: 25)
-                        PTButton(amount: 1000, text: "PAY $54.20", completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
+                        PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
                         .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
                     }.environmentObject(ptObject)
                 } else if type == 2 {
