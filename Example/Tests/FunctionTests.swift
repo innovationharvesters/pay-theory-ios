@@ -81,13 +81,13 @@ class FunctionTests: XCTestCase {
         let lastName = "Person"
         let email = "test@test.com"
         let phone = "5555555555"
-        let buyer = Buyer()
+        let buyer = Payor()
         buyer.firstName = firstName
         buyer.lastName = lastName
         buyer.email = email
         buyer.phone = phone
 
-        let result: [String: Any] = buyerToDictionary(buyer: buyer)
+        let result: [String: Any] = payorToDictionary(payor: buyer)
 
         XCTAssertEqual(firstName, result["first_name"] as? String ?? "")
         XCTAssertEqual(lastName, result["last_name"] as? String ?? "")

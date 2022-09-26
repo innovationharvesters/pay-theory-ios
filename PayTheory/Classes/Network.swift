@@ -5,63 +5,93 @@
 //  Created by Austin Zani on 11/3/20.
 //
 
+import Network
 import Foundation
-import Alamofire
-//import Sodium
 
-enum ResponseError: String, Error {
-    case noData = "There was no data in the repsonse"
-    case canNotDecode = "Unable to decode the response"
+class NetworkMonitor: ObservableObject {
+    private let monitor = NWPathMonitor()
+    private let queue = DispatchQueue(label: "Monitor")
+    
+    var isActive = false
+    var isExpensive = false
+    var isConstrained = false
+    var connectionType = NWInterface.InterfaceType.other
+    
+    init() {
+        monitor.pathUpdateHandler = { path in
+            self.isActive = path.status == .satisfied
+            self.isExpensive = path.isExpensive
+            self.isConstrained = path.isConstrained
+
+            let connectionTypes: [NWInterface.InterfaceType] = [.cellular, .wifi, .wiredEthernet]
+            self.connectionType = connectionTypes.first(where: path.usesInterfaceType) ?? .other
+
+            DispatchQueue.main.async {
+                self.objectWillChange.send()
+            }
+        }
+
+        monitor.start(queue: queue)
+    }
 }
 
-func handleMapResponse(response: AFDataResponse<Any>, completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
-                        guard response.error == nil else {
-                                print("Call failed")
-                                if let value = response.value as? [String: AnyObject] {
-                                          print(value)
-                                       }
-                            if let data = response.data {
-                                let json = String(data: data, encoding: String.Encoding.utf8)
-                                let errorArray = convertStringToDictionary(text: json!)
-                                if let errors = errorArray {
-                                    completion(.failure(FailureResponse(type: errors["reason"] as? String ?? "Unknown Error")))
-                                    return
-                                }
-                            }
-                            completion(.failure(FailureResponse(type: response.error!.localizedDescription)))
-                                return
-                                }
-                        
-                        if let value = response.value as? [String: AnyObject] {
-                            if value["state"] as? String ?? "" == "FAILURE" {
-                                completion(.failure(FailureResponse(type: value["type"] as? String ?? "",
-                                                                    receiptNumber: value["receipt_number"] as? String ?? "",
-                                                                    lastFour: value["last_four"] as? String ?? "",
-                                                                    brand: value["brand"] as? String ?? "")))
-                            } else {
-                                completion(.success(value))
-                            }
-                                } else {
-                                print("Can't decode")
-                                    completion(.failure(FailureResponse(type: ResponseError.canNotDecode.rawValue)))
-                           }
-                        }
+enum NetworkError: Error {
+    case transportError(Error)
+    case serverError(statusCode: Int)
+    case noData
+    case decodingError
+    case encodingError
+}
 
+func makeRequest(request: URLRequest,completion: @escaping (Result<[String: AnyObject], NetworkError>) -> Void) {
+    let config = URLSessionConfiguration.default
+    config.allowsExpensiveNetworkAccess = false
+    config.allowsConstrainedNetworkAccess = false
+    config.waitsForConnectivity = true
+    config.requestCachePolicy = .reloadIgnoringLocalCacheData
 
+    let session = URLSession(configuration: config)
+
+    session.dataTask(with: request) { data, response, error in
+        if let error = error {
+            completion(.failure(.transportError(error)))
+            return
+        }
+        
+        if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
+            completion(.failure(.serverError(statusCode: response.statusCode)))
+            return
+        }
+        
+        guard let data = data else {
+            completion(.failure(.noData))
+            return
+        }
+        
+        do {
+            let json = try JSONSerialization.jsonObject(with: data) as? [String : AnyObject]
+            completion(.success(json!))
+        } catch {
+            completion(.failure(.decodingError))
+        }
+        
+    }.resume()
+}
 
 func getToken(apiKey: String,
               environment: String,
               stage: String,
-              completion: @escaping (Result<[String: AnyObject], Error>) -> Void) {
+              completion: @escaping (Result<[String: AnyObject], NetworkError>) -> Void) {
     
-    let url = "https://\(environment).rest.\(stage).com/token-service/token"
-    
-    let headers: HTTPHeaders = [
-        "X-API-Key": apiKey,
-        "Content-Type": "application/json"
-    ]
-    
-    AF.request(url, headers: headers).validate().responseJSON { response in
-        handleMapResponse(response: response, completion: completion)
+    guard let url = URL(string:"https://\(environment).\(stage).com/pt-token-service/") else {
+        completion(.failure(.decodingError))
+        return
     }
+    
+    var request = URLRequest(url: url)
+    request.httpMethod = "GET"
+    request.setValue(apiKey, forHTTPHeaderField: "X-API-Key")
+    request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+    
+    makeRequest(request: request, completion: completion)
 }

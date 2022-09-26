@@ -8,6 +8,30 @@
 import Foundation
 import Sodium
 
+public extension Data {
+    init?(hexString: String) {
+      let len = hexString.count / 2
+      var data = Data(capacity: len)
+      var i = hexString.startIndex
+      for _ in 0..<len {
+        let j = hexString.index(i, offsetBy: 2)
+        let bytes = hexString[i..<j]
+        if var num = UInt8(bytes, radix: 16) {
+          data.append(&num, count: 1)
+        } else {
+          return nil
+        }
+        i = j
+      }
+      self = data
+    }
+    /// Hexadecimal string representation of `Data` object.
+    var hexadecimal: String {
+        return map { String(format: "%02x", $0) }
+            .joined()
+    }
+}
+
 func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
     var result: [String: Any] = [:]
     
@@ -19,7 +43,7 @@ func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
     result["expiration_month"] = card.expirationMonth
     result["expiration_year"] = card.expirationYear
     result["number"] = card.spacelessCard
-    result["type"] = "PAYMENT_CARD"
+    result["type"] = "card"
     
     return result
 }
@@ -32,28 +56,28 @@ func bankAccountToDictionary(account: BankAccount) -> [String: Any] {
     result["account_number"] = account.accountNumber
     result["account_type"] = types[account.accountType]
     result["bank_code"] = account.bankCode
-    result["type"] = "BANK_ACCOUNT"
+    result["type"] = "ach"
     
     return result
 }
 
-func buyerToDictionary(buyer: Buyer) -> [String: Any] {
+func payorToDictionary(payor: Payor) -> [String: Any] {
     var result: [String: Any] = [:]
     
-    if let phone = buyer.phone {
+    if let phone = payor.phone {
         result["phone"] = phone
     }
-    if let firstName = buyer.firstName {
+    if let firstName = payor.firstName {
         result["first_name"] = firstName
     }
-    if let lastName = buyer.lastName {
+    if let lastName = payor.lastName {
         result["last_name"] = lastName
     }
-    if let email = buyer.email {
+    if let email = payor.email {
         result["email"] = email
     }
     
-    result["personal_address"] = addressToDictionary(address: buyer.personalAddress)
+    result["personal_address"] = addressToDictionary(address: payor.personalAddress)
     
     return result
 }
@@ -84,7 +108,7 @@ func addressToDictionary(address: Address) -> [String: String] {
 }
 
 func cashToDictionary(cash: Cash) -> [String: String] {
-    return ["buyer" : cash.name, "buyer_contact": cash.contact]
+    return ["payor" : cash.name, "payor_contact": cash.contact]
 }
 
 func convertStringToDictionary(text: String) -> [String: AnyObject]? {
@@ -93,7 +117,7 @@ func convertStringToDictionary(text: String) -> [String: AnyObject]? {
             let json = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String: AnyObject]
             return json
         } catch {
-            print("Something went wrong")
+            print("Something went wrong decoding repsonse")
         }
     }
     return nil

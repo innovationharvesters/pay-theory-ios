@@ -22,7 +22,8 @@ class PaymentCard: ObservableObject, Equatable {
         return false
     }
 
-    private var type = "PAYMENT_CARD"
+    private var type = "card"
+    @Published var isVisible: Bool = false
     @Published var name: String?
     @Published var identity = ""
     @Published var address = Address()
@@ -47,31 +48,7 @@ class PaymentCard: ObservableObject, Equatable {
             }
         }
     }
-    @Published var number = ""{
-        didSet {
-            if (self.number.prefix(2) == "34" || self.number.prefix(2) == "37") &&
-                (self.number.count == 4 || self.number.count == 11) {
-                if oldValue.last == " " {
-                    number.remove(at: oldValue.index(before: number.endIndex))
-                } else {
-                    number += " "
-                }
-            } else if (self.number.prefix(2) != "34" && self.number.prefix(2) != "37") &&
-                        (self.number.count == 4 || self.number.count == 9 ||
-                            self.number.count == 14 || self.number.count == 19) {
-                if oldValue.last == " " {
-                    number.remove(at: oldValue.index(before: number.endIndex))
-                } else {
-                    number += " "
-                }
-            }
-            if self.number.count > 23 ||
-                ((self.number.prefix(2) == "34" || self.number.prefix(2) == "37") &&
-                    self.number.count == 18) {
-                number = oldValue
-            }
-        }
-    }
+    @Published var number = ""
     @Published var securityCode = ""{
         didSet {
             let filtered = securityCode.filter { $0.isNumber }
@@ -270,7 +247,12 @@ public struct PTCardNumber: View {
     public var body: some View {
         TextField("Card Number", text: $card.number)
             .keyboardType(.decimalPad)
-            
+            .onAppear {
+                card.isVisible = true
+            }
+            .onDisappear {
+                card.isVisible = false
+            }
     }
 }
 

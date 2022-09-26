@@ -105,11 +105,10 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    @ObservedObject var ptObject = PayTheory(apiKey: "learn-paytheorylab-67ae7514070c9fe21f9ba4e9d3ad529a",
-                                             fee_mode: .SERVICE_FEE)
+    @ObservedObject var ptObject = PayTheory(apiKey: "austin-paytheorylab-d7dbe665f5565fe8ae8a23eab45dd285")
 
 
-    let buyer = Buyer(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
+    let buyer = Payor(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
     @State private var type = 0
     @State private var amount = 0
     private var types: [String] = ["Card", "ACH", "Cash"]
@@ -190,7 +189,7 @@ struct ContentView: View {
                                                             (ptObject.cvv.isValid || ptObject.cvv.isEmpty))
 
                     Spacer().frame(height: 25)
-                        PTButton(amount: 1250, text: "PAY $54.20", buyerOptions: buyer, completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
+//                        PTButton(amount: 1250, text: "PAY $54.20", buyerOptions: buyer, completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
                     }.environmentObject(ptObject)
                 } else if type == 1 {
                     PTForm {
@@ -199,7 +198,7 @@ struct ContentView: View {
                         PTAchRoutingNumber().textFieldStyle(valid: ptObject.achRoutingNumber.isValid || ptObject.achRoutingNumber.isEmpty)
                         PTAchAccountType()
                         Spacer().frame(height: 25)
-                        PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
+//                        PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
                         .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
                     }.environmentObject(ptObject)
                 } else if type == 2 {
@@ -207,10 +206,13 @@ struct ContentView: View {
                     PTCashName().textFieldStyle(valid: ptObject.cashName.isValid || ptObject.cashName.isEmpty)
                     PTCashContact().textFieldStyle(valid: ptObject.cashContact.isValid || ptObject.cashContact.isEmpty)
                     Spacer().frame(height: 25)
-                    PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
+//                    PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
                     .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
                     }.environmentObject(ptObject)
                 }
+            Button("Transct") {
+                ptObject.initialize(amount: 1000, completion: confirmCompletion)
+            }
             }
             .padding()
             .frame(

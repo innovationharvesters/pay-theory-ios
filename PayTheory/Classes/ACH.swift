@@ -30,8 +30,9 @@ class BankAccount: ObservableObject, Equatable {
     @Published var country: String?
     @Published var identity = ""
     @Published var isValid: Bool = false
+    @Published var isVisible: Bool = false
     private var isValidCancellable: AnyCancellable!
-    private var type = "BANK_ACCOUNT"
+    private var type = "ach"
     
     var validBankCode: AnyPublisher<Bool,Never> {
         return $bankCode
@@ -149,5 +150,11 @@ public struct PTAchRoutingNumber: View {
     public var body: some View {
         TextField("Routing Number", text: $account.bankCode)
             .keyboardType(.decimalPad)
+            .onAppear {
+                account.isVisible = true
+            }
+            .onDisappear {
+                account.isVisible = false
+            }
     }
 }

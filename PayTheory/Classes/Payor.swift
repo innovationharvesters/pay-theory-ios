@@ -1,5 +1,5 @@
 //
-//  BuyerFields.swift
+//  PayorFields.swift
 //  PayTheory
 //
 //  Created by Austin Zani on 3/15/21.
@@ -7,8 +7,8 @@
 import SwiftUI
 import Foundation
 
-public class Buyer: ObservableObject, Codable, Equatable {
-    public static func == (lhs: Buyer, rhs: Buyer) -> Bool {
+public class Payor: ObservableObject, Codable, Equatable {
+    public static func == (lhs: Payor, rhs: Payor) -> Bool {
         if lhs.phone == rhs.phone &&
         lhs.firstName == rhs.firstName &&
         lhs.lastName == rhs.lastName &&
@@ -74,8 +74,8 @@ public class Buyer: ObservableObject, Codable, Equatable {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerFirstName: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorFirstName: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
    public var body: some View {
@@ -87,8 +87,8 @@ public struct PTBuyerFirstName: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerLastName: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorLastName: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {
@@ -100,8 +100,8 @@ public struct PTBuyerLastName: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerPhone: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorPhone: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {
@@ -113,8 +113,8 @@ public struct PTBuyerPhone: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerEmail: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorEmail: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {
@@ -126,8 +126,8 @@ public struct PTBuyerEmail: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerLineOne: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorLineOne: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {
@@ -139,8 +139,8 @@ public struct PTBuyerLineOne: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerLineTwo: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorLineTwo: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {
@@ -152,8 +152,8 @@ public struct PTBuyerLineTwo: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerCity: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorCity: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {
@@ -165,8 +165,8 @@ public struct PTBuyerCity: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerState: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorState: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {
@@ -178,8 +178,8 @@ public struct PTBuyerState: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerZip: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorZip: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {
@@ -191,8 +191,8 @@ public struct PTBuyerZip: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTBuyerCountry: View {
-    @EnvironmentObject var identity: Buyer
+public struct PTPayorCountry: View {
+    @EnvironmentObject var identity: Payor
     public init() {
     }
     public var body: some View {

@@ -85,16 +85,34 @@ public class Address: ObservableObject, Codable, Equatable {
     }
 }
 
-//Actions for webhook messages
+//Action Constants
 let HOST_TOKEN = "host:hostToken"
 let TRANSFER_PART1 = "host:transfer_part1"
 let TRANSFER_PART2 = "host:transfer_part2"
+let TOKENIZE = "host:tokenize"
 let CANCEL_TRANSFER = "host:cancel_transfer"
-let CASH = "host:barcode"
+let BARCODE = "host:barcode"
+
+// Constants for incoming message types
+let HOST_TOKEN_TYPE = "host_token"
+let TRANSFER_CONFIRMATION_TYPE = "transfer_confirmation"
+let CANCEL_TYPE = "cancel"
+let BARCODE_COMPLETE_TYPE = "barcode_complete"
+let TRANSFER_COMPLETE_TYPE = "transfer_complete"
+let TOKENIZE_COMPLETE_TYPE = "tokenize_complete"
+let ERROR_TYPE = "error"
+
+let ENCRYPTED_MESSAGES = [TRANSFER_CONFIRMATION_TYPE, BARCODE_COMPLETE_TYPE, TRANSFER_COMPLETE_TYPE, TOKENIZE_COMPLETE_TYPE]
 
 public enum FEE_MODE: String, Codable {
-    case SURCHARGE = "surcharge"
+    case INTERCHANGE = "interchange"
     case SERVICE_FEE = "service_fee"
+}
+
+public enum PAYMENT_TYPE: String, Codable {
+    case CARD = "CARD"
+    case ACH = "ACH"
+    case CASH = "CASH"
 }
 
 //Extensions to swift foundational 

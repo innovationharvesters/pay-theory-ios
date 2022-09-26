@@ -12,6 +12,7 @@ class Cash: ObservableObject {
     @Published var name = ""
     @Published var contact = ""
     @Published var isValid: Bool = false
+    @Published var isVisible: Bool = false
     private var isValidCancellable: AnyCancellable!
     
     var validName: AnyPublisher<Bool,Never> {
@@ -78,6 +79,12 @@ public struct PTCashName: View {
     public var body: some View {
         TextField("Full Name", text: $cash.name)
             .autocapitalization(UITextAutocapitalizationType.words)
+            .onAppear {
+                cash.isVisible = true
+            }
+            .onDisappear {
+                cash.isVisible = false
+            }
     }
 }
 

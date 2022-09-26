@@ -10,29 +10,6 @@ import XCTest
 @testable import PayTheory
 
 class DataModelTests: XCTestCase {
-    
-    func testBankAccountIsValid() {
-        let bankAccount = BankAccount()
-        bankAccount.identity = "test"
-        XCTAssertFalse(bankAccount.isValid)
-        XCTAssertTrue(bankAccount.validAccountType)
-        
-        bankAccount.accountType = 3
-        
-        XCTAssertFalse(bankAccount.validAccountType)
-        
-        bankAccount.accountType = 1
-        
-        XCTAssertTrue(bankAccount.validAccountType)
-        
-        bankAccount.bankCode = "789456124"
-        bankAccount.accountNumber = "11111111"
-        bankAccount.name = "Test Name"
-        
-        XCTAssertTrue(bankAccount.isValid)
-        XCTAssertEqual(bankAccount.lastFour, "1111")
-        
-    }
 
     func testClearBankAccount() {
         let bank = BankAccount()
@@ -50,48 +27,35 @@ class DataModelTests: XCTestCase {
         XCTAssertEqual(bank, bank2)
     }
 
-    func testBankAccountValidAccountType() {
-        let bankAccount = BankAccount()
-        XCTAssertTrue(bankAccount.validAccountType)
-
-        bankAccount.accountType = 3
-
-        XCTAssertFalse(bankAccount.validAccountType)
-
-        bankAccount.accountType = 1
-
-        XCTAssertTrue(bankAccount.validAccountType)
-    }
-
-    func testBankAccountValidBankCode() {
-        let bankAccount = BankAccount()
-
-        XCTAssertFalse(bankAccount.validBankCode)
-
-        bankAccount.bankCode = "000"
-
-        XCTAssertFalse(bankAccount.validBankCode)
-
-        bankAccount.bankCode = "789456124"
-
-        XCTAssertTrue(bankAccount.validBankCode)
-
-        bankAccount.bankCode = "789456124000"
-
-        XCTAssertFalse(bankAccount.validBankCode)
-
-        bankAccount.bankCode = "F89456124"
-
-        XCTAssertFalse(bankAccount.validBankCode)
-
-        bankAccount.bankCode = "7F9456124"
-
-        XCTAssertFalse(bankAccount.validBankCode)
-
-        bankAccount.bankCode = "78F456124"
-
-        XCTAssertFalse(bankAccount.validBankCode)
-    }
+//    func testBankAccountValidBankCode() {
+//        let bankAccount = BankAccount()
+//
+//        XCTAssertFalse(bankAccount.validBankCode)
+//
+//        bankAccount.bankCode = "000"
+//
+//        XCTAssertFalse(bankAccount.validBankCode)
+//
+//        bankAccount.bankCode = "789456124"
+//
+//        XCTAssertTrue(bankAccount.validBankCode)
+//
+//        bankAccount.bankCode = "789456124000"
+//
+//        XCTAssertFalse(bankAccount.validBankCode)
+//
+//        bankAccount.bankCode = "F89456124"
+//
+//        XCTAssertFalse(bankAccount.validBankCode)
+//
+//        bankAccount.bankCode = "7F9456124"
+//
+//        XCTAssertFalse(bankAccount.validBankCode)
+//
+//        bankAccount.bankCode = "78F456124"
+//
+//        XCTAssertFalse(bankAccount.validBankCode)
+//    }
     
     func testClearPaymentCard() {
         let card = PaymentCard()
@@ -166,31 +130,31 @@ class DataModelTests: XCTestCase {
         XCTAssertEqual(card.firstSix, "601187")
     }
 
-    func testCreditCardValidCardNumber() {
-        let card = PaymentCard()
-
-        XCTAssertFalse(card.validCardNumber)
-
-        card.number = "0001"
-
-        XCTAssertFalse(card.validCardNumber)
-
-        card.number = "4242424242424242"
-
-        XCTAssertTrue(card.validCardNumber)
-
-        card.number = "4929449361763377"
-
-        XCTAssertTrue(card.validCardNumber)
-
-        card.number = "1111111111111111"
-
-        XCTAssertFalse(card.validCardNumber)
-
-        card.number = "card-number-test"
-
-        XCTAssertFalse(card.validCardNumber)
-    }
+//    func testCreditCardValidCardNumber() {
+//        let card = PaymentCard()
+//
+//        XCTAssertFalse(card.validCardNumber)
+//
+//        card.number = "0001"
+//
+//        XCTAssertFalse(card.validCardNumber)
+//
+//        card.number = "4242424242424242"
+//
+//        XCTAssertTrue(card.validCardNumber)
+//
+//        card.number = "4929449361763377"
+//
+//        XCTAssertTrue(card.validCardNumber)
+//
+//        card.number = "1111111111111111"
+//
+//        XCTAssertFalse(card.validCardNumber)
+//
+//        card.number = "card-number-test"
+//
+//        XCTAssertFalse(card.validCardNumber)
+//    }
 
     func testCreditCardIsValid() {
         let card = PaymentCard()
@@ -216,53 +180,53 @@ class DataModelTests: XCTestCase {
 
     }
 
-    func testCreditCardExpIsValid() {
-        let card = PaymentCard()
-        XCTAssertFalse(card.validExpirationDate)
-
-        card.expirationDate = "12 / 22"
-
-        XCTAssertTrue(card.validExpirationDate)
-
-        card.expirationDate = "NO / 22"
-
-        XCTAssertFalse(card.validExpirationDate)
-
-        card.expirationDate = "12 / NO"
-
-        XCTAssertFalse(card.validExpirationDate)
-
-    }
-
-    func testCreditCardValidExpDate() {
-        let card = PaymentCard()
-        XCTAssertFalse(card.validExpirationDate)
-
-        card.expirationDate = "13 / 22"
-
-
-        XCTAssertFalse(card.validExpirationDate)
-
-        card.expirationDate = "13 / 22"
-
-        XCTAssertFalse(card.validExpirationDate)
-
-        card.expirationDate = "11 / 2019"
-
-        XCTAssertFalse(card.validExpirationDate)
-
-        card.expirationDate = "NO"
-
-        XCTAssertFalse(card.validExpirationDate)
-
-        card.expirationDate = "13 / NO"
-
-        XCTAssertFalse(card.validExpirationDate)
-
-        card.expirationDate = "11 / 22"
-
-        XCTAssertTrue(card.validExpirationDate)
-    }
+//    func testCreditCardExpIsValid() {
+//        let card = PaymentCard()
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//        card.expirationDate = "12 / 22"
+//
+//        XCTAssertTrue(card.validExpirationDate)
+//
+//        card.expirationDate = "NO / 22"
+//
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//        card.expirationDate = "12 / NO"
+//
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//    }
+//
+//    func testCreditCardValidExpDate() {
+//        let card = PaymentCard()
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//        card.expirationDate = "13 / 22"
+//
+//
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//        card.expirationDate = "13 / 22"
+//
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//        card.expirationDate = "11 / 2019"
+//
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//        card.expirationDate = "NO"
+//
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//        card.expirationDate = "13 / NO"
+//
+//        XCTAssertFalse(card.validExpirationDate)
+//
+//        card.expirationDate = "11 / 22"
+//
+//        XCTAssertTrue(card.validExpirationDate)
+//    }
 
     func testDidSetCardDate() {
         let card = PaymentCard()
@@ -404,7 +368,7 @@ class DataModelTests: XCTestCase {
         address.line2 = "Apt 2"
         address.postalCode = "45212"
 
-        let buyer = Buyer()
+        let buyer = Payor()
         buyer.firstName = "Test"
         buyer.lastName = "Buyer"
         buyer.email = "test"
@@ -415,14 +379,14 @@ class DataModelTests: XCTestCase {
         let decoder = JSONDecoder()
 
         let data = try? encoder.encode(buyer)
-        let decodedBuyer = try? decoder.decode(Buyer.self, from: data!)
+        let decodedBuyer = try? decoder.decode(Payor.self, from: data!)
 
         XCTAssertEqual(buyer, decodedBuyer)
 
-        let buyer2 = Buyer()
+        let buyer2 = Payor()
 
         let data2 = try? encoder.encode(buyer2)
-        let decodedBuyer2 = try? decoder.decode(Buyer.self, from: data2!)
+        let decodedBuyer2 = try? decoder.decode(Payor.self, from: data2!)
 
         XCTAssertEqual(buyer2, decodedBuyer2)
 
@@ -434,13 +398,13 @@ class DataModelTests: XCTestCase {
         let lastName = "Person"
         let email = "test@test.com"
         let phone = "5555555555"
-        let buyer = Buyer()
+        let buyer = Payor()
         buyer.firstName = firstName
         buyer.lastName = lastName
         buyer.email = email
         buyer.phone = phone
 
-        let buyer2 = Buyer()
+        let buyer2 = Payor()
 
         XCTAssertNotEqual(buyer, buyer2)
 

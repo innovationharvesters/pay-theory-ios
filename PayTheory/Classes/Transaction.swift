@@ -7,29 +7,62 @@
 
 import Foundation
 import Sodium
+//import CryptoKit
 
 class Transaction: ObservableObject {
     
     @Published var hostToken: String?
     var sessionKey: String = ""
+//    var serverKey: Data = Data()
     var publicKey: Bytes = "".bytes
     var ptInstrument: String?
     var idempotencyToken: [String: AnyObject]?
     var transferToken: [String: AnyObject]?
-    var keyPair: Box.KeyPair
     var completionHandler: ((Result<[String: Any], FailureResponse>) -> Void)?
-    var sodium: Sodium
     var apiKey: String = ""
     var amount: Int = 0
-    var feeMode: FEE_MODE = .SURCHARGE
-    var tags: [String: Any] = [:]
+    var keyPair: Box.KeyPair
+    var sodium: Sodium
+//    let privateKey: Curve25519.KeyAgreement.PrivateKey
+//    let publicKey: Curve25519.KeyAgreement.PublicKey
+    var feeMode: FEE_MODE = .INTERCHANGE
+    var metadata: [String: Any] = [:]
+    var payTheoryData: [String: Any] = [:]
     var lastMessage: String?
-    var buyerOptions: Buyer?
+    var payor: Payor?
+    var confirmation: Bool = false
     
     init() {
-        self.sodium = Sodium()
-        self.keyPair = sodium.box.keyPair()!
+        sodium = Sodium()
+        keyPair = sodium.box.keyPair()!
     }
+    
+    
+//    func encryptBody(body: [String: Any], action: String) -> String? {
+//        var message: [String: Any] = [:]
+//        let strigifiedMessage = stringify(jsonDictionary: body).data(using: .utf8)!
+//        do {
+//            print(publicKey.rawRepresentation)
+//            print(serverKey)
+//            let serverPublicKey = try Curve25519.KeyAgreement.PublicKey(rawRepresentation: serverKey)
+//            print(serverPublicKey)
+//            let sharedSecret = try privateKey.sharedSecretFromKeyAgreement(with: serverPublicKey)
+//            print(sharedSecret)
+//            let sharedKey = sharedSecret.hkdfDerivedSymmetricKey(using: SHA256.self, salt: Data(), sharedInfo: Data(), outputByteCount: 32)
+//            print(sharedKey)
+//            let encryptedMessage = try ChaChaPoly.seal(strigifiedMessage, using: sharedKey).combined
+//            let sealedBox = try ChaChaPoly.SealedBox(combined: encryptedMessage)
+//            let nonceAndMessage = Data(sealedBox.nonce) + Data(sealedBox.ciphertext)
+//            print(Data(sealedBox.nonce))
+//            message["encoded"] = nonceAndMessage.base64EncodedString()
+//            message["sessionKey"] = sessionKey
+//            message["publicKey"] = publicKey.rawRepresentation.base64EncodedString()
+//            message["action"] =  action
+//            return stringify(jsonDictionary: message)
+//        } catch {
+//            return nil
+//        }
+//    }
     
     func encryptBody(body: [String: Any], action: String) -> String {
         var message: [String: Any] = [:]
@@ -45,6 +78,21 @@ class Transaction: ObservableObject {
         message["action"] =  action
         return stringify(jsonDictionary: message)
     }
+
+    func decryptBody(body: String, publicKey: String) -> String {
+        let senderKey = convertStringToByte(string: publicKey)
+        let bodyBytes = convertStringToByte(string: body)
+        if let decrypted = sodium.box.open(nonceAndAuthenticatedCipherText: bodyBytes,
+                                           senderPublicKey: senderKey,
+                                           recipientSecretKey: self.keyPair.secretKey) {
+            print("decrypted", decrypted)
+            let decryptedString = convertBytesToString(bytes: decrypted)
+            let decodedData = Data(base64Encoded: decryptedString) ?? Data()
+            let decodedString = String(data: decodedData, encoding: .utf8) ?? ""
+            return decodedString
+        }
+        return ""
+    }
     
     func createCashBody(payment: [String: Any]) -> String? {
         if let host = hostToken {
@@ -55,30 +103,33 @@ class Transaction: ObservableObject {
                 "sessionKey": sessionKey,
                 "timing": Date().millisecondsSince1970,
                 "payment": newPayment,
-                "buyerOptions": buyerToDictionary(buyer: buyerOptions ?? Buyer()),
-                "tags": tags
-            ], action: CASH)
+                "payor_info": payorToDictionary(payor: payor ?? Payor()),
+                "pay_theory_data": payTheoryData,
+                "metadata": metadata
+            ], action: BARCODE)
         } else {
             return nil
         }
     }
     
     func createTransferPartOneBody(instrument: [String: Any]) -> String? {
+        print("got here")
         if let host = hostToken {
-            let confirmation = feeMode == .SERVICE_FEE ? true : false
+            print("even got here")
             return encryptBody(body: [
                 "hostToken": host,
                 "sessionKey": sessionKey,
                 "timing": Date().millisecondsSince1970,
-                "instrument_data": instrument,
+                "payment_method_data": instrument,
                 "payment_data": [
                     "fee_mode": feeMode.rawValue,
                     "currency": "USD",
                     "amount": amount
                 ],
                 "confirmation_needed": confirmation,
-                "buyerOptions": buyerToDictionary(buyer: buyerOptions ?? Buyer()),
-                "tags": tags
+                "payor_info": payorToDictionary(payor: payor ?? Payor()),
+                "pay_theory_data": payTheoryData,
+                "metadata": metadata
             ], action: TRANSFER_PART1)
         } else {
             return nil
@@ -88,10 +139,10 @@ class Transaction: ObservableObject {
     func createTransferPartTwoBody() -> String? {
         if let transfer = idempotencyToken {
             return encryptBody(body: [
-                "transfer": transfer,
+                "payment_prep": transfer,
                 "sessionKey": sessionKey,
                 "timing": Date().millisecondsSince1970,
-                "tags": tags
+                "metadata": metadata
             ], action: TRANSFER_PART2)
         } else {
             return nil
@@ -119,7 +170,7 @@ class Transaction: ObservableObject {
               "amount": transfer["amount"] as? Int ?? 0,
               "service_fee": transfer["service_fee"] as? Int ?? 0,
               "state": transfer["state"] as? String ?? "",
-              "tags": transfer["tags"] as? [String: Any] ?? [:]
+              "metadata": transfer["metadata"] as? [String: Any] ?? [:]
             ]
             if let brand = transfer["card_brand"] {
                 result["brand"] = brand as? String ?? ""
