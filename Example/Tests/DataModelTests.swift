@@ -12,13 +12,13 @@ import XCTest
 class DataModelTests: XCTestCase {
 
     func testClearBankAccount() {
-        let bank = BankAccount()
+        let bank = ACH()
         bank.name = "Test"
         bank.accountNumber = "11111111"
         bank.accountType = 0
         bank.bankCode = "11111111"
         
-        let bank2 = BankAccount()
+        let bank2 = ACH()
 
         XCTAssertNotEqual(bank, bank2)
 
@@ -58,12 +58,12 @@ class DataModelTests: XCTestCase {
 //    }
     
     func testClearPaymentCard() {
-        let card = PaymentCard()
+        let card = Card()
         card.number = "11111111"
         card.expirationDate = "12 / 22"
         card.securityCode = "240"
         
-        let card2 = PaymentCard()
+        let card2 = Card()
 
         XCTAssertNotEqual(card, card2)
 
@@ -73,7 +73,7 @@ class DataModelTests: XCTestCase {
     }
 
     func testCreditCardBrand() {
-        let card = PaymentCard()
+        let card = Card()
 
         XCTAssertEqual(card.brand, "")
 
@@ -103,7 +103,7 @@ class DataModelTests: XCTestCase {
     }
 
     func testCardLastFour() {
-        let card = PaymentCard()
+        let card = Card()
 
         XCTAssertEqual(card.lastFour, "")
 
@@ -117,7 +117,7 @@ class DataModelTests: XCTestCase {
     }
 
     func testCardFirstSix() {
-        let card = PaymentCard()
+        let card = Card()
 
         XCTAssertEqual(card.firstSix, "")
 
@@ -157,7 +157,7 @@ class DataModelTests: XCTestCase {
 //    }
 
     func testCreditCardIsValid() {
-        let card = PaymentCard()
+        let card = Card()
         XCTAssertFalse(card.isValid)
 
         card.number =  "424242424242424242424242424242"
@@ -229,7 +229,7 @@ class DataModelTests: XCTestCase {
 //    }
 
     func testDidSetCardDate() {
-        let card = PaymentCard()
+        let card = Card()
 
         card.expirationDate = "1"
 
@@ -262,7 +262,7 @@ class DataModelTests: XCTestCase {
     }
 
     func testDidSetCadNumber() {
-        let card = PaymentCard()
+        let card = Card()
 
         card.number = "1"
 

@@ -32,7 +32,7 @@ public extension Data {
     }
 }
 
-func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
+func paymentCardToDictionary(card: Card) -> [String: Any] {
     var result: [String: Any] = [:]
     
     if let name = card.name {
@@ -48,7 +48,7 @@ func paymentCardToDictionary(card: PaymentCard) -> [String: Any] {
     return result
 }
 
-func bankAccountToDictionary(account: BankAccount) -> [String: Any] {
+func bankAccountToDictionary(account: ACH) -> [String: Any] {
     var result: [String: Any] = [:]
     let types = ["CHECKING", "SAVINGS"]
     
@@ -158,6 +158,21 @@ func parseError(errors: [String: AnyObject]) -> String {
     return "\(type) \(message)"
 }
 
+func isValidPostalCode(value: String) -> Bool {
+    if(value == "") {
+        return false
+    }
+    for regex in postalRegexList {
+        let zipTest = NSPredicate(format:"SELF MATCHES %@", regex[1])
+        let evaluated = zipTest.evaluate(with: value)
+        if(evaluated) {
+            return true
+        }
+    }
+    
+    return false
+}
+
 func isValidEmail(value: String) -> Bool {
             let EMAIL_REGEX = "(?:[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}~-]+(?:\\.[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}" +
                 "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\" +
@@ -187,20 +202,24 @@ func isValidExpDate(month: String, year: String) -> Bool {
     let currentDate = Date()
     let calendar = Calendar.current
     let currentYear = calendar.component(.year, from: currentDate)
-
-    if let monthed = Int(month) {
-        if monthed <= 0 || monthed > 12 {
-            return false
-        }
-    } else {
-        return false
-    }
-
+    let currentMonth = calendar.component(.month, from: currentDate)
+    
     if let yeared = Int(year) {
         if yeared < currentYear {
+            // Expired because past exp year
+            return false
+        }
+        if let monthed = Int(month) {
+            if monthed < currentMonth && yeared == currentYear {
+                // Expired because month is previous month this year
+                return false
+            }
+        } else {
+            // Could not parse month to Int
             return false
         }
     } else {
+        // Could not parse year to Int
         return false
     }
 
@@ -263,3 +282,46 @@ func isValidRoutingNumber(code: String) -> Bool {
     
     return number > 0 && number % 10 == 0
 }
+
+func insertCreditCardSpaces(_ string: String) -> String {
+        // Mapping of card prefix to pattern is taken from
+        // https://baymard.com/checkout-usability/credit-card-patterns
+
+        // UATP cards have 4-5-6 (XXXX-XXXXX-XXXXXX) format
+        let is456 = string.hasPrefix("1")
+
+        // These prefixes reliably indicate either a 4-6-5 or 4-6-4 card. We treat all these
+        // as 4-6-5-4 to err on the side of always letting the user type more digits.
+        let is465 = [
+            // Amex
+            "34", "37",
+
+            // Diners Club
+            "300", "301", "302", "303", "304", "305", "309", "36", "38", "39"
+        ].contains { string.hasPrefix($0) }
+
+        // In all other cases, assume 4-4-4-4-3.
+        // This won't always be correct; for instance, Maestro has 4-4-5 cards according
+        // to https://baymard.com/checkout-usability/credit-card-patterns, but I don't
+        // know what prefixes identify particular formats.
+        let is4444 = !(is456 || is465)
+
+        var stringWithAddedSpaces = ""
+
+        for i in 0..<string.count {
+            let needs465Spacing = (is465 && (i == 4 || i == 10))
+            let needs456Spacing = (is456 && (i == 4 || i == 9))
+            let needs4444Spacing = (is4444 && i > 0 && (i % 4) == 0 && i < 13)
+
+            if needs465Spacing || needs456Spacing || needs4444Spacing {
+                stringWithAddedSpaces.append(" ")
+            }
+
+            let characterToAdd = string[string.index(string.startIndex, offsetBy:i)]
+            if(((is456 || is465) && i <= 14) || (is4444 && i <= 15)) {
+                stringWithAddedSpaces.append(characterToAdd)
+            }
+        }
+
+        return stringWithAddedSpaces
+    }

@@ -8,14 +8,14 @@ import SwiftUI
 import Foundation
 import Combine
 
-class PaymentCard: ObservableObject, Equatable {
-    static func == (lhs: PaymentCard, rhs: PaymentCard) -> Bool {
+class Card: ObservableObject, Equatable {
+    static func == (lhs: Card, rhs: Card) -> Bool {
         if lhs.name == rhs.name &&
-        lhs.expirationDate == rhs.expirationDate &&
-        lhs.identity == rhs.identity &&
-        lhs.address == rhs.address &&
-        lhs.number == rhs.number &&
-        lhs.type == rhs.type &&
+            lhs.expirationDate == rhs.expirationDate &&
+            lhs.identity == rhs.identity &&
+            lhs.address == rhs.address &&
+            lhs.number == rhs.number &&
+            lhs.type == rhs.type &&
             lhs.securityCode == rhs.securityCode {
             return true
         }
@@ -29,26 +29,42 @@ class PaymentCard: ObservableObject, Equatable {
     @Published var address = Address()
     @Published var expirationDate = ""{
         didSet {
-            if let month = Int(self.expirationDate) {
-                if self.expirationDate.count == 1 && month > 1 {
-                    expirationDate = "0" + expirationDate + " / "
-                }
-                if self.expirationDate.count == 2 && month > 12 {
-                    expirationDate = "0" + String(expirationDate.prefix(1)) + " / " + String(expirationDate.suffix(1))
-                }
-            }
-            if self.expirationDate.count == 2 {
-                expirationDate += " / "
-            }
-            if self.expirationDate.count == 4 {
-                expirationDate = String(expirationDate.prefix(1))
-            }
-            if self.expirationDate.count > 9 {
+            var filtered = expirationDate.filter { $0.isNumber }
+            if filtered.count > 4 {
                 expirationDate = oldValue
+            } else {
+                if let month = Int(filtered) {
+                    if filtered.count == 1 && month > 1 {
+                        filtered = "0" + filtered
+                    }
+                    if filtered.count == 2 && month > 12 {
+                        filtered = "0" + filtered
+                    }
+                }
+                var stringWithAddedSpaces = ""
+                
+                for i in 0..<filtered.count {
+                    if i == 2 {
+                        stringWithAddedSpaces.append(" / ")
+                    }
+                    let characterToAdd = filtered[filtered.index(filtered.startIndex, offsetBy:i)]
+                    stringWithAddedSpaces.append(characterToAdd)
+                }
+                if(expirationDate != oldValue) {
+                    expirationDate = stringWithAddedSpaces
+                }
             }
         }
     }
-    @Published var number = ""
+    @Published var number = ""{
+        didSet {
+            let filtered = number.filter { $0.isNumber }
+            let formatted = insertCreditCardSpaces(filtered)
+            if(number != oldValue) {
+                number = formatted
+            }
+        }
+    }
     @Published var securityCode = ""{
         didSet {
             let filtered = securityCode.filter { $0.isNumber }
@@ -83,8 +99,6 @@ class PaymentCard: ObservableObject, Equatable {
                 var result = ""
                 if data.count == 7 {
                     result = "20" + String(data.suffix(2))
-                } else if data.count == 9 {
-                    result = String(data.suffix(4))
                 }
                 return result
             }
@@ -100,7 +114,7 @@ class PaymentCard: ObservableObject, Equatable {
     }
     
     var spacelessCard: String {
-        return String(number.filter { !" \n\t\r".contains($0) })
+        return number.filter { $0.isNumber }
     }
     
     var brand: String {
@@ -141,26 +155,10 @@ class PaymentCard: ObservableObject, Equatable {
             .eraseToAnyPublisher()
     }
     
-    var publicValidCardNumber: AnyPublisher<Bool,Never> {
-        return $number
-            .map { data in
-                return isValidCardNumber(cardString: data) && data.isEmpty
-            }
-            .eraseToAnyPublisher()
-    }
-    
     var validExpirationDate: AnyPublisher<Bool,Never> {
         return Publishers.CombineLatest(expirationYearPublisher, expirationMonthPublisher)
             .map { year, month in
                 return isValidExpDate(month: month, year: year)
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    var publicValidExpirationDate: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest(expirationYearPublisher, expirationMonthPublisher)
-            .map { year, month in
-                return isValidExpDate(month: month, year: year) && self.expirationDate.isEmpty
             }
             .eraseToAnyPublisher()
     }
@@ -174,19 +172,20 @@ class PaymentCard: ObservableObject, Equatable {
             .eraseToAnyPublisher()
     }
     
-    var publicValidSecurityCode: AnyPublisher<Bool,Never> {
-        return $securityCode
-            .map { input in
-                let num = Int(input)
-                return num != nil && input.length > 2 && input.length < 5 && input.isEmpty
-              }
+    var validPostalCode: AnyPublisher<Bool, Never> {
+        return address.$postalCode
+            .map {
+                data in
+                let unwrapped = data ?? ""
+                return isValidPostalCode(value: unwrapped)
+            }
             .eraseToAnyPublisher()
     }
     
     var isValidPublisher: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest3(validCardNumber, validSecurityCode, validExpirationDate)
-            .map { validNumber, validCode, validDate in
-                if validNumber == false || validCode == false || validDate == false {
+        return Publishers.CombineLatest4(validCardNumber, validSecurityCode, validExpirationDate, validPostalCode)
+            .map { validNumber, validCode, validDate, validPostal in
+                if validNumber == false || validCode == false || validDate == false || validPostal == false {
                     return false
                 }
                 return true
@@ -223,7 +222,7 @@ class PaymentCard: ObservableObject, Equatable {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTCardName: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
     }
 
@@ -240,7 +239,7 @@ public struct PTCardName: View {
 ///  - Important: This is required to be able to run a transaction.
 ///
 public struct PTCardNumber: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
         
     }
@@ -263,7 +262,7 @@ public struct PTCardNumber: View {
 ///  - Important: This is required to be able to run a transaction.
 ///
 public struct PTExp: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
         
     }
@@ -280,7 +279,7 @@ public struct PTExp: View {
 ///  - Important: This is required to be able to run a transaction.
 ///
 public struct PTCvv: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
         
     }
@@ -295,7 +294,7 @@ public struct PTCvv: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTCardLineOne: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
         
     }
@@ -311,7 +310,7 @@ public struct PTCardLineOne: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTCardLineTwo: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
         
     }
@@ -326,7 +325,7 @@ public struct PTCardLineTwo: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTCardCity: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
         
     }
@@ -341,7 +340,7 @@ public struct PTCardCity: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTCardState: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
         
     }
@@ -357,15 +356,15 @@ public struct PTCardState: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTCardZip: View {
-    @EnvironmentObject var card: PaymentCard
+public struct PTCardPostalCode: View {
+    @EnvironmentObject var card: Card
     public init() {
         
     }
     
     public var body: some View {
         TextField("Zip", text: $card.address.postalCode ?? "")
-            .keyboardType(.decimalPad)
+            .keyboardType(.numbersAndPunctuation)
     }
 }
 
@@ -374,7 +373,7 @@ public struct PTCardZip: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTCardCountry: View {
-    @EnvironmentObject var card: PaymentCard
+    @EnvironmentObject var card: Card
     public init() {
         
     }

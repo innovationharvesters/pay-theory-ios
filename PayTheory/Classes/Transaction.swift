@@ -13,7 +13,6 @@ class Transaction: ObservableObject {
     
     @Published var hostToken: String?
     var sessionKey: String = ""
-//    var serverKey: Data = Data()
     var publicKey: Bytes = "".bytes
     var ptInstrument: String?
     var idempotencyToken: [String: AnyObject]?
@@ -23,8 +22,6 @@ class Transaction: ObservableObject {
     var amount: Int = 0
     var keyPair: Box.KeyPair
     var sodium: Sodium
-//    let privateKey: Curve25519.KeyAgreement.PrivateKey
-//    let publicKey: Curve25519.KeyAgreement.PublicKey
     var feeMode: FEE_MODE = .INTERCHANGE
     var metadata: [String: Any] = [:]
     var payTheoryData: [String: Any] = [:]
@@ -113,9 +110,7 @@ class Transaction: ObservableObject {
     }
     
     func createTransferPartOneBody(instrument: [String: Any]) -> String? {
-        print("got here")
         if let host = hostToken {
-            print("even got here")
             return encryptBody(body: [
                 "hostToken": host,
                 "sessionKey": sessionKey,
@@ -144,6 +139,24 @@ class Transaction: ObservableObject {
                 "timing": Date().millisecondsSince1970,
                 "metadata": metadata
             ], action: TRANSFER_PART2)
+        } else {
+            return nil
+        }
+    }
+    
+    func createTokenizePaymentMethodBody(instrument: [String: Any], payorId: String? = nil) -> String? {
+        if let host = hostToken {
+            return encryptBody(body: [
+                "hostToken": host,
+                "sessionKey": sessionKey,
+                "timing": Date().millisecondsSince1970,
+                "payment_method_data": instrument,
+                "payor_info": payorToDictionary(payor: payor ?? Payor()),
+                "pay_theory_data": [
+                    "payor_id": payorId ?? ""
+                ],
+                "metadata": metadata
+            ], action: TOKENIZE)
         } else {
             return nil
         }

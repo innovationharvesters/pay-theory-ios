@@ -19,10 +19,10 @@ public class FailureResponse: Error, Equatable {
         return false
     }
 
-    public var receiptNumber = ""
-    public var lastFour = ""
+    public var receiptNumber: String?
+    public var lastFour: String?
     public var brand: String?
-    public var state = "FAILURE"
+    public var state: String?
     public var type: String
     public init(type: String) {
         self.type = type

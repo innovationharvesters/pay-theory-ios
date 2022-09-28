@@ -8,8 +8,8 @@ import SwiftUI
 import Foundation
 import Combine
 
-class BankAccount: ObservableObject, Equatable {
-    static func == (lhs: BankAccount, rhs: BankAccount) -> Bool {
+class ACH: ObservableObject, Equatable {
+    static func == (lhs: ACH, rhs: ACH) -> Bool {
         if lhs.name == rhs.name &&
         lhs.accountNumber == rhs.accountNumber &&
         lhs.accountType == rhs.accountType &&
@@ -62,7 +62,7 @@ class BankAccount: ObservableObject, Equatable {
     var isValidPublisher: AnyPublisher<Bool,Never> {
         return Publishers.CombineLatest4(validAccountName, $accountType, validBankCode, validAccountNumber)
             .map { name, type, validCode, validNumber in
-                if validCode == false || validNumber == false || name || type > 1 {
+                if validCode == false || validNumber == false || name == false || type > 1 {
                     return false
                 }
                 return true
@@ -94,7 +94,7 @@ class BankAccount: ObservableObject, Equatable {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTAchAccountName: View {
-    @EnvironmentObject var account: BankAccount
+    @EnvironmentObject var account: ACH
     public init() {
     }
     
@@ -109,7 +109,7 @@ public struct PTAchAccountName: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTAchAccountNumber: View {
-    @EnvironmentObject var account: BankAccount
+    @EnvironmentObject var account: ACH
     public init() {
     }
     
@@ -124,7 +124,7 @@ public struct PTAchAccountNumber: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTAchAccountType: View {
-    @EnvironmentObject var account: BankAccount
+    @EnvironmentObject var account: ACH
     var types = ["Checking", "Savings"]
     public init() {
     }
@@ -143,7 +143,7 @@ public struct PTAchAccountType: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTAchRoutingNumber: View {
-    @EnvironmentObject var account: BankAccount
+    @EnvironmentObject var account: ACH
     public init() {
     }
     

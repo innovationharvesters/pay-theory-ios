@@ -105,10 +105,10 @@ struct ContentView: View {
     @State private var confirmationMessage = ""
     @State private var showingConfirmation = false
     @State private var showingMessage = false
-    @ObservedObject var ptObject = PayTheory(apiKey: "austin-paytheorylab-d7dbe665f5565fe8ae8a23eab45dd285")
+    @EnvironmentObject private var ptObject: PayTheory
 
 
-    let buyer = Payor(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
+    let payor = Payor(firstName: "Swift", lastName: "Demo", phone: "555-555-5555")
     @State private var type = 0
     @State private var amount = 0
     private var types: [String] = ["Card", "ACH", "Cash"]
@@ -117,6 +117,7 @@ struct ContentView: View {
     func completion(result: Result<[String: Any], FailureResponse>) {
         switch result {
         case .success(let token):
+            print("success", token)
             if token["brand"] as? String ?? "" != "ACH" {
                 self.confirmationMessage = """
                                             Are you sure you want to charge
@@ -141,6 +142,7 @@ struct ContentView: View {
     func confirmCompletion(result: Result<[String: Any], FailureResponse>) {
         switch result {
         case .success(let token):
+            print("success", token)
             if let brand = token["brand"] {
                 self.confirmationMessage = """
                                             You charged $\(String(format:"%.2f",
@@ -165,6 +167,7 @@ struct ContentView: View {
     }
     
     var body: some View {
+        Text(ptObject.exp.isValid ? "Valid" : "Invalid")
         VStack(spacing: 10) {
                 Spacer().frame(height: 50)
                 Text("$54.20").bold()
@@ -181,38 +184,32 @@ struct ContentView: View {
                 }.pickerStyle(SegmentedPickerStyle())
                 
                 if type == 0 {
-                    PTForm {
                         PTCardName().textFieldStyle()
                         
                         PTCombinedCard().textFieldStyle(valid: (ptObject.cardNumber.isValid || ptObject.cardNumber.isEmpty) &&
                                                             (ptObject.exp.isValid || ptObject.exp.isEmpty) &&
                                                             (ptObject.cvv.isValid || ptObject.cvv.isEmpty))
+                    PTCardPostalCode().textFieldStyle(valid: (ptObject.postalCode.isValid || ptObject.postalCode.isEmpty))
 
                     Spacer().frame(height: 25)
-//                        PTButton(amount: 1250, text: "PAY $54.20", buyerOptions: buyer, completion: completion).buttonStyle(disabled: ptObject.buttonDisabled)
-                    }.environmentObject(ptObject)
                 } else if type == 1 {
-                    PTForm {
-                        PTAchAccountName().textFieldStyle(valid: ptObject.achAccountName.isValid || ptObject.achAccountName.isEmpty)
-                        PTAchAccountNumber().textFieldStyle(valid: ptObject.achAccountNumber.isValid || ptObject.achAccountNumber.isEmpty)
-                        PTAchRoutingNumber().textFieldStyle(valid: ptObject.achRoutingNumber.isValid || ptObject.achRoutingNumber.isEmpty)
+                        PTAchAccountName().textFieldStyle(valid: ptObject.accountName.isValid || ptObject.accountName.isEmpty)
+                        PTAchAccountNumber().textFieldStyle(valid: ptObject.accountNumber.isValid || ptObject.accountNumber.isEmpty)
+                        PTAchRoutingNumber().textFieldStyle(valid: ptObject.routingNumber.isValid || ptObject.routingNumber.isEmpty)
                         PTAchAccountType()
                         Spacer().frame(height: 25)
-//                        PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
                         .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
-                    }.environmentObject(ptObject)
                 } else if type == 2 {
-                    PTForm {
                     PTCashName().textFieldStyle(valid: ptObject.cashName.isValid || ptObject.cashName.isEmpty)
                     PTCashContact().textFieldStyle(valid: ptObject.cashContact.isValid || ptObject.cashContact.isEmpty)
                     Spacer().frame(height: 25)
-//                    PTButton(amount: 1000, text: "PAY $54.20", completion: confirmCompletion).buttonStyle(disabled: ptObject.buttonDisabled)
                     .frame(minWidth: 100, maxWidth: .infinity, minHeight: 44)
-                    }.environmentObject(ptObject)
                 }
             Button("Transct") {
-                ptObject.initialize(amount: 1000, completion: confirmCompletion)
+//                ptObject.transact(amount: 1000, payor: payor, completion: confirmCompletion)
+                ptObject.tokenizePaymentMethod(payor: payor ,completion: confirmCompletion)
             }
+            .disabled(!(ptObject.valid.card && type == 0) && !(ptObject.valid.ach && type == 1) && !(ptObject.valid.cash && type == 2))
             }
             .padding()
             .frame(

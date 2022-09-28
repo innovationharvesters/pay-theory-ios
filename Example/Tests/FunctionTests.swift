@@ -16,7 +16,7 @@ class FunctionTests: XCTestCase {
         let accNumber = "111111111"
         let accountType = 0
         let bankCode = "789456124"
-        let bank = BankAccount()
+        let bank = ACH()
         
         bank.name = name
         bank.accountNumber = accNumber
@@ -36,7 +36,7 @@ class FunctionTests: XCTestCase {
         let number = "4242424242424242"
         let exp = "12 / 22"
         let cvv = "222"
-        let card = PaymentCard()
+        let card = Card()
         card.name = name
         card.number = number
         card.expirationDate = exp
