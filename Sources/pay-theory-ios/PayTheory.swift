@@ -9,7 +9,6 @@ import Foundation
 import Combine
 
 import DeviceCheck
-import CryptoKit
 
 public class PayTheory: ObservableObject, WebSocketProtocol {
     func receiveMessage(message: String) {
