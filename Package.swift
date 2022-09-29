@@ -19,7 +19,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "pay-theory-ios",
-            dependencies: [.product(name: "Sodium")],
+            dependencies: [.product(name: "swift-sodium")],
             path: "Sources"
         ),
         .testTarget(
