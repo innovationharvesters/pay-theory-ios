@@ -202,14 +202,14 @@ class Transaction: ObservableObject {
         if let payment = idempotencyToken {
             var result: [String: Any] = [
                 "receipt_number": payment["idempotency"] as? String ?? "",
-                "amount": payment["payment"]?["amount"] as? Int ?? 0,
-                "convenience_fee": payment["payment"]?["service_fee"] as? Int ?? 0,
+                "amount": payment["amount"] as? Int ?? 0,
+                "service_fee": payment["service_fee"] as? Int ?? 0,
+                "brand": payment["brand"] as? String ?? "",
+                "first_six": payment["first_six"] as? String ?? "",
+                "last_four": payment["last_four"] as? String ?? ""
                 ]
-            if let brand = payment["bin"]?["card_brand"] as? String {
-                result["brand"] = brand
-                result["first_six"] = payment["bin"]?["first_six"] as? String ?? ""
-            } else {
-                result["last_four"] = payment["bin"]?["last_four"] as? String ?? ""
+            if feeMode == FEE_MODE.INTERCHANGE {
+                result["service_fee"] = 0
             }
             return result
         } else {
