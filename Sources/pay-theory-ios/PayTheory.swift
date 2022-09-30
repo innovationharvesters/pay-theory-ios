@@ -23,8 +23,9 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         let hostToken: [String: Any] = [
             "ptToken": ptToken!,
             "origin": "ios",
-            "attestation":attestationString ?? "",
-            "timing": Date().millisecondsSince1970
+            "attestation": attestationString ?? "",
+            "timing": Date().millisecondsSince1970,
+            "appleEnvironment": appleEnvironment
         ]
         message["encoded"] = stringify(jsonDictionary: hostToken).data(using: .utf8)!.base64EncodedString()
         session!.sendMessage(messageBody: stringify(jsonDictionary: message), requiresResponse: session!.REQUIRE_RESPONSE)
@@ -66,8 +67,8 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var initialized = false
     @ObservedObject var transaction: Transaction
     
-    private var encodedChallenge: String = ""
     private var isConnected = false
+    private var appleEnvironment: String
     private var passedPayor: Payor?
     private var ptToken: String?
     private var session: WebSocketSession?
@@ -167,7 +168,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                         return
                     }
                     let encodedChallengeData = challenge.data(using: .utf8)!
-                    self.encodedChallenge = encodedChallengeData.base64EncodedString()
                     let hash = Data(SHA256.hash(data: encodedChallengeData))
                     self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
                         guard error == nil else {
@@ -183,7 +183,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         }
     }
     
-    public init(apiKey: String) {
+    public init(apiKey: String, devMode: Bool = false) {
         
         self.apiKey = apiKey
         let apiParts = apiKey.split{$0 == "-"}.map { String($0) }
@@ -194,6 +194,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
 
         environment = apiParts[0]
         stage = apiParts[1]
+        appleEnvironment = devMode ? "appattestdevelop" : "appattest"
         envAch = ACH()
         envCard = Card()
         envPayor = Payor()
