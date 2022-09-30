@@ -185,11 +185,8 @@ class Transaction: ObservableObject {
               "metadata": transfer["metadata"] as? [String: Any] ?? [:],
               "payor_id": transfer["payor_id"] as? String ?? "",
               "payment_method_id": transfer["payment_method_id"] as? String ?? "",
-              "brand": ""
+              "brand": transfer["brand"] as? String ?? ""
             ]
-            if let brand = transfer["card_brand"] {
-                result["brand"] = brand as? String ?? ""
-            }
             
             return result
         } else {
