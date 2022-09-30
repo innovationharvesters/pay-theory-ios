@@ -82,7 +82,6 @@ class Transaction: ObservableObject {
         if let decrypted = sodium.box.open(nonceAndAuthenticatedCipherText: bodyBytes,
                                            senderPublicKey: senderKey,
                                            recipientSecretKey: self.keyPair.secretKey) {
-            print("decrypted", decrypted)
             let decryptedString = convertBytesToString(bytes: decrypted)
             let decodedData = Data(base64Encoded: decryptedString) ?? Data()
             let decodedString = String(data: decodedData, encoding: .utf8) ?? ""
@@ -203,13 +202,13 @@ class Transaction: ObservableObject {
             var result: [String: Any] = [
                 "receipt_number": payment["idempotency"] as? String ?? "",
                 "amount": payment["amount"] as? Int ?? 0,
-                "service_fee": payment["service_fee"] as? Int ?? 0,
+                "service_fee": payment["fee"] as? Int ?? 0,
                 "brand": payment["brand"] as? String ?? "",
                 "first_six": payment["first_six"] as? String ?? "",
                 "last_four": payment["last_four"] as? String ?? ""
                 ]
             if feeMode == FEE_MODE.INTERCHANGE {
-                result["service_fee"] = 0
+                result["fee"] = 0
             }
             return result
         } else {

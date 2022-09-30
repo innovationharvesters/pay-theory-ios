@@ -86,7 +86,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     func onMessage(response: String) {
         if let dictionary = convertStringToDictionary(text: response) {
-            print(dictionary, "dictionary")
             let type = dictionary["type"] as? String ?? ""
             if type == HOST_TOKEN_TYPE {
                 let body = dictionary["body"] as? [String: AnyObject] ?? [:]
@@ -101,7 +100,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             
             if var body = dictionary["body"] as? String {
                 if ENCRYPTED_MESSAGES.contains(type) {
-                    print("we gonna decrypt")
                     let publicKey = dictionary["public_key"] as? String ?? ""
                     body = transaction.decryptBody(body: body, publicKey: publicKey)
                 }
@@ -299,7 +297,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     //Public function that will void the authorization and relase any funds that may be held.
     public func cancel() {
         if isTokenized {
-            print("cancel")
             let body = transaction.createCancelBody() ?? ""
             session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
         }
