@@ -183,7 +183,10 @@ class Transaction: ObservableObject {
               "amount": transfer["amount"] as? Int ?? 0,
               "service_fee": transfer["service_fee"] as? Int ?? 0,
               "state": transfer["state"] as? String ?? "",
-              "metadata": transfer["metadata"] as? [String: Any] ?? [:]
+              "metadata": transfer["metadata"] as? [String: Any] ?? [:],
+              "payor_id": transfer["payor_id"] as? String ?? "",
+              "payment_method_id": transfer["payment_method_id"] as? String ?? "",
+              "brand": ""
             ]
             if let brand = transfer["card_brand"] {
                 result["brand"] = brand as? String ?? ""
