@@ -17,7 +17,6 @@ class Transaction: ObservableObject {
     var ptInstrument: String?
     var idempotencyToken: [String: AnyObject]?
     var transferToken: [String: AnyObject]?
-    var completionHandler: ((Result<[String: Any], FailureResponse>) -> Void)?
     var apiKey: String = ""
     var amount: Int = 0
     var keyPair: Box.KeyPair
@@ -230,7 +229,6 @@ class Transaction: ObservableObject {
         ptInstrument = nil
         idempotencyToken = nil
         transferToken = nil
-        completionHandler = nil
         amount = 0
         lastMessage = nil
     }

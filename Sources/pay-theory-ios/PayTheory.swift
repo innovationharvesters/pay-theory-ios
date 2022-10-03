@@ -61,11 +61,13 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     let service = DCAppAttestService.shared
     var apiKey: String
+    var completionHandler: ((Result<[String: Any], FailureResponse>) -> Void)
     var environment: String
     var stage: String
     var monitor: NetworkMonitor
     var initialized = false
     @ObservedObject var transaction: Transaction
+    var transactionCancellable: AnyCancellable? = nil
     
     private var isConnected = false
     private var appleEnvironment: String
@@ -104,28 +106,47 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                     body = transaction.decryptBody(body: body, publicKey: publicKey)
                 }
                 if type == ERROR_TYPE {
-                    transaction.completionHandler?(.failure(FailureResponse(type: body)))
+                    completionHandler(.failure(FailureResponse(type: body)))
                     if transaction.hostToken != nil {
                         resetTransaction()
                     }
                 } else if var parsedbody = convertStringToDictionary(text: body)  {
                     if type == TRANSFER_CONFIRMATION_TYPE {
                         transaction.idempotencyToken = parsedbody
-                        transaction.completionHandler?(.success(transaction.createTokenizationResponse()!))
+                        let body = transaction.createTokenizationResponse()!
+                        let response = [
+                            "type": "CONFIRMATION",
+                            "body": parsedbody
+                        ] as [String : Any]
+                        completionHandler(.success(response))
                     } else if type == TRANSFER_COMPLETE_TYPE {
                         transaction.transferToken = parsedbody
                         if parsedbody["state"] as? String ?? "" == "FAILURE" {
-                            transaction.completionHandler?(.failure(transaction.createFailureResponse()))
+                            let body = transaction.createFailureResponse()
+                            completionHandler(.failure(body))
                             resetTransaction()
                         } else {
-                            transaction.completionHandler?(.success(transaction.createCompletionResponse()!))
+                            let body = transaction.createCompletionResponse()!
+                            let response = [
+                                "type": "COMPLETE",
+                                "body": parsedbody
+                            ] as [String : Any]
+                            completionHandler(.success(response))
                             transaction.resetTransaction()
                         }
                     } else if type == BARCODE_COMPLETE_TYPE {
                         parsedbody["mapUrl"] = "https://pay.vanilladirect.com/pages/locations" as AnyObject
-                        transaction.completionHandler?(.success(parsedbody))
+                        let response = [
+                            "type": "BARCODE",
+                            "body": parsedbody
+                        ] as [String : Any]
+                        completionHandler(.success(response))
                     } else if type == TOKENIZE_COMPLETE_TYPE {
-                        transaction.completionHandler?(.success(parsedbody))
+                        let response = [
+                            "type": "TOKENIZED",
+                            "body": parsedbody
+                        ] as [String : Any]
+                        completionHandler(.success(response))
                     }
                 }
             }
@@ -138,9 +159,9 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                     }
                 }
                 if result != "" {
-                    transaction.completionHandler?(.failure(FailureResponse(type: result)))
+                    completionHandler(.failure(FailureResponse(type: result)))
                 } else {
-                    transaction.completionHandler?(.failure(FailureResponse(type: "SOCKET_ERROR: An unknown socket error occured")))
+                    completionHandler(.failure(FailureResponse(type: "SOCKET_ERROR: An unknown socket error occured")))
                 }
             }
         } else {
@@ -183,7 +204,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         }
     }
     
-    public init(apiKey: String, devMode: Bool = false) {
+    public init(apiKey: String, devMode: Bool = false, completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
         
         self.apiKey = apiKey
         let apiParts = apiKey.split{$0 == "-"}.map { String($0) }
@@ -211,6 +232,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         monitor = NetworkMonitor()
         let newTransaction = Transaction()
         transaction = newTransaction
+        completionHandler = completion
         valid = ValidFields(cash: envCash, card: envCard, ach: envAch, transaction: newTransaction)
         transaction.apiKey = apiKey
         // These sinks are to make sure the PayTheory object updates whenever a value is updated from one of our text fields
@@ -224,6 +246,9 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             self?.objectWillChange.send()
         }
         payorCancellable = envPayor.objectWillChange.sink { [weak self] (_) in
+            self?.objectWillChange.send()
+        }
+        transactionCancellable = transaction.objectWillChange.sink { [weak self] (_) in
             self?.objectWillChange.send()
         }
         getToken(apiKey: apiKey, environment: environment, stage: stage, completion: ptTokenClosure)
@@ -242,10 +267,8 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                          sendReceipt: Bool = false,
                          receiptDescription: String? = nil,
                          confirmation: Bool = false,
-                         metadata: [String: Any]? = nil,
-                         completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
+                         metadata: [String: Any]? = nil) {
         if initialized == false && transaction.hostToken != nil {
-            self.transaction.completionHandler = completion
             self.transaction.amount = amount
             self.transaction.payor = payor
             self.transaction.feeMode = feeMode
@@ -275,7 +298,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             } else {
                 initialized = false
-                completion(.failure(FailureResponse(type: "No Visible and Valid PayTheory Fields to Transact")))
+                completionHandler(.failure(FailureResponse(type: "No Visible and Valid PayTheory Fields to Transact")))
             }
         }
     }
@@ -308,15 +331,14 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     //Public function that will complete the authorization and send a
     //Completion Response with all the transaction details to the completion handler provided
 
-    public func capture(completion: @escaping (Result<[String: Any], FailureResponse>) -> Void) {
+    public func capture() {
         if isTokenized {
-            transaction.completionHandler = completion
             let body = transaction.createTransferPartTwoBody() ?? ""
             session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
         } else {
             let error = FailureResponse(type: "There is no payment authorization to capture")
             print("The capture function should only be used with the .SERVICE_FEE fee mode")
-            completion(.failure(error))
+            completionHandler(.failure(error))
         }
     }
     
@@ -330,10 +352,8 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     public func tokenizePaymentMethod(payor: Payor? = nil,
                                       payorId: String? = nil,
-                                      metadata: [String: Any]? = nil,
-                                      completion: @escaping (Result<[String: Any], FailureResponse>) -> Void ) {
+                                      metadata: [String: Any]? = nil) {
         if initialized == false {
-            self.transaction.completionHandler = completion
             self.transaction.payor = payor
             self.transaction.metadata = metadata ?? [:]
             initialized = true
@@ -345,7 +365,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             } else {
                 initialized = false
-                completion(.failure(FailureResponse(type: "No Visible and Valid PayTheory Fields to Tokenize")))
+                completionHandler(.failure(FailureResponse(type: "No Visible and Valid PayTheory Fields to Tokenize")))
             }
         }
     }
