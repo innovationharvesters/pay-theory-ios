@@ -105,7 +105,9 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 }
                 if type == ERROR_TYPE {
                     transaction.completionHandler?(.failure(FailureResponse(type: body)))
-                    resetTransaction()
+                    if transaction.hostToken != nil {
+                        resetTransaction()
+                    }
                 } else if var parsedbody = convertStringToDictionary(text: body)  {
                     if type == TRANSFER_CONFIRMATION_TYPE {
                         transaction.idempotencyToken = parsedbody
