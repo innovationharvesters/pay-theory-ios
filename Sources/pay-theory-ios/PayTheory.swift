@@ -128,7 +128,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                         } else {
                             let body = transaction.createCompletionResponse()!
                             let response = [
-                                "type": PT_CONFIRMATION,
+                                "type": PT_COMPLETE,
                                 "body": parsedbody
                             ] as [String : Any]
                             completion?(.success(response))
