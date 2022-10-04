@@ -115,7 +115,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                         transaction.idempotencyToken = parsedbody
                         let body = transaction.createTokenizationResponse()!
                         let response = [
-                            "type": "CONFIRMATION",
+                            "type": PT_CONFIRMATION,
                             "body": parsedbody
                         ] as [String : Any]
                         completion?(.success(response))
@@ -128,7 +128,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                         } else {
                             let body = transaction.createCompletionResponse()!
                             let response = [
-                                "type": "COMPLETE",
+                                "type": PT_CONFIRMATION,
                                 "body": parsedbody
                             ] as [String : Any]
                             completion?(.success(response))
@@ -137,13 +137,13 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                     } else if type == BARCODE_COMPLETE_TYPE {
                         parsedbody["mapUrl"] = "https://pay.vanilladirect.com/pages/locations" as AnyObject
                         let response = [
-                            "type": "BARCODE",
+                            "type": PT_BARCODE,
                             "body": parsedbody
                         ] as [String : Any]
                         completion?(.success(response))
                     } else if type == TOKENIZE_COMPLETE_TYPE {
                         let response = [
-                            "type": "TOKENIZED",
+                            "type": PT_TOKENIZE,
                             "body": parsedbody
                         ] as [String : Any]
                         completion?(.success(response))
