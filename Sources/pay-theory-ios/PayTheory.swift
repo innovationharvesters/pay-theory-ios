@@ -33,11 +33,15 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     func handleError(error: Error) {
         debugPrint("handle error")
+        let errorString = "SOCKET_ERROR: An unknown socket error occured"
+        completion?(.failure(FailureResponse(type: errorString)))
         debugPrint(error)
     }
     
     func handleDisconnect() {
-        debugPrint("handle disconnected")
+        let errorString = "SESSION_EXPIRED: Socket session has expired"
+        completion?(.failure(FailureResponse(type: errorString)))
+        debugPrint("socket disconnected")
     }
     
     var envCard: Card
@@ -74,6 +78,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     private var passedPayor: Payor?
     private var ptToken: String?
     private var session: WebSocketSession?
+    private var devMode = false
     private var attestationString: String?{
         didSet {
             let provider = WebSocketProvider()
@@ -106,7 +111,8 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                     body = transaction.decryptBody(body: body, publicKey: publicKey)
                 }
                 if type == ERROR_TYPE {
-                    completion?(.failure(FailureResponse(type: body)))
+                    let errorString = "SOCKET_ERROR: \(body)"
+                    completion?(.failure(FailureResponse(type: errorString)))
                     if transaction.hostToken != nil {
                         resetTransaction()
                     }
@@ -159,13 +165,18 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                     }
                 }
                 if result != "" {
-                    completion?(.failure(FailureResponse(type: result)))
+                    let errorString = "SOCKET_ERROR: \(result)"
+                    completion?(.failure(FailureResponse(type: errorString)))
                 } else {
                     completion?(.failure(FailureResponse(type: "SOCKET_ERROR: An unknown socket error occured")))
                 }
             }
         } else {
             debugPrint("Could not convert the response to a Dictionary")
+            completion?(.failure(FailureResponse(type: "SOCKET_ERROR: An unknown socket error occured")))
+            if transaction.hostToken != nil {
+                resetTransaction()
+            }
         }
         
         if completion == nil {
@@ -186,24 +197,35 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         switch response {
             case .success(let token):
                 ptToken = token["pt-token"] as? String ?? ""
-                if let challenge = token["challengeOptions"]?["challenge"] as? String {
-                service.generateKey { (keyIdentifier, error) in
-                    guard error == nil else {
-                        debugPrint(error ?? "")
-                        return
-                    }
-                    let encodedChallengeData = challenge.data(using: .utf8)!
-                    let hash = Data(SHA256.hash(data: encodedChallengeData))
-                    self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
-                        guard error == nil else {
-                            debugPrint(error!)
-                            return
+                if devMode {
+                    // Skip attestation if it is in devMode for testing in the simulator
+                    self.attestationString = ""
+                } else {
+                    if let challenge = token["challengeOptions"]?["challenge"] as? String {
+                        service.generateKey { (keyIdentifier, error) in
+                            guard error == nil else {
+                                debugPrint(error ?? "")
+                                let errorString = "INVALID_APP: App Attestation Failed"
+                                self.completion?(.failure(FailureResponse(type: errorString)))
+                                return
+                            }
+                            let encodedChallengeData = challenge.data(using: .utf8)!
+                            let hash = Data(SHA256.hash(data: encodedChallengeData))
+                            self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
+                                guard error == nil else {
+                                    debugPrint(error!)
+                                    let errorString = "INVALID_APP: App Attestation Failed"
+                                    self.completion?(.failure(FailureResponse(type: errorString)))
+                                    return
+                                }
+                                self.attestationString = attestation!.base64EncodedString()
+                            }
                         }
-                        self.attestationString = attestation!.base64EncodedString()
                     }
-                }
                 }
             case .failure(_):
+                let errorString = "NO_TOKEN: No pt-token found"
+                completion?(.failure(FailureResponse(type: errorString)))
                 debugPrint("failed to fetch pt-token")
         }
     }
@@ -220,6 +242,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         environment = apiParts[0]
         stage = apiParts[1]
         appleEnvironment = devMode ? "appattestdevelop" : "appattest"
+        self.devMode = devMode
         envAch = ACH()
         envCard = Card()
         envPayor = Payor()
@@ -301,7 +324,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             } else {
                 initialized = false
-                completion?(.failure(FailureResponse(type: "No Visible and Valid PayTheory Fields to Transact")))
+                completion?(.failure(FailureResponse(type: "NO_FIELDS: No Visible and Valid PayTheory Fields to Transact")))
             }
         }
     }
@@ -339,7 +362,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             let body = transaction.createTransferPartTwoBody() ?? ""
             session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
         } else {
-            let error = FailureResponse(type: "There is no payment authorization to capture")
+            let error = FailureResponse(type: "NO_AUTH: There is no authorization to capture")
             debugPrint("The capture function should only be used with the .SERVICE_FEE fee mode")
             completion?(.failure(error))
         }
@@ -368,7 +391,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                 session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
             } else {
                 initialized = false
-                completion?(.failure(FailureResponse(type: "No Visible and Valid PayTheory Fields to Tokenize")))
+                completion?(.failure(FailureResponse(type: "NO_FIELDS: No Visible and Valid PayTheory Fields to Tokenize")))
             }
         }
     }
