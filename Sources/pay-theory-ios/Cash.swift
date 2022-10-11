@@ -63,11 +63,14 @@ class Cash: ObservableObject {
 ///
 public struct PTCashName: View {
     @EnvironmentObject var cash: Cash
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Full Name") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Full Name", text: $cash.name)
+        TextField(placeholder, text: $cash.name)
             .autocapitalization(UITextAutocapitalizationType.words)
             .onAppear {
                 cash.isVisible = true
@@ -84,11 +87,14 @@ public struct PTCashName: View {
 ///
 public struct PTCashContact: View {
     @EnvironmentObject var cash: Cash
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Phone or Email") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Phone or Email", text: $cash.contact)
+        TextField(placeholder, text: $cash.contact)
     }
 }
 

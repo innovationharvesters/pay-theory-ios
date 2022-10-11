@@ -76,10 +76,14 @@ public class Payor: ObservableObject, Codable, Equatable {
 ///
 public struct PTPayorFirstName: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "First Name") {
+        self.placeholder = placeholder
     }
-   public var body: some View {
-        TextField("First Name", text: $identity.firstName ?? "")
+    
+    public var body: some View {
+        TextField(placeholder, text: $identity.firstName ?? "")
     }
 }
 
@@ -89,10 +93,14 @@ public struct PTPayorFirstName: View {
 ///
 public struct PTPayorLastName: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Last Name") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("Last Name", text: $identity.lastName ?? "")
+        TextField(placeholder, text: $identity.lastName ?? "")
     }
 }
 
@@ -102,10 +110,14 @@ public struct PTPayorLastName: View {
 ///
 public struct PTPayorPhone: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Phone Number") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("Phone", text: $identity.phone ?? "")
+        TextField(placeholder, text: $identity.phone ?? "")
     }
 }
 
@@ -115,10 +127,14 @@ public struct PTPayorPhone: View {
 ///
 public struct PTPayorEmail: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Email") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("Email", text: $identity.email ?? "")
+        TextField(placeholder, text: $identity.email ?? "")
     }
 }
 
@@ -128,10 +144,14 @@ public struct PTPayorEmail: View {
 ///
 public struct PTPayorLineOne: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Address Line 1") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("Address Line 1", text: $identity.personalAddress.line1 ?? "")
+        TextField(placeholder, text: $identity.personalAddress.line1 ?? "")
     }
 }
 
@@ -141,10 +161,14 @@ public struct PTPayorLineOne: View {
 ///
 public struct PTPayorLineTwo: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Address Line 2") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("Address Line 2", text: $identity.personalAddress.line2 ?? "")
+        TextField(placeholder, text: $identity.personalAddress.line2 ?? "")
     }
 }
 
@@ -154,10 +178,14 @@ public struct PTPayorLineTwo: View {
 ///
 public struct PTPayorCity: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "City") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("City", text: $identity.personalAddress.city ?? "")
+        TextField(placeholder, text: $identity.personalAddress.city ?? "")
     }
 }
 
@@ -165,12 +193,16 @@ public struct PTPayorCity: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTPayorState: View {
+public struct PTPayorRegion: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Region") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("State", text: $identity.personalAddress.region ?? "")
+        TextField(placeholder, text: $identity.personalAddress.region ?? "")
     }
 }
 
@@ -178,12 +210,16 @@ public struct PTPayorState: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTPayorZip: View {
+public struct PTPayorPostalCode: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Postal Code") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("Zip", text: $identity.personalAddress.postalCode ?? "")
+        TextField(placeholder, text: $identity.personalAddress.postalCode ?? "")
     }
 }
 
@@ -193,9 +229,13 @@ public struct PTPayorZip: View {
 ///
 public struct PTPayorCountry: View {
     @EnvironmentObject var identity: Payor
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Country") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("Country", text: $identity.personalAddress.country ?? "")
+        TextField(placeholder, text: $identity.personalAddress.country ?? "")
     }
 }

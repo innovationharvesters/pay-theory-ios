@@ -95,11 +95,14 @@ class ACH: ObservableObject, Equatable {
 ///
 public struct PTAchAccountName: View {
     @EnvironmentObject var account: ACH
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Name on Account") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Name on Account", text: $account.name)
+        TextField(placeholder, text: $account.name)
             .autocapitalization(UITextAutocapitalizationType.words)
     }
 }
@@ -110,11 +113,14 @@ public struct PTAchAccountName: View {
 ///
 public struct PTAchAccountNumber: View {
     @EnvironmentObject var account: ACH
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Account Number") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Account Number", text: $account.accountNumber)
+        TextField(placeholder, text: $account.accountNumber)
             .keyboardType(.decimalPad)
     }
 }
@@ -144,11 +150,14 @@ public struct PTAchAccountType: View {
 ///
 public struct PTAchRoutingNumber: View {
     @EnvironmentObject var account: ACH
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Routing Number") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Routing Number", text: $account.bankCode)
+        TextField(placeholder, text: $account.bankCode)
             .keyboardType(.decimalPad)
             .onAppear {
                 account.isVisible = true

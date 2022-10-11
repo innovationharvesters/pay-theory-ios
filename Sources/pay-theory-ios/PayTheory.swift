@@ -357,7 +357,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     //Public function that will complete the authorization and send a
     //Completion Response with all the transaction details to the completion handler provided
 
-    public func capture() {
+    public func confirm() {
         if isTokenized {
             let body = transaction.createTransferPartTwoBody() ?? ""
             session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)

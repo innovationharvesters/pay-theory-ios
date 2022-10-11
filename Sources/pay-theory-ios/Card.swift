@@ -223,11 +223,14 @@ class Card: ObservableObject, Equatable {
 ///
 public struct PTCardName: View {
     @EnvironmentObject var card: Card
-    public init() {
+    let placeholder: String
+    
+    public init(placeholder: String = "Name on Card") {
+        self.placeholder = placeholder
     }
 
     public var body: some View {
-        TextField("Name on Card", text: $card.name ?? "")
+        TextField(placeholder, text: $card.name ?? "")
             .autocapitalization(UITextAutocapitalizationType.words)
     }
 }
@@ -240,11 +243,14 @@ public struct PTCardName: View {
 ///
 public struct PTCardNumber: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "Card Number") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("Card Number", text: $card.number)
+        TextField(placeholder, text: $card.number)
             .keyboardType(.decimalPad)
             .onAppear {
                 card.isVisible = true
@@ -263,11 +269,14 @@ public struct PTCardNumber: View {
 ///
 public struct PTExp: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "MM / YY") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("MM / YY", text: $card.expirationDate)
+        TextField(placeholder, text: $card.expirationDate)
             .keyboardType(.decimalPad)
     }
 }
@@ -280,11 +289,14 @@ public struct PTExp: View {
 ///
 public struct PTCvv: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "CVV") {
+        self.placeholder = placeholder
     }
+    
     public var body: some View {
-        TextField("CVV", text: $card.securityCode)
+        TextField(placeholder, text: $card.securityCode)
             .keyboardType(.decimalPad)
     }
 }
@@ -295,12 +307,14 @@ public struct PTCvv: View {
 ///
 public struct PTCardLineOne: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "Address Line 1") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Address Line 1", text: $card.address.line1 ?? "")
+        TextField(placeholder, text: $card.address.line1 ?? "")
             .autocapitalization(UITextAutocapitalizationType.words)
     }
 }
@@ -311,12 +325,14 @@ public struct PTCardLineOne: View {
 ///
 public struct PTCardLineTwo: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "Address Line 2") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Address Line 2", text: $card.address.line2 ?? "")
+        TextField(placeholder, text: $card.address.line2 ?? "")
     }
 }
 
@@ -326,12 +342,14 @@ public struct PTCardLineTwo: View {
 ///
 public struct PTCardCity: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "City") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("City", text: $card.address.city ?? "")
+        TextField(placeholder, text: $card.address.city ?? "")
     }
 }
 
@@ -339,14 +357,16 @@ public struct PTCardCity: View {
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
-public struct PTCardState: View {
+public struct PTCardRegion: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "Region") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("State", text: $card.address.region ?? "")
+        TextField(placeholder, text: $card.address.region ?? "")
             .autocapitalization(UITextAutocapitalizationType.allCharacters)
             .disableAutocorrection(true)
     }
@@ -358,12 +378,14 @@ public struct PTCardState: View {
 ///
 public struct PTCardPostalCode: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "Postal Code") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Zip", text: $card.address.postalCode ?? "")
+        TextField(placeholder, text: $card.address.postalCode ?? "")
             .keyboardType(.numbersAndPunctuation)
     }
 }
@@ -374,12 +396,14 @@ public struct PTCardPostalCode: View {
 ///
 public struct PTCardCountry: View {
     @EnvironmentObject var card: Card
-    public init() {
-        
+    let placeholder: String
+    
+    public init(placeholder: String = "Country") {
+        self.placeholder = placeholder
     }
     
     public var body: some View {
-        TextField("Country", text: $card.address.country ?? "")
+        TextField(placeholder, text: $card.address.country ?? "")
     }
 }
 
@@ -388,19 +412,25 @@ public struct PTCardCountry: View {
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
 public struct PTCombinedCard: View {
-    public init() {
-        
+    let numberPlaceholder: String
+    let expPlaceholder: String
+    let cvvPlaceholder: String
+    
+    public init(numberPlaceholder: String = "Card Number", expPlaceholder: String = "EXP", cvvPlaceholder: String = "CVV") {
+        self.numberPlaceholder = numberPlaceholder
+        self.expPlaceholder = expPlaceholder
+        self.cvvPlaceholder = cvvPlaceholder
     }
     
     public var body: some View {
         HStack() {
-            PTCardNumber()
+            PTCardNumber(placeholder: numberPlaceholder)
                 .frame(minWidth: 200)
             Spacer()
             HStack {
-                PTExp()
+                PTExp(placeholder: expPlaceholder)
             Spacer()
-                PTCvv()
+                PTCvv(placeholder: cvvPlaceholder)
             }
         }
     }
