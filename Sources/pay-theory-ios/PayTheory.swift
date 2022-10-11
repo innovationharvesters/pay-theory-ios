@@ -296,7 +296,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                          metadata: [String: Any]? = nil) {
         if initialized == false && transaction.hostToken != nil {
             self.transaction.amount = amount
-            self.transaction.payor = payor
+            self.transaction.payor = payor ?? envPayor
             self.transaction.feeMode = feeMode
             self.transaction.confirmation = confirmation
             self.transaction.metadata = metadata ?? [:]
@@ -380,7 +380,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                                       payorId: String? = nil,
                                       metadata: [String: Any]? = nil) {
         if initialized == false {
-            self.transaction.payor = payor
+            self.transaction.payor = payor ?? envPayor
             self.transaction.metadata = metadata ?? [:]
             initialized = true
             if (envCard.isVisible && envCard.isValid) && !envCash.isVisible && !envAch.isVisible {
