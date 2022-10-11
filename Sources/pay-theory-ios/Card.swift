@@ -416,7 +416,7 @@ public struct PTCombinedCard: View {
     let expPlaceholder: String
     let cvvPlaceholder: String
     
-    public init(numberPlaceholder: String = "Card Number", expPlaceholder: String = "EXP", cvvPlaceholder: String = "CVV") {
+    public init(numberPlaceholder: String = "Card Number", expPlaceholder: String = "MM / YY", cvvPlaceholder: String = "CVV") {
         self.numberPlaceholder = numberPlaceholder
         self.expPlaceholder = expPlaceholder
         self.cvvPlaceholder = cvvPlaceholder
