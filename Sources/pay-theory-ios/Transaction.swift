@@ -174,7 +174,7 @@ class Transaction: ObservableObject {
     
     func createCompletionResponse() -> [String: Any]? {
         if let transfer = transferToken {
-            var result: [String: Any] = [
+            let result: [String: Any] = [
               "receipt_number": idempotencyToken?["idempotency"] as? String ?? "",
               "last_four": transfer["last_four"] as? String ?? "",
               "created_at": transfer["created_at"] as? String ?? "",
@@ -204,7 +204,7 @@ class Transaction: ObservableObject {
                 "last_four": payment["last_four"] as? String ?? ""
                 ]
             if feeMode == FEE_MODE.INTERCHANGE {
-                result["fee"] = 0
+                result["service_fee"] = 0
             }
             return result
         } else {
@@ -217,8 +217,9 @@ class Transaction: ObservableObject {
         let receipt = transferToken?["receipt_number"] as? String ?? ""
         let lastFour = transferToken?["last_four"] as? String ?? ""
         let brand = transferToken?["card_brand"] as? String ?? ""
+        let state = transferToken?["state"] as? String ?? ""
         
-        return FailureResponse(type: type, receiptNumber: receipt, lastFour: lastFour, brand: brand)
+        return FailureResponse(type: type, receiptNumber: receipt, lastFour: lastFour, brand: brand, state: state)
     }
     
     func resetTransaction() {

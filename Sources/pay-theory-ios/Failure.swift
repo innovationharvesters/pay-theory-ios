@@ -28,10 +28,11 @@ public class FailureResponse: Error, Equatable {
         self.type = type
     }
     
-    public init(type: String, receiptNumber: String, lastFour: String, brand: String?) {
+    public init(type: String, receiptNumber: String, lastFour: String, brand: String?, state: String?) {
         self.type = type
         self.receiptNumber = receiptNumber
         self.lastFour = lastFour
         self.brand = brand
+        self.state = state
     }
 }
