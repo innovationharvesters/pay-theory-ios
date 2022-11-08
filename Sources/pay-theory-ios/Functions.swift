@@ -12,16 +12,16 @@ public extension Data {
     init?(hexString: String) {
       let len = hexString.count / 2
       var data = Data(capacity: len)
-      var i = hexString.startIndex
+      var index = hexString.startIndex
       for _ in 0..<len {
-        let j = hexString.index(i, offsetBy: 2)
-        let bytes = hexString[i..<j]
+        let offset = hexString.index(index, offsetBy: 2)
+        let bytes = hexString[index..<offset]
         if var num = UInt8(bytes, radix: 16) {
           data.append(&num, count: 1)
         } else {
           return nil
         }
-        i = j
+        index = offset
       }
       self = data
     }
@@ -108,7 +108,7 @@ func addressToDictionary(address: Address) -> [String: String] {
 }
 
 func cashToDictionary(cash: Cash) -> [String: String] {
-    return ["payor" : cash.name, "payor_contact": cash.contact]
+    return ["payor": cash.name, "payor_contact": cash.contact]
 }
 
 func convertStringToDictionary(text: String) -> [String: AnyObject]? {
@@ -159,13 +159,13 @@ func parseError(errors: [String: AnyObject]) -> String {
 }
 
 func isValidPostalCode(value: String) -> Bool {
-    if(value == "") {
+    if value == "" {
         return false
     }
     for regex in postalRegexList {
-        let zipTest = NSPredicate(format:"SELF MATCHES %@", regex[1])
+        let zipTest = NSPredicate(format: "SELF MATCHES %@", regex[1])
         let evaluated = zipTest.evaluate(with: value)
-        if(evaluated) {
+        if evaluated {
             return true
         }
     }
@@ -308,17 +308,17 @@ func insertCreditCardSpaces(_ string: String) -> String {
 
         var stringWithAddedSpaces = ""
 
-        for i in 0..<string.count {
-            let needs465Spacing = (is465 && (i == 4 || i == 10))
-            let needs456Spacing = (is456 && (i == 4 || i == 9))
-            let needs4444Spacing = (is4444 && i > 0 && (i % 4) == 0 && i < 13)
+        for index in 0..<string.count {
+            let needs465Spacing = (is465 && (index == 4 || index == 10))
+            let needs456Spacing = (is456 && (index == 4 || index == 9))
+            let needs4444Spacing = (is4444 && index > 0 && (index % 4) == 0 && index < 13)
 
             if needs465Spacing || needs456Spacing || needs4444Spacing {
                 stringWithAddedSpaces.append(" ")
             }
 
-            let characterToAdd = string[string.index(string.startIndex, offsetBy:i)]
-            if(((is456 || is465) && i <= 14) || (is4444 && i <= 15)) {
+            let characterToAdd = string[string.index(string.startIndex, offsetBy: index)]
+            if ((is456 || is465) && index <= 14) || (is4444 && index <= 15) {
                 stringWithAddedSpaces.append(characterToAdd)
             }
         }

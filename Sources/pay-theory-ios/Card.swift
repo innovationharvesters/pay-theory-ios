@@ -43,14 +43,14 @@ class Card: ObservableObject, Equatable {
                 }
                 var stringWithAddedSpaces = ""
                 
-                for i in 0..<filtered.count {
-                    if i == 2 {
+                for index in 0..<filtered.count {
+                    if index == 2 {
                         stringWithAddedSpaces.append(" / ")
                     }
-                    let characterToAdd = filtered[filtered.index(filtered.startIndex, offsetBy:i)]
+                    let characterToAdd = filtered[filtered.index(filtered.startIndex, offsetBy: index)]
                     stringWithAddedSpaces.append(characterToAdd)
                 }
-                if(expirationDate != oldValue) {
+                if expirationDate != oldValue {
                     expirationDate = stringWithAddedSpaces
                 }
             }
@@ -60,7 +60,7 @@ class Card: ObservableObject, Equatable {
         didSet {
             let filtered = number.filter { $0.isNumber }
             let formatted = insertCreditCardSpaces(filtered)
-            if(number != oldValue) {
+            if number != oldValue {
                 number = formatted
             }
         }
@@ -174,8 +174,7 @@ class Card: ObservableObject, Equatable {
     
     var validPostalCode: AnyPublisher<Bool, Never> {
         return address.$postalCode
-            .map {
-                data in
+            .map { data in
                 let unwrapped = data ?? ""
                 return isValidPostalCode(value: unwrapped)
             }
@@ -416,7 +415,9 @@ public struct PTCombinedCard: View {
     let expPlaceholder: String
     let cvvPlaceholder: String
     
-    public init(numberPlaceholder: String = "Card Number", expPlaceholder: String = "MM / YY", cvvPlaceholder: String = "CVV") {
+    public init(numberPlaceholder: String = "Card Number",
+                expPlaceholder: String = "MM / YY",
+                cvvPlaceholder: String = "CVV") {
         self.numberPlaceholder = numberPlaceholder
         self.expPlaceholder = expPlaceholder
         self.cvvPlaceholder = cvvPlaceholder

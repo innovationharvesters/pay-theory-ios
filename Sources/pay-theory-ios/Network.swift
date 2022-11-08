@@ -43,7 +43,7 @@ enum NetworkError: Error {
     case encodingError
 }
 
-func makeRequest(request: URLRequest,completion: @escaping (Result<[String: AnyObject], NetworkError>) -> Void) {
+func makeRequest(request: URLRequest, completion: @escaping (Result<[String: AnyObject], NetworkError>) -> Void) {
     let config = URLSessionConfiguration.default
     config.allowsExpensiveNetworkAccess = false
     config.allowsConstrainedNetworkAccess = false
@@ -69,7 +69,7 @@ func makeRequest(request: URLRequest,completion: @escaping (Result<[String: AnyO
         }
         
         do {
-            let json = try JSONSerialization.jsonObject(with: data) as? [String : AnyObject]
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: AnyObject]
             completion(.success(json!))
         } catch {
             completion(.failure(.decodingError))
@@ -83,7 +83,7 @@ func getToken(apiKey: String,
               stage: String,
               completion: @escaping (Result<[String: AnyObject], NetworkError>) -> Void) {
     
-    guard let url = URL(string:"https://\(environment).\(stage).com/pt-token-service/") else {
+    guard let url = URL(string: "https://\(environment).\(stage).com/pt-token-service/") else {
         completion(.failure(.decodingError))
         return
     }

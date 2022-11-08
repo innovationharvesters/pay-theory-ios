@@ -161,9 +161,9 @@ class Transaction: ObservableObject {
     }
     
     func createCancelBody() -> String? {
-        if let payment_intent = idempotencyToken?["payment_intent_id"] as? String {
+        if let paymentIntent = idempotencyToken?["payment_intent_id"] as? String {
             return encryptBody(body: [
-                "payment_intent_id": payment_intent,
+                "payment_intent_id": paymentIntent,
                 "sessionKey": sessionKey,
                 "timing": Date().millisecondsSince1970
             ], action: CANCEL_TRANSFER)

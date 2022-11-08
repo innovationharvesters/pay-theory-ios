@@ -212,7 +212,7 @@ public class ValidFields: ObservableObject {
     private let achObject: ACH
     private let transaction: Transaction
     
-    var validCashPublisher: AnyPublisher<Bool,Never> {
+    var validCashPublisher: AnyPublisher<Bool, Never> {
         return Publishers.CombineLatest(cashObject.$isValid, transaction.$hostToken)
             .map { valid, hostToken in
                 if valid == false || hostToken == nil {
@@ -223,7 +223,7 @@ public class ValidFields: ObservableObject {
             .eraseToAnyPublisher()
     }
     
-    var validCardPublisher: AnyPublisher<Bool,Never> {
+    var validCardPublisher: AnyPublisher<Bool, Never> {
         return Publishers.CombineLatest(cardObject.$isValid, transaction.$hostToken)
             .map { valid, hostToken in
                 if valid == false || hostToken == nil {
@@ -234,7 +234,7 @@ public class ValidFields: ObservableObject {
             .eraseToAnyPublisher()
     }
     
-    var validACHPublisher: AnyPublisher<Bool,Never> {
+    var validACHPublisher: AnyPublisher<Bool, Never> {
         return Publishers.CombineLatest(achObject.$isValid, transaction.$hostToken)
             .map { valid, hostToken in
                 if valid == false || hostToken == nil {

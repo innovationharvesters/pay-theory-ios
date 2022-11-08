@@ -45,13 +45,13 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     }
     
     var envCard: Card
-    var cardCancellable: AnyCancellable? = nil
+    var cardCancellable: AnyCancellable?
     var envPayor: Payor
-    var payorCancellable: AnyCancellable? = nil
+    var payorCancellable: AnyCancellable?
     var envAch: ACH
-    var achCancellable: AnyCancellable? = nil
+    var achCancellable: AnyCancellable?
     var envCash: Cash
-    var cashCancellable: AnyCancellable? = nil
+    var cashCancellable: AnyCancellable?
     @Published public var cashName: CashName
     @Published public var cashContact: CashContact
     @Published public var cardNumber: CardNumber
@@ -79,12 +79,12 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     private var ptToken: String?
     private var session: WebSocketSession?
     private var devMode = false
-    private var attestationString: String?{
+    private var attestationString: String? {
         didSet {
             let provider = WebSocketProvider()
             session = WebSocketSession()
             session!.prepare(_provider: provider, _handler: self)
-            session!.open(ptToken:ptToken!, environment: environment, stage: stage)
+            session!.open(ptToken: ptToken!, environment: environment, stage: stage)
             let notificationCenter = NotificationCenter.default
             notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
             notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
@@ -116,14 +116,14 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                     if transaction.hostToken != nil {
                         resetTransaction()
                     }
-                } else if var parsedbody = convertStringToDictionary(text: body)  {
+                } else if var parsedbody = convertStringToDictionary(text: body) {
                     if type == TRANSFER_CONFIRMATION_TYPE {
                         transaction.idempotencyToken = parsedbody
                         let body = transaction.createTokenizationResponse()!
                         let response = [
                             "type": PT_CONFIRMATION,
                             "body": parsedbody
-                        ] as [String : Any]
+                        ] as [String: Any]
                         completion?(.success(response))
                     } else if type == TRANSFER_COMPLETE_TYPE {
                         transaction.transferToken = parsedbody
@@ -136,7 +136,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
                             let response = [
                                 "type": PT_COMPLETE,
                                 "body": parsedbody
-                            ] as [String : Any]
+                            ] as [String: Any]
                             completion?(.success(response))
                             transaction.resetTransaction()
                         }
@@ -184,7 +184,6 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         }
     }
 
-
     @objc func appMovedToBackground() {
         session!.close()
     }
@@ -195,45 +194,45 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     func ptTokenClosure(response: Result<[String: AnyObject], NetworkError>) {
         switch response {
-            case .success(let token):
-                ptToken = token["pt-token"] as? String ?? ""
-                if devMode {
-                    // Skip attestation if it is in devMode for testing in the simulator
-                    self.attestationString = ""
-                } else {
-                    if let challenge = token["challengeOptions"]?["challenge"] as? String {
-                        service.generateKey { (keyIdentifier, error) in
+        case .success(let token):
+            ptToken = token["pt-token"] as? String ?? ""
+            if devMode {
+                // Skip attestation if it is in devMode for testing in the simulator
+                self.attestationString = ""
+            } else {
+                if let challenge = token["challengeOptions"]?["challenge"] as? String {
+                    service.generateKey { (keyIdentifier, error) in
+                        guard error == nil else {
+                            debugPrint(error ?? "")
+                            let errorString = "INVALID_APP: App Attestation Failed"
+                            self.completion?(.failure(FailureResponse(type: errorString)))
+                            return
+                        }
+                        let encodedChallengeData = challenge.data(using: .utf8)!
+                        let hash = Data(SHA256.hash(data: encodedChallengeData))
+                        self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
                             guard error == nil else {
-                                debugPrint(error ?? "")
+                                debugPrint(error!)
                                 let errorString = "INVALID_APP: App Attestation Failed"
                                 self.completion?(.failure(FailureResponse(type: errorString)))
                                 return
                             }
-                            let encodedChallengeData = challenge.data(using: .utf8)!
-                            let hash = Data(SHA256.hash(data: encodedChallengeData))
-                            self.service.attestKey(keyIdentifier!, clientDataHash: hash) { attestation, error in
-                                guard error == nil else {
-                                    debugPrint(error!)
-                                    let errorString = "INVALID_APP: App Attestation Failed"
-                                    self.completion?(.failure(FailureResponse(type: errorString)))
-                                    return
-                                }
-                                self.attestationString = attestation!.base64EncodedString()
-                            }
+                            self.attestationString = attestation!.base64EncodedString()
                         }
                     }
                 }
-            case .failure(_):
-                let errorString = "NO_TOKEN: No pt-token found"
-                completion?(.failure(FailureResponse(type: errorString)))
-                debugPrint("failed to fetch pt-token")
+            }
+        case .failure(_):
+            let errorString = "NO_TOKEN: No pt-token found"
+            completion?(.failure(FailureResponse(type: errorString)))
+            debugPrint("failed to fetch pt-token")
         }
     }
     
     public init(apiKey: String, devMode: Bool = false) {
         
         self.apiKey = apiKey
-        let apiParts = apiKey.split{$0 == "-"}.map { String($0) }
+        let apiParts = apiKey.split {$0 == "-"}.map { String($0) }
         
         if apiParts.count != 3 {
             fatalError("API Key should be formatted '{partner}-{paytheorystage}-{number}'")
@@ -396,5 +395,3 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         }
     }
 }
-
-
