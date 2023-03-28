@@ -110,7 +110,7 @@ public let PT_TOKENIZE = "TOKENIZE"
 let ENCRYPTED_MESSAGES = [TRANSFER_CONFIRMATION_TYPE, BARCODE_COMPLETE_TYPE, TRANSFER_COMPLETE_TYPE, TOKENIZE_COMPLETE_TYPE]
 
 public enum FEE_MODE: String, Codable {
-    case INTERCHANGE = "interchange"
+    case MERCHANT_FEE = "merchant_fee"
     case SERVICE_FEE = "service_fee"
 }
 

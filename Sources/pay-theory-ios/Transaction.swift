@@ -21,7 +21,7 @@ class Transaction: ObservableObject {
     var amount: Int = 0
     var keyPair: Box.KeyPair
     var sodium: Sodium
-    var feeMode: FEE_MODE = .INTERCHANGE
+    var feeMode: FEE_MODE = .MERCHANT_FEE
     var metadata: [String: Any] = [:]
     var payTheoryData: [String: Any] = [:]
     var lastMessage: String?
@@ -203,7 +203,7 @@ class Transaction: ObservableObject {
                 "first_six": payment["first_six"] as? String ?? "",
                 "last_four": payment["last_four"] as? String ?? ""
                 ]
-            if feeMode == FEE_MODE.INTERCHANGE {
+            if feeMode == FEE_MODE.MERCHANT_FEE {
                 result["service_fee"] = 0
             }
             return result

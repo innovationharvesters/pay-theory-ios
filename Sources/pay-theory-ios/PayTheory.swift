@@ -282,7 +282,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     public func transact(amount: Int,
                          payor: Payor? = nil,
                          payorId: String? = nil,
-                         feeMode: FEE_MODE = FEE_MODE.INTERCHANGE,
+                         feeMode: FEE_MODE = FEE_MODE.MERCHANT_FEE,
                          fee: Int? = nil,
                          accountCode: String? = nil,
                          reference: String? = nil,
