@@ -46,7 +46,7 @@ If you encounter missing libraries, ensure that Xcode and CocoaPods are both up 
 Initialize a PayTheory element for handling state. It accepts the following arguments.
 *   **apiKey**: Your PayTheory merchant API Key
 *   **tags**: optional custom tags you can include to track purchases
-*   **fee_mode**: optionally set the fee mode.  By default **.SURCHARGE** mode is used **.SERVICE_FEE** mode is available only when enabled by Pay Theory **.SURCHARGE** mode applies a fee of 2.9% + $0.30 to be deducted from original amount **.SERVICE FEE** mode calculates a fee based on predetermined parameters  and adds it to the original amount
+*   **fee_mode**: optionally set the fee mode.  By default **.MERCHANT_FEE** mode is used **.SERVICE_FEE** mode is available only when enabled by Pay Theory **.MERCHANT_FEE** mode applies a fee of 2.9% + $0.30 to be deducted from original amount **.SERVICE FEE** mode calculates a fee based on predetermined parameters  and adds it to the original amount
 
 ```swift
 let apiKey = 'your-api-key'
@@ -55,7 +55,7 @@ let TAGS: [String: String] = [
         "pay-theory-reference": "field-trip"
       ];
 
-let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE)
+let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .MERCHANT_FEE)
 ```
 
 ### Credit Card Text Fields
@@ -244,7 +244,7 @@ When the necessary info is collected and the PTButton is clicked when fee_mode i
 
 ## Completion Response
 
-Once the PTButton is clicked and service_fee is set to **.SURCHARGE** or if the capture function is called after tokenization, a dictionary will be returned with the following info:
+Once the PTButton is clicked and service_fee is set to **.MERCHANT_FEE** or if the capture function is called after tokenization, a dictionary will be returned with the following info:
 
 *note that the service fee is included in amount*
 
@@ -358,7 +358,7 @@ For each of these fields we have access to two pieces of state
 These can be accessed from the PayTheory object like so
 
 ```swift
-let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .SURCHARGE)
+let pt = PayTheory(apiKey: apiKey, tags: tags, fee_mode: .MERCHANT_FEE)
 
 //Card details
 pt.cardNumber.isValid
