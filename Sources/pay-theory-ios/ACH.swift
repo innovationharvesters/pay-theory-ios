@@ -80,6 +80,10 @@ class ACH: ObservableObject, Equatable {
                 }
     }
     
+    deinit {
+        isValidCancellable.cancel()
+    }
+    
     func clear() {
         self.name = ""
         self.accountType = 0
@@ -97,6 +101,9 @@ public struct PTAchAccountName: View {
     @EnvironmentObject var account: ACH
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Name on Account".
     public init(placeholder: String = "Name on Account") {
         self.placeholder = placeholder
     }
@@ -115,6 +122,9 @@ public struct PTAchAccountNumber: View {
     @EnvironmentObject var account: ACH
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Account Number".
     public init(placeholder: String = "Account Number") {
         self.placeholder = placeholder
     }
@@ -137,8 +147,8 @@ public struct PTAchAccountType: View {
     
     public var body: some View {
         Picker("Account Type", selection: $account.accountType) {
-            ForEach(0 ..< types.count) {
-                Text(self.types[$0])
+            ForEach(types, id: \.self) {type in
+                Text(type)
             }
         }.pickerStyle(SegmentedPickerStyle())
     }
@@ -152,6 +162,9 @@ public struct PTAchRoutingNumber: View {
     @EnvironmentObject var account: ACH
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Routing Number".
     public init(placeholder: String = "Routing Number") {
         self.placeholder = placeholder
     }

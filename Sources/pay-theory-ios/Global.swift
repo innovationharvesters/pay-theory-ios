@@ -88,26 +88,19 @@ public class Address: ObservableObject, Codable, Equatable {
 //Action Constants
 let HOST_TOKEN = "host:hostToken"
 let TRANSFER_PART1 = "host:transfer_part1"
-let TRANSFER_PART2 = "host:transfer_part2"
 let TOKENIZE = "host:tokenize"
-let CANCEL_TRANSFER = "host:cancel_transfer"
 let BARCODE = "host:barcode"
+let CALCULATE_FEE = "host:calculate_fee"
 
 // Constants for incoming message types
 let HOST_TOKEN_TYPE = "host_token"
-let TRANSFER_CONFIRMATION_TYPE = "transfer_confirmation"
-let CANCEL_TYPE = "cancel"
 let BARCODE_COMPLETE_TYPE = "barcode_complete"
 let TRANSFER_COMPLETE_TYPE = "transfer_complete"
 let TOKENIZE_COMPLETE_TYPE = "tokenize_complete"
 let ERROR_TYPE = "error"
+let CALCULATE_FEE_TYPE = "calculate_fee_complete"
 
-public let PT_CONFIRMATION = "CONFIRMATION"
-public let PT_COMPLETE = "COMPLETE"
-public let PT_BARCODE = "BARCODE"
-public let PT_TOKENIZE = "TOKENIZE"
-
-let ENCRYPTED_MESSAGES = [TRANSFER_CONFIRMATION_TYPE, BARCODE_COMPLETE_TYPE, TRANSFER_COMPLETE_TYPE, TOKENIZE_COMPLETE_TYPE]
+let ENCRYPTED_MESSAGES = [BARCODE_COMPLETE_TYPE, TRANSFER_COMPLETE_TYPE, TOKENIZE_COMPLETE_TYPE]
 
 public enum FEE_MODE: String, Codable {
     case MERCHANT_FEE = "merchant_fee"
@@ -119,6 +112,89 @@ public enum PAYMENT_TYPE: String, Codable {
     case ACH = "ACH"
     case CASH = "CASH"
 }
+
+public enum TaxIndicatorType: String {
+    case taxAmountProvided = "TAX_AMOUNT_PROVIDED"
+    case notTaxable = "NOT_TAXABLE"
+    case noTaxInfoProvided = "NO_TAX_INFO_PROVIDED"
+}
+
+public enum HealthExpenseType: String {
+    case healthcare = "HEALTHCARE"
+    case rx = "RX"
+    case vision = "VISION"
+    case clinical = "CLINICAL"
+    case copay = "COPAY"
+    case dental = "DENTAL"
+    case transit = "TRANSIT"
+}
+
+public struct Level3DataSummary {
+    var taxAmt: Double?
+    var taxInd: TaxIndicatorType?
+    var purchIdfr: String?
+    var orderNum: String?
+    var discntAmt: Double?
+    var frghtAmt: Double?
+    var dutyAmt: Double?
+    var destPostalCode: String?
+    var prodDesc: [String]?
+    
+    public init(taxAmt: Double? = nil,
+                taxInd: TaxIndicatorType? = nil,
+                purchIdfr: String? = nil,
+                orderNum: String? = nil,
+                discntAmt: Double? = nil,
+                frghtAmt: Double? = nil,
+                dutyAmt: Double? = nil,
+                destPostalCode: String? = nil,
+                prodDesc: [String]? = nil) {
+        self.taxAmt = taxAmt
+        self.taxInd = taxInd
+        self.purchIdfr = purchIdfr
+        self.orderNum = orderNum
+        self.discntAmt = discntAmt
+        self.frghtAmt = frghtAmt
+        self.dutyAmt = dutyAmt
+        self.destPostalCode = destPostalCode
+        self.prodDesc = prodDesc
+    }
+    
+    func toDictionary() -> [String: Any] {
+            var dict: [String: Any] = [:]
+            
+            if let taxAmt = taxAmt {
+                dict["taxAmt"] = taxAmt
+            }
+            if let taxInd = taxInd {
+                dict["taxInd"] = taxInd.rawValue
+            }
+            if let purchIdfr = purchIdfr {
+                dict["purchIdfr"] = purchIdfr
+            }
+            if let orderNum = orderNum {
+                dict["orderNum"] = orderNum
+            }
+            if let discntAmt = discntAmt {
+                dict["discntAmt"] = discntAmt
+            }
+            if let frghtAmt = frghtAmt {
+                dict["frghtAmt"] = frghtAmt
+            }
+            if let dutyAmt = dutyAmt {
+                dict["dutyAmt"] = dutyAmt
+            }
+            if let destPostalCode = destPostalCode {
+                dict["destPostalCode"] = destPostalCode
+            }
+            if let prodDesc = prodDesc {
+                dict["prodDesc"] = prodDesc
+            }
+            
+            return dict
+        }
+}
+
 
 //Extensions to swift foundational 
 extension Date {
@@ -157,16 +233,8 @@ public func ?? <T>(lhs: Binding<T?>, rhs: T) -> Binding<T> {
     )
 }
 public enum Environment {
-    case DEMO, PROD
-    
-    var value: String {
-        switch self {
-        case .DEMO:
-            return "demo"
-        case .PROD:
-            return "prod"
-        }
-    }
+    case DEMO
+    case PROD
 }
 
 // Got list from https://github.com/melwynfurtado/postcode-validator/blob/master/src/postcode-regexes.ts

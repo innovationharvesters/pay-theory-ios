@@ -14,15 +14,19 @@ public class WebSocketProvider: NSObject {
     var webSocket: URLSessionWebSocketTask?
     var handler: WebSocketProtocol?
     
+    
     override init() {
         super.init()
     }
+        
+    private(set) var status: WebSocketStatus = .notConnected
     
     func startSocket(environment:String, stage: String, ptToken:String, listener: WebSocketListener, _handler: WebSocketProtocol) {
         let urlSession = URLSession(configuration: .default, delegate: listener, delegateQueue: OperationQueue())
         let socketUrl = "wss://\(environment).secure.socket.\(stage).com/\(environment)/?pt_token=\(ptToken)"
         handler = _handler
         webSocket = urlSession.webSocketTask(with: URL(string:socketUrl)!)
+        status = .connecting
         print("socket connected")
         self.webSocket!.resume()
     }
@@ -31,13 +35,16 @@ public class WebSocketProvider: NSObject {
         webSocket!.receive { result in
         switch result {
         case .success(let message):
-          switch message {
-          case .string(let text):
-            self.handler!.receiveMessage(message: text)
-          default:
-            print("recieved unknown response type")
-          }
+            self.status = .connected
+            switch message {
+            case .string(let text):
+                self.handler!.receiveMessage(message: text)
+            default:
+                print("recieved unknown response type")
+            }
+            
         case .failure(let error):
+            self.status = .disconnected
             self.handler!.handleError(error: error)
             self.stopSocket()
         }
@@ -54,8 +61,14 @@ public class WebSocketProvider: NSObject {
     }
     
     func stopSocket() {
+        status = .disconnected
         webSocket?.cancel(with: .normalClosure, reason: webSocket?.closeReason)
     }
 }
     
-    
+enum WebSocketStatus {
+        case notConnected
+        case connecting
+        case connected
+        case disconnected
+    }

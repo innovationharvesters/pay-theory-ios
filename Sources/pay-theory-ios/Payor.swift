@@ -78,6 +78,9 @@ public struct PTPayorFirstName: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "First Name".
     public init(placeholder: String = "First Name") {
         self.placeholder = placeholder
     }
@@ -95,6 +98,9 @@ public struct PTPayorLastName: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Last Name".
     public init(placeholder: String = "Last Name") {
         self.placeholder = placeholder
     }
@@ -112,6 +118,9 @@ public struct PTPayorPhone: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Phone Number".
     public init(placeholder: String = "Phone Number") {
         self.placeholder = placeholder
     }
@@ -129,6 +138,9 @@ public struct PTPayorEmail: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Email".
     public init(placeholder: String = "Email") {
         self.placeholder = placeholder
     }
@@ -146,6 +158,9 @@ public struct PTPayorLineOne: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Address Line 1".
     public init(placeholder: String = "Address Line 1") {
         self.placeholder = placeholder
     }
@@ -163,6 +178,9 @@ public struct PTPayorLineTwo: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Address Line 2".
     public init(placeholder: String = "Address Line 2") {
         self.placeholder = placeholder
     }
@@ -180,6 +198,9 @@ public struct PTPayorCity: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "City".
     public init(placeholder: String = "City") {
         self.placeholder = placeholder
     }
@@ -189,7 +210,7 @@ public struct PTPayorCity: View {
     }
 }
 
-/// TextField that can be used to capture the State for Buyer Options to be used in a Pay Theory payment
+/// TextField that can be used to capture the Region for Buyer Options to be used in a Pay Theory payment
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
@@ -197,6 +218,9 @@ public struct PTPayorRegion: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Region".
     public init(placeholder: String = "Region") {
         self.placeholder = placeholder
     }
@@ -214,6 +238,9 @@ public struct PTPayorPostalCode: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Postal Code".
     public init(placeholder: String = "Postal Code") {
         self.placeholder = placeholder
     }
@@ -231,6 +258,9 @@ public struct PTPayorCountry: View {
     @EnvironmentObject var identity: Payor
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Country".
     public init(placeholder: String = "Country") {
         self.placeholder = placeholder
     }

@@ -16,6 +16,9 @@ public class WebSocketSession: NSObject {
     private var listener: WebSocketListener?
     public let REQUIRE_RESPONSE = true
     var handler: WebSocketProtocol?
+    var status: WebSocketStatus {
+        return provider?.status ?? .notConnected
+    }
     
     func prepare(_provider: WebSocketProvider, _handler: WebSocketProtocol) {
         self.handler = _handler
@@ -25,9 +28,7 @@ public class WebSocketSession: NSObject {
     }
     
     func open(ptToken: String, environment: String, stage: String) {
-
         self.provider!.startSocket(environment: environment, stage: stage, ptToken: ptToken, listener: self.listener!, _handler: self.handler!)
-        
     }
 
     func close() {
@@ -40,6 +41,22 @@ public class WebSocketSession: NSObject {
         
         if (requiresResponse) {
             self.provider!.receive()
+        }
+    }
+    
+    func sendAsyncMessage(messageBody: String) async throws -> String {
+        return try await withCheckedThrowingContinuation { continuation in
+            self.provider!.sendMessage(message: .string(messageBody), handler: self.handler!)
+            
+            // Assume we modify the provider to take a completion handler
+            self.provider!.receive { result in
+                switch result {
+                case .success(let response):
+                    continuation.resume(returning: response)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
         }
     }
 }

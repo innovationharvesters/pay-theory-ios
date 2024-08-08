@@ -325,3 +325,7 @@ func insertCreditCardSpaces(_ string: String) -> String {
 
         return stringWithAddedSpaces
     }
+
+func generateUUID() -> String {
+    return UUID().uuidString
+}

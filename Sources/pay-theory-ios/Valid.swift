@@ -10,202 +10,244 @@ import Combine
 
 public class CardNumber: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
+    private var cancellables = Set<AnyCancellable>()
     
     let card: Card
     
     init(card: Card) {
         self.card = card
         
-        validCancellable = card.validCardNumber.sink { valid in
+        card.validCardNumber.sink { valid in
             self.isValid = valid
         }
+        .store(in: &cancellables)
         
-        emptyCancellable = card.$number.sink { empty in
+        card.$number.sink { empty in
             self.isEmpty = empty.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class CardExp: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
+    private var cancellables = Set<AnyCancellable>()
     
     let card: Card
     
     init(card: Card) {
         self.card = card
         
-        validCancellable = card.validExpirationDate.sink { valid in
+        card.validExpirationDate.sink { valid in
             self.isValid = valid
         }
+        .store(in: &cancellables)
         
-        emptyCancellable = card.$expirationDate.sink { empty in
+        card.$expirationDate.sink { empty in
             self.isEmpty = empty.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class CardCvv: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
+    private var cancellables = Set<AnyCancellable>()
     
     let card: Card
     
     init(card: Card) {
         self.card = card
         
-        validCancellable = card.validSecurityCode.sink { valid in
+        card.validSecurityCode.sink { valid in
             self.isValid = valid
         }
+        .store(in: &cancellables)
         
-        emptyCancellable = card.$securityCode.sink { empty in
+        card.$securityCode.sink { empty in
             self.isEmpty = empty.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class CardPostalCode: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
-    
+    private var cancellables = Set<AnyCancellable>()
+
     let card: Card
     
     init(card: Card) {
         self.card = card
         
-        validCancellable = card.validPostalCode.sink { valid in
+        card.validPostalCode.sink { valid in
             self.isValid = valid
         }
+        .store(in: &cancellables)
         
-        emptyCancellable = card.address.$postalCode.sink { empty in
+        card.address.$postalCode.sink { empty in
             let postal = empty ?? ""
             self.isEmpty = postal.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class ACHAccountName: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
-    
+    private var cancellables = Set<AnyCancellable>()
+
     let bank: ACH
     
     init(bank: ACH) {
         self.bank = bank
         
-        validCancellable = bank.validAccountName.sink { valid in
-            
+        bank.validAccountName.sink { valid in
             self.isValid = valid
         }
-        
-        emptyCancellable = bank.$name.sink { empty in
+        .store(in: &cancellables)
+
+        bank.$name.sink { empty in
             self.isEmpty = empty.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class ACHAccountNumber: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
-    
+    private var cancellables = Set<AnyCancellable>()
+
     let bank: ACH
     
     init(bank: ACH) {
         self.bank = bank
         
-        validCancellable = bank.validAccountNumber.sink { valid in
+        bank.validAccountNumber.sink { valid in
             self.isValid = valid
         }
+        .store(in: &cancellables)
         
-        emptyCancellable = bank.$accountNumber.sink { empty in
+        bank.$accountNumber.sink { empty in
             self.isEmpty = empty.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class ACHRoutingNumber: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
-    
+    private var cancellables = Set<AnyCancellable>()
+
     let bank: ACH
     
     init(bank: ACH) {
         self.bank = bank
         
-        validCancellable = bank.validBankCode.sink { valid in
+        bank.validBankCode.sink { valid in
             self.isValid = valid
         }
+        .store(in: &cancellables)
         
-        emptyCancellable = bank.$bankCode.sink { empty in
+        bank.$bankCode.sink { empty in
             self.isEmpty = empty.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class CashName: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
-    
+    private var cancellables = Set<AnyCancellable>()
+
     let cash: Cash
     
     init(cash: Cash) {
         self.cash = cash
         
-        validCancellable = cash.validName.sink { valid in
+        cash.validName.sink { valid in
             self.isValid = valid
         }
+        .store(in: &cancellables)
         
-        emptyCancellable = cash.$name.sink { empty in
+        cash.$name.sink { empty in
             self.isEmpty = empty.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class CashContact: ObservableObject {
     @Published public var isValid = false
-    private var validCancellable: AnyCancellable!
     @Published public var isEmpty = false
-    private var emptyCancellable: AnyCancellable!
-    
+    private var cancellables = Set<AnyCancellable>()
+
     let cash: Cash
     
     init(cash: Cash) {
         self.cash = cash
         
-        validCancellable = cash.validContact.sink { valid in
+        cash.validContact.sink { valid in
             self.isValid = valid
         }
+        .store(in: &cancellables)
         
-        emptyCancellable = cash.$contact.sink { empty in
+        cash.$contact.sink { empty in
             self.isEmpty = empty.isEmpty
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }
 
 public class ValidFields: ObservableObject {
     @Published public var cash = false
-    private var cashCancellable: AnyCancellable!
     @Published public var card = false
-    private var cardCancellable: AnyCancellable!
     @Published public var ach = false
-    private var achCancellable: AnyCancellable!
+    private var cancellables = Set<AnyCancellable>()
     
     private let cashObject: Cash
     private let cardObject: Card
@@ -251,16 +293,23 @@ public class ValidFields: ObservableObject {
         self.achObject = ach
         self.transaction = transaction
         
-        cashCancellable = validCashPublisher.sink { valid in
+        validCashPublisher.sink { valid in
             self.cash = valid
         }
+        .store(in: &cancellables)
         
-        cardCancellable = validCardPublisher.sink { valid in
+        validCardPublisher.sink { valid in
             self.card = valid
         }
+        .store(in: &cancellables)
         
-        achCancellable = validACHPublisher.sink { valid in
+        validACHPublisher.sink { valid in
             self.ach = valid
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
 }

@@ -77,13 +77,9 @@ class Card: ObservableObject, Equatable {
     }
     
     @Published var isValid: Bool = false
-    private var isValidCancellable: AnyCancellable!
-    
     @Published var expirationMonth: String = ""
-    private var expirationMonthCancellable: AnyCancellable!
-    
     @Published var expirationYear: String = ""
-    private var expirationYearCancellable: AnyCancellable!
+    private var cancellables = Set<AnyCancellable>()
     
     var expirationMonthPublisher: AnyPublisher<String,Never> {
         return $expirationDate
@@ -193,16 +189,22 @@ class Card: ObservableObject, Equatable {
     }
     
     init() {
-        isValidCancellable = isValidPublisher.sink { valid in
+        isValidPublisher.sink { valid in
             self.isValid = valid
                 }
-        expirationMonthCancellable = expirationMonthPublisher.sink { month in
+        .store(in: &cancellables)
+        expirationMonthPublisher.sink { month in
             self.expirationMonth = month
         }
-        
-        expirationYearCancellable = expirationYearPublisher.sink { year in
+        .store(in: &cancellables)
+        expirationYearPublisher.sink { year in
             self.expirationYear = year
         }
+        .store(in: &cancellables)
+    }
+    
+    deinit {
+        cancellables.forEach { $0.cancel() }
     }
     
     func clear() {
@@ -244,6 +246,9 @@ public struct PTCardNumber: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Card Number".
     public init(placeholder: String = "Card Number") {
         self.placeholder = placeholder
     }
@@ -270,6 +275,9 @@ public struct PTExp: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "MM / YY".
     public init(placeholder: String = "MM / YY") {
         self.placeholder = placeholder
     }
@@ -290,6 +298,9 @@ public struct PTCvv: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "CVV".
     public init(placeholder: String = "CVV") {
         self.placeholder = placeholder
     }
@@ -308,6 +319,9 @@ public struct PTCardLineOne: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Address Line 1".
     public init(placeholder: String = "Address Line 1") {
         self.placeholder = placeholder
     }
@@ -326,6 +340,9 @@ public struct PTCardLineTwo: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Address Line 2".
     public init(placeholder: String = "Address Line 2") {
         self.placeholder = placeholder
     }
@@ -343,6 +360,9 @@ public struct PTCardCity: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "City".
     public init(placeholder: String = "City") {
         self.placeholder = placeholder
     }
@@ -352,7 +372,7 @@ public struct PTCardCity: View {
     }
 }
 
-/// TextField that can be used to capture the State for a card object to be used in a Pay Theory payment
+/// TextField that can be used to capture the Region for a card object to be used in a Pay Theory payment
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
@@ -360,6 +380,9 @@ public struct PTCardRegion: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Region".
     public init(placeholder: String = "Region") {
         self.placeholder = placeholder
     }
@@ -371,7 +394,7 @@ public struct PTCardRegion: View {
     }
 }
 
-/// TextField that can be used to capture the Zip for a card object to be used in a Pay Theory payment
+/// TextField that can be used to capture the Postal Code for a card object to be used in a Pay Theory payment
 ///
 ///  - Requires: Ancestor view must be wrapped in a PTForm
 ///
@@ -379,6 +402,9 @@ public struct PTCardPostalCode: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Postal Code".
     public init(placeholder: String = "Postal Code") {
         self.placeholder = placeholder
     }
@@ -397,6 +423,9 @@ public struct PTCardCountry: View {
     @EnvironmentObject var card: Card
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Country".
     public init(placeholder: String = "Country") {
         self.placeholder = placeholder
     }
@@ -415,6 +444,12 @@ public struct PTCombinedCard: View {
     let expPlaceholder: String
     let cvvPlaceholder: String
     
+    /// Initializes a new instance of the view with placeholder texts for card details.
+    ///
+    /// - Parameters:
+    ///   - numberPlaceholder: A `String` that represents the placeholder text for the card number field. The default value is "Card Number".
+    ///   - expPlaceholder: A `String` that represents the placeholder text for the expiration date field. The default value is "MM / YY".
+    ///   - cvvPlaceholder: A `String` that represents the placeholder text for the CVV field. The default value is "CVV".
     public init(numberPlaceholder: String = "Card Number",
                 expPlaceholder: String = "MM / YY",
                 cvvPlaceholder: String = "CVV") {

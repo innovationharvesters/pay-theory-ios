@@ -50,6 +50,10 @@ class Cash: ObservableObject {
                 }
     }
     
+    deinit {
+        isValidCancellable.cancel()
+    }
+    
     func clear() {
         self.name = ""
         self.contact = ""
@@ -65,6 +69,9 @@ public struct PTCashName: View {
     @EnvironmentObject var cash: Cash
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Full Name".
     public init(placeholder: String = "Full Name") {
         self.placeholder = placeholder
     }
@@ -89,6 +96,9 @@ public struct PTCashContact: View {
     @EnvironmentObject var cash: Cash
     let placeholder: String
     
+    /// Initializes a new instance of the view with a placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Phone or Email".
     public init(placeholder: String = "Phone or Email") {
         self.placeholder = placeholder
     }
