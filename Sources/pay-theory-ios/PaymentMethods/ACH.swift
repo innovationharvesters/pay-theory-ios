@@ -8,7 +8,7 @@ import SwiftUI
 import Foundation
 import Combine
 
-class ACH: ObservableObject, Equatable {
+class ACH: ObservableObject, Equatable, PaymentMethod {
     static func == (lhs: ACH, rhs: ACH) -> Bool {
         if lhs.name == rhs.name &&
         lhs.accountNumber == rhs.accountNumber &&
@@ -133,12 +133,7 @@ public struct PTAchAccountNumber: View {
                 account.accountNumber = formatDigitTextField(newValue, maxLength: 17)
             }
             .keyboardType(.decimalPad)
-            .onAppear {
-                account.isVisible = true
-            }
-            .onDisappear {
-                account.isVisible = false
-            }
+            .trackVisibility(account)
     }
 }
 

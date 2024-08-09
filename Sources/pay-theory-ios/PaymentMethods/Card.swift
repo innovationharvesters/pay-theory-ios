@@ -8,7 +8,7 @@ import SwiftUI
 import Foundation
 import Combine
 
-class Card: ObservableObject, Equatable {
+class Card: ObservableObject, Equatable, PaymentMethod {
     static func == (lhs: Card, rhs: Card) -> Bool {
         if lhs.name == rhs.name &&
             lhs.expirationDate == rhs.expirationDate &&
@@ -211,12 +211,7 @@ public struct PTCardNumber: View {
                 card.number = insertCreditCardSpaces(newValue.filter({$0 .isNumber}))
             }
             .keyboardType(.decimalPad)
-            .onAppear {
-                card.isVisible = true
-            }
-            .onDisappear {
-                card.isVisible = false
-            }
+            .trackVisibility(card)
     }
 }
 

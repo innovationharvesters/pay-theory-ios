@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-class Cash: ObservableObject {
+class Cash: ObservableObject, PaymentMethod {
     @Published var name = ""
     @Published var contact = ""
     @Published var isValid: Bool = false
@@ -79,12 +79,7 @@ public struct PTCashName: View {
     public var body: some View {
         TextField(placeholder, text: $cash.name)
             .autocapitalization(UITextAutocapitalizationType.words)
-            .onAppear {
-                cash.isVisible = true
-            }
-            .onDisappear {
-                cash.isVisible = false
-            }
+            .trackVisibility(cash)
     }
 }
 
