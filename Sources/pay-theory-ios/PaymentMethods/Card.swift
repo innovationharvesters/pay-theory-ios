@@ -218,20 +218,17 @@ public struct PTCardNumber: View {
     }
     
     public var body: some View {
-        TextField(placeholder, text: Binding(
-            get: { card.number },
-            set: { newValue in
-                let filtered = newValue.filter { $0.isNumber }
-                card.number = insertCreditCardSpaces(filtered)
+        TextField(placeholder, text: $card.number)
+            .onChange(of: card.number) { newValue in
+                card.number = insertCreditCardSpaces(newValue.filter({$0 .isNumber}))
             }
-        ))
-        .keyboardType(.decimalPad)
-        .onAppear {
-            card.isVisible = true
-        }
-        .onDisappear {
-            card.isVisible = false
-        }
+            .keyboardType(.decimalPad)
+            .onAppear {
+                card.isVisible = true
+            }
+            .onDisappear {
+                card.isVisible = false
+            }
     }
 }
 
@@ -253,35 +250,29 @@ public struct PTExp: View {
     }
     
     public var body: some View {
-        TextField(placeholder, text: Binding(
-            get: { card.expirationDate },
-            set: { newValue in
-                var filtered = newValue.filter { $0.isNumber }
-                if filtered.count > 4 {
-                    filtered = String(filtered.prefix(4))
-                }
-                if let month = Int(filtered) {
-                    if filtered.count == 1 && month > 1 {
-                        filtered = "0" + filtered
-                    }
-                    if filtered.count == 2 && month > 12 {
-                        filtered = "0" + filtered
-                    }
-                }
-                var stringWithAddedSpaces = ""
-                
-                for index in 0..<filtered.count {
-                    if index == 2 {
-                        stringWithAddedSpaces.append(" / ")
-                    }
-                    let characterToAdd = filtered[filtered.index(filtered.startIndex, offsetBy: index)]
-                    stringWithAddedSpaces.append(characterToAdd)
-                }
-                card.expirationDate = stringWithAddedSpaces
+        TextField(placeholder, text: $card.expirationDate)
+            .onChange(of: card.expirationDate) { newValue in
+                card.expirationDate = formatExpirationDate(newValue)
             }
-        ))
-        .keyboardType(.decimalPad)
+            .keyboardType(.decimalPad)
     }
+    
+    private func formatExpirationDate(_ input: String) -> String {
+            let cleaned = input.filter { $0.isNumber }
+            var formatted = ""
+            
+            if cleaned.count > 4 {
+                formatted = String(cleaned.prefix(4))
+            } else {
+                formatted = cleaned
+            }
+            
+            if formatted.count > 2 {
+                formatted.insert("/", at: formatted.index(formatted.startIndex, offsetBy: 2))
+            }
+            
+            return formatted
+        }
 }
 
 /// TextField that can be used to capture the CVV for a card object to be used in a Pay Theory payment
