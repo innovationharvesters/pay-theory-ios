@@ -76,6 +76,7 @@ func getToken(apiKey: String, environment: String, stage: String, sessionKey: St
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.setValue(apiKey, forHTTPHeaderField: "X-API-Key")
+    request.setValue(sessionKey, forHTTPHeaderField: "X-Session-Key")
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
     
     do {
