@@ -254,14 +254,20 @@ public struct PTCardNumber: View {
     }
     
     public var body: some View {
-        TextField(placeholder, text: $card.number)
-            .keyboardType(.decimalPad)
-            .onAppear {
-                card.isVisible = true
+        TextField(placeholder, text: Binding(
+            get: { card.number },
+            set: { newValue in
+                let filtered = newValue.filter { $0.isNumber }
+                card.number = insertCreditCardSpaces(filtered)
             }
-            .onDisappear {
-                card.isVisible = false
-            }
+        ))
+        .keyboardType(.decimalPad)
+        .onAppear {
+            card.isVisible = true
+        }
+        .onDisappear {
+            card.isVisible = false
+        }
     }
 }
 
@@ -283,8 +289,34 @@ public struct PTExp: View {
     }
     
     public var body: some View {
-        TextField(placeholder, text: $card.expirationDate)
-            .keyboardType(.decimalPad)
+        TextField(placeholder, text: Binding(
+            get: { card.expirationDate },
+            set: { newValue in
+                var filtered = newValue.filter { $0.isNumber }
+                if filtered.count > 4 {
+                    filtered = String(filtered.prefix(4))
+                }
+                if let month = Int(filtered) {
+                    if filtered.count == 1 && month > 1 {
+                        filtered = "0" + filtered
+                    }
+                    if filtered.count == 2 && month > 12 {
+                        filtered = "0" + filtered
+                    }
+                }
+                var stringWithAddedSpaces = ""
+                
+                for index in 0..<filtered.count {
+                    if index == 2 {
+                        stringWithAddedSpaces.append(" / ")
+                    }
+                    let characterToAdd = filtered[filtered.index(filtered.startIndex, offsetBy: index)]
+                    stringWithAddedSpaces.append(characterToAdd)
+                }
+                card.expirationDate = stringWithAddedSpaces
+            }
+        ))
+        .keyboardType(.decimalPad)
     }
 }
 
