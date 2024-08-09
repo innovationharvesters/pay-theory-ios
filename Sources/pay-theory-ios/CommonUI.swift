@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// This is used to wrap an ancestor view to allow the TextFields and Buttons to access the data needed.
+/// This is used to wrap an ancestor view to allow the TextFields to access the data needed.
 ///
 /// - Requires: Needs to have the PayTheory Object that was initialized with the API Key passed as an EnvironmentObject
 ///

@@ -31,7 +31,26 @@ extension PayTheory {
         if let completion = completion {
             completion(result)
         } else {
-            debugPrint("The completion handler is not set on the PayTheory object", result)
+            switch result {
+            case .success(let response):
+                debugPrint("Success: \(describeSuccessResponse(response))")
+            case .failure(let error):
+                debugPrint("Error: \(error.code) - \(error.error)")
+            }
+            debugPrint("Note: The completion handler is not set on the PayTheory object")
+        }
+    }
+
+    private func describeSuccessResponse(_ response: SuccessfulResponse) -> String {
+        switch response {
+        case .Success(let transaction):
+            return "Successful transaction: \(transaction.transactionId)"
+        case .Failure(let failedTransaction):
+            return "Failed transaction: \(failedTransaction.state) - \(failedTransaction.failureText)"
+        case .Cash(let cashBarcode):
+            return "Cash barcode generated: \(cashBarcode.barcodeUrl)"
+        case .Tokenized(let tokenizedPayment):
+            return "Payment method tokenized: \(tokenizedPayment.paymentMethodId)"
         }
     }
     

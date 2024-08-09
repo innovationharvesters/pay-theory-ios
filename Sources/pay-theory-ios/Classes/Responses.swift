@@ -112,6 +112,7 @@ public enum PTErrorCode: String {
     case actionInProgress
     case attestationFailed
     case inProgress
+    case invalidAPIKey
     case invalidParam
     case noFields
     case notReady

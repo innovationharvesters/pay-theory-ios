@@ -88,12 +88,12 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     ///
     /// - Note: This initializer sets up various state variables, configures the network monitor,
     ///         sets up observers for app lifecycle events, and stores the completion handler for later use.
-    public init(amount: Int?, apiKey: String, devMode: Bool = false, completion: ((Result<SuccessfulResponse, PTError>) -> Void)?) {
+    public init(amount: Int? = nil, apiKey: String, devMode: Bool = false, completion: ((Result<SuccessfulResponse, PTError>) -> Void)? = nil) throws {
         // Parse the API key to extract environment and stage information
         let apiParts = apiKey.split {$0 == "-"}.map { String($0) }
         // Validate the the API key is the correct format
         if apiParts.count != 3 {
-            fatalError("This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'")
+            throw PTError(code: .invalidAPIKey, error: "API Key should be formatted '{partner}-{paytheorystage}-{UUID}'")
         }
         
         self.amount = amount
