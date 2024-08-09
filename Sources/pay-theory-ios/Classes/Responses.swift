@@ -110,18 +110,14 @@ public class CashBarcode {
 public enum PTErrorCode: String {
     case actionComplete
     case actionInProgress
-    case cancelFailed
-    case fieldError
+    case attestationFailed
+    case inProgress
     case invalidParam
-    case invalidApp
-    case noConfirm
     case noFields
-    case noToken
     case notReady
     case notValid
-    case sessionExpired
     case socketError
-    case transactingFieldError
+    case tokenFailed
 }
 
 public class PTError: Error, Equatable {

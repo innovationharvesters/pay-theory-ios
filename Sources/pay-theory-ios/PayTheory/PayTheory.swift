@@ -4,6 +4,8 @@
 //
 //  Created by Austin Zani on 11/3/20.
 //
+// Base of the Pay Theory class that contains all attributes, the initializer, and the functions needed to make it conform to the WebSocketProtocol
+
 import SwiftUI
 import Foundation
 import Combine
@@ -31,7 +33,10 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     @Published public var cardServiceFee: Int?
     @Published public var bankServiceFee: Int?
     
-    // Variables for the class to track things across fields
+    @Published public var isReady: Bool = false
+
+    var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    var isAwaitingResponse: Bool = false
     let service = DCAppAttestService.shared
     var amount: Int?
     var apiKey: String
@@ -42,50 +47,23 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     @ObservedObject var transaction: Transaction
     var transactionCancellable: AnyCancellable? = nil
     public var completion: ((Result<SuccessfulResponse, PTError>) -> Void)?
-    public var isReady: Bool {
-        // Ready when the socket is connected and we have the hostToken, publicKey, and sessionKey on the Transaction class
-        return session?.status == .connected &&
-        transaction.hostToken != nil &&
-        transaction.publicKey != nil &&
-        transaction.sessionKey != nil
-    }
     
     var appleEnvironment: String
     var devMode = false
-    var initialized = false
+    var isInitialized = false
+    var isComplete = false
     var passedPayor: Payor?
     var ptToken: String?
-    var session: WebSocketSession?
+    var session: WebSocketSession
     // Attestation string being set should trigger the connection of our socket or sending of the hostTokenMessage if it is already connected
-    var attestationString: String? {
-        didSet {
-            if let unwrappedSession = session {
-                // If there is a session already set it will either be connected or disconnected
-                if unwrappedSession.status == .connected {
-                    // Send message if socket is still connected
-                    sendHostTokenMessage()
-                } else if unwrappedSession.status == .disconnected {
-                    // Reopen the socket if it is closed
-                    session?.open(ptToken: ptToken!, environment: environment, stage: stage)
-                }
-            } else {
-                let provider = WebSocketProvider()
-                session = WebSocketSession()
-                session!.prepare(_provider: provider, _handler: self)
-                session!.open(ptToken: ptToken!, environment: environment, stage: stage)
-                let notificationCenter = NotificationCenter.default
-                notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-                notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
-            }
-        }
-    }
+    var attestationString: String?
     
     // Setting of the cardBin should trigger the potential calculation of fees if an amount is set
     var cardBin: String? {
         didSet {
             // If there is a cardBin then try and send the amount message if the amount is sent
             if let cardBin = cardBin {
-                if let amount = amount {
+                if let _ = amount {
                     sendCalcFeeMessage(card_bin: cardBin)
                 }
             } else { // If cardBin is set to nil then set the cardServiceFee to nil
@@ -155,6 +133,16 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         // Initialize validation object
         valid = ValidFields(cash: envCash, card: envCard, ach: envAch, transaction: newTransaction)
         
+        // Initialize the WebSocketSession we will use for socket communications
+        let provider = WebSocketProvider()
+        session = WebSocketSession()
+        session.prepare(_provider: provider, _handler: self)
+        let notificationCenter = NotificationCenter.default
+        
+        // Initialize the observer for managing the socket connection
+        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
+        
         // Set up Combine publishers to propagate changes
         envCard.objectWillChange.sink { [weak self] (_) in
             self?.objectWillChange.send()
@@ -176,6 +164,14 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         envCard.$number.sink { [weak self] newNumber in
             self?.cardNumberChanged(newNumber)
         }.store(in: &cancellables)
+        
+        Task {
+            do {
+                try await connectSocket()
+            } catch {
+                useCompletionHandler(.failure(PTError(code: .socketError, error: "Unable to connect to the socket.")))
+            }
+        }
     }
     
     deinit {
@@ -188,18 +184,15 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         onMessage(response: message)
     }
     
-    func handleConnect() {
-        sendHostTokenMessage()
-    }
-    
     func handleError(error: Error) {
-        completion?(.failure(PTError(code: .socketError, error: "An unknown socket error occured")))
+        useCompletionHandler(.failure(PTError(code: .socketError, error: "An unknown socket error occured")))
         debugPrint(error)
     }
     
     func handleDisconnect() {
         self.transaction.sessionKey = nil
         self.transaction.publicKey = nil
+        self.isReady = false
         debugPrint("socket disconnected")
     }
 }

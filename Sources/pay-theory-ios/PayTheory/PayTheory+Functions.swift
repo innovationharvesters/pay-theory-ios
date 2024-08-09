@@ -4,6 +4,7 @@
 //
 //  Created by Austin Zani on 8/7/24.
 //
+// Extension of the Pay Theory class that contains public functions that are available to users of the PayTheory SDK
 
 import Foundation
 
@@ -18,28 +19,47 @@ extension PayTheory {
     public func tokenizePaymentMethod(payor: Payor? = nil,
                                       payorId: String? = nil,
                                       metadata: [String: Any]? = nil) {
-        // Check if the transaction is not initialized
-        if initialized == false {
-            // Set transaction properties
-            self.transaction.payor = payor ?? envPayor
-            self.transaction.metadata = metadata ?? [:]
-            initialized = true
-            
-            // Check if only the card is visible and valid
-            if (envCard.isVisible && envCard.isValid) && !envCash.isVisible && !envAch.isVisible {
-                let body = transaction.createTokenizePaymentMethodBody(instrument: paymentCardToDictionary(card: envCard), payorId: payorId) ?? ""
-                session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
+        // Call function to check if action has already completed or is initialized
+        if canCallAction() == false {
+            return
+        }
+        isInitialized = true
+        // Ensure the socket is connected and reconnect if not
+        Task {
+            do {
+                let _ = try await ensureConnected()
+            } catch {
+                handleConnectionError(error)
+                isInitialized = false
+                return
             }
-            // Check if only ACH is visible and valid
-            else if (envAch.isVisible && envAch.isValid) && !envCash.isVisible && !envCard.isVisible {
-                let body = transaction.createTokenizePaymentMethodBody(instrument: bankAccountToDictionary(account: envAch), payorId: payorId) ?? ""
-                session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
+        }
+        // Set transaction properties
+        self.transaction.payor = payor ?? envPayor
+        self.transaction.metadata = metadata ?? [:]
+        
+        // Check if only the card is visible and valid
+        if (envCard.isVisible && envCard.isValid) && !envCash.isVisible && !envAch.isVisible {
+            let body = transaction.createTokenizePaymentMethodBody(instrument: paymentCardToDictionary(card: envCard), payorId: payorId) ?? ""
+            do {
+                try session.sendMessage(messageBody: body)
+            } catch {
+                useCompletionHandler(.failure(PTError(code: .socketError, error: "There was an error sending the socket message")))
             }
-            // If no valid payment method is visible
-            else {
-                initialized = false
-                completion?(.failure(PTError(code: .noFields, error: "No Visible and Valid PayTheory Fields to Transact")))
+        }
+        // Check if only ACH is visible and valid
+        else if (envAch.isVisible && envAch.isValid) && !envCash.isVisible && !envCard.isVisible {
+            let body = transaction.createTokenizePaymentMethodBody(instrument: bankAccountToDictionary(account: envAch), payorId: payorId) ?? ""
+            do {
+                try session.sendMessage(messageBody: body)
+            } catch {
+                useCompletionHandler(.failure(PTError(code: .socketError, error: "There was an error sending the socket message")))
             }
+        }
+        // If no valid payment method is visible
+        else {
+            isInitialized = false
+            useCompletionHandler(.failure(PTError(code: .noFields, error: "No Visible and Valid PayTheory Fields to Transact")))
         }
     }
     
@@ -83,58 +103,83 @@ extension PayTheory {
                          recurringId: String? = nil,
                          reference: String? = nil,
                          sendReceipt: Bool = false) {
-        // Check if the transaction is not initialized and the host token is available
-        if initialized == false && transaction.hostToken != nil {
-            // Set transaction properties
-            self.transaction.amount = amount
-            self.transaction.payor = payor ?? envPayor
-            self.transaction.feeMode = feeMode
-            self.transaction.metadata = metadata ?? [:]
-            
-            // Validate that the fee is passed in if they are using the Service Fee mode
-            if fee == nil && feeMode == .SERVICE_FEE {
-                completion?(.failure(PTError(code: .invalidParam, error: "Fee must be passed in if you are using the Service Fee fee mode")))
-                return // Exit the function if check is true
+        // Call function to check if action has already completed or is initialized
+        if canCallAction() == false {
+            return
+        }
+        isInitialized = true
+        // Ensure the socket is connected and reconnect if not
+        Task {
+            do {
+                let _ = try await ensureConnected()
+            } catch {
+                handleConnectionError(error)
+                isInitialized = false
+                return
             }
-            
-            // Construct the payTheoryData dictionary with provided parameters and metadata
-            let payTheoryData: [String: Any] = [
-                "account_code": accountCode ?? (metadata?["pay-theory-account-code"] as? String ?? ""),
-                "fee": fee ?? 0,
-                "healthExpenseType": healthExpenseType ?? "",
-                "invoice_id": invoiceId ?? "",
-                "level3DataSummary": level3DataSummary ?? "",
-                "oneTimeUseToken": oneTimeUseToken,
-                "payor_id": payorId ?? "",
-                "receipt_description": receiptDescription ?? (metadata?["pay-theory-receipt-description"] as? String ?? ""),
-                "recurring_id": recurringId ?? "",
-                "reference": reference ?? (metadata?["pay-theory-reference"] as? String ?? ""),
-                "send_receipt": sendReceipt || (metadata?["pay-theory-receipt"] as? Bool ?? false),
-                "timezone": TimeZone.current.identifier
-            ]
-            
-            // Assign the constructed dictionary to the transaction's payTheoryData
-            self.transaction.payTheoryData = payTheoryData
-            initialized = true
-            
-            // Determine the payment method and send the appropriate message
-            if (envCard.isVisible && envCard.isValid) && !envCash.isVisible && !envAch.isVisible {
-                // If only the card is visible and valid
-                let body = transaction.createTransferPartOneBody(instrument: paymentCardToDictionary(card: envCard)) ?? ""
-                session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
-            } else if (envAch.isVisible && envAch.isValid) && !envCash.isVisible && !envCard.isVisible {
-                // If only ACH is visible and valid
-                let body = transaction.createTransferPartOneBody(instrument: bankAccountToDictionary(account: envAch)) ?? ""
-                session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
-            } else if (envCash.isVisible && envCash.isValid) && !envCard.isVisible && !envAch.isVisible {
-                // If only cash is visible and valid
-                let body = transaction.createCashBody(payment: cashToDictionary(cash: envCash)) ?? ""
-                session?.sendMessage(messageBody: body, requiresResponse: session!.REQUIRE_RESPONSE)
-            } else {
-                // If no valid payment method is visible
-                initialized = false
-                completion?(.failure(PTError(code: .noFields, error: "No Visible and Valid PayTheory Fields to Transact")))
+        }
+        
+        // Set transaction properties
+        self.transaction.amount = amount
+        self.transaction.payor = payor ?? envPayor
+        self.transaction.feeMode = feeMode
+        self.transaction.metadata = metadata ?? [:]
+        
+        // Validate that the fee is passed in if they are using the Service Fee mode
+        if fee == nil && feeMode == .SERVICE_FEE {
+            useCompletionHandler(.failure(PTError(code: .invalidParam, error: "Fee must be passed in if you are using the Service Fee fee mode")))
+            isInitialized = false
+            return // Exit the function if check is true
+        }
+        
+        // Construct the payTheoryData dictionary with provided parameters and metadata
+        let payTheoryData: [String: Any] = [
+            "account_code": accountCode ?? (metadata?["pay-theory-account-code"] as? String ?? ""),
+            "fee": fee ?? 0,
+            "healthExpenseType": healthExpenseType ?? "",
+            "invoice_id": invoiceId ?? "",
+            "level3DataSummary": level3DataSummary ?? "",
+            "oneTimeUseToken": oneTimeUseToken,
+            "payor_id": payorId ?? "",
+            "receipt_description": receiptDescription ?? (metadata?["pay-theory-receipt-description"] as? String ?? ""),
+            "recurring_id": recurringId ?? "",
+            "reference": reference ?? (metadata?["pay-theory-reference"] as? String ?? ""),
+            "send_receipt": sendReceipt || (metadata?["pay-theory-receipt"] as? Bool ?? false),
+            "timezone": TimeZone.current.identifier
+        ]
+        
+        // Assign the constructed dictionary to the transaction's payTheoryData
+        self.transaction.payTheoryData = payTheoryData
+        
+        // Determine the payment method and send the appropriate message
+        if (envCard.isVisible && envCard.isValid) && !envCash.isVisible && !envAch.isVisible {
+            // If only the card is visible and valid
+            let body = transaction.createTransferPartOneBody(instrument: paymentCardToDictionary(card: envCard)) ?? ""
+            do {
+                try session.sendMessage(messageBody: body)
+            } catch {
+                useCompletionHandler(.failure(PTError(code: .socketError, error: "There was an error sending the socket message")))
             }
+        } else if (envAch.isVisible && envAch.isValid) && !envCash.isVisible && !envCard.isVisible {
+            // If only ACH is visible and valid
+            let body = transaction.createTransferPartOneBody(instrument: bankAccountToDictionary(account: envAch)) ?? ""
+            do {
+                try session.sendMessage(messageBody: body)
+            } catch {
+                useCompletionHandler(.failure(PTError(code: .socketError, error: "There was an error sending the socket message")))
+            }
+        } else if (envCash.isVisible && envCash.isValid) && !envCard.isVisible && !envAch.isVisible {
+            // If only cash is visible and valid
+            let body = transaction.createCashBody(payment: cashToDictionary(cash: envCash)) ?? ""
+            do {
+                try session.sendMessage(messageBody: body)
+            } catch {
+                useCompletionHandler(.failure(PTError(code: .socketError, error: "There was an error sending the socket message")))
+            }
+        } else {
+            // If no valid payment method is visible
+            isInitialized = false
+            useCompletionHandler(.failure(PTError(code: .noFields, error: "No Visible and Valid PayTheory Fields to Transact")))
         }
     }
     
@@ -147,12 +192,25 @@ extension PayTheory {
         self.transaction.resetTransaction()
         self.sessionId = generateUUID()
         Task {
-            await fetchToken()
+            do {
+                let connected = try await ensureConnected()
+                if connected {
+                    try await fetchToken()
+                    try await sendHostTokenMessage()
+                }
+            } catch {
+                handleConnectionError(error)
+            }
         }
     }
     
     public func updateAmount(newAmount: Int) {
-        amount = newAmount
+        // Only set the amount if it is different than what is stored
+        // We don't want to recalc the fees for the same amount
+        if amount != newAmount {
+            amount = newAmount
+            calcFeesWithAmount()
+        }
     }
     
 }

@@ -69,14 +69,19 @@ func makeRequest(request: URLRequest) async throws -> [String: AnyObject] {
 
 func getToken(apiKey: String, environment: String, stage: String, sessionKey: String) async throws -> [String: AnyObject] {
     guard let url = URL(string: "https://\(environment).\(stage).com/pt-token-service/") else {
-        throw NetworkError.decodingError
+        debugPrint("Url for host token cannot be decided")
+        throw ConnectionError.hostTokenCallFailed
     }
 
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
     request.setValue(apiKey, forHTTPHeaderField: "X-API-Key")
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-    return try await makeRequest(request: request)
+    
+    do {
+        return try await makeRequest(request: request)
+    } catch {
+        throw ConnectionError.hostTokenCallFailed
+    }
 }
 
