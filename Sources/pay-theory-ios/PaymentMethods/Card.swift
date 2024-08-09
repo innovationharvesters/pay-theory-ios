@@ -27,44 +27,8 @@ class Card: ObservableObject, Equatable {
     @Published var name: String?
     @Published var identity = ""
     @Published var address = Address()
-    @Published var expirationDate = ""{
-        didSet {
-            var filtered = expirationDate.filter { $0.isNumber }
-            if filtered.count > 4 {
-                expirationDate = oldValue
-            } else {
-                if let month = Int(filtered) {
-                    if filtered.count == 1 && month > 1 {
-                        filtered = "0" + filtered
-                    }
-                    if filtered.count == 2 && month > 12 {
-                        filtered = "0" + filtered
-                    }
-                }
-                var stringWithAddedSpaces = ""
-                
-                for index in 0..<filtered.count {
-                    if index == 2 {
-                        stringWithAddedSpaces.append(" / ")
-                    }
-                    let characterToAdd = filtered[filtered.index(filtered.startIndex, offsetBy: index)]
-                    stringWithAddedSpaces.append(characterToAdd)
-                }
-                if expirationDate != oldValue {
-                    expirationDate = stringWithAddedSpaces
-                }
-            }
-        }
-    }
-    @Published var number = ""{
-        didSet {
-            let filtered = number.filter { $0.isNumber }
-            let formatted = insertCreditCardSpaces(filtered)
-            if number != oldValue {
-                number = formatted
-            }
-        }
-    }
+    @Published var expirationDate = ""
+    @Published var number = ""
     @Published var securityCode = ""{
         didSet {
             let filtered = securityCode.filter { $0.isNumber }
