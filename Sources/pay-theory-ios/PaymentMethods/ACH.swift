@@ -15,7 +15,6 @@ class ACH: ObservableObject, Equatable {
         lhs.accountType == rhs.accountType &&
         lhs.bankCode == rhs.bankCode &&
         lhs.country == rhs.country &&
-        lhs.identity == rhs.identity &&
             lhs.type == rhs.type {
             return true
         }
@@ -28,7 +27,6 @@ class ACH: ObservableObject, Equatable {
     @Published var accountType = 0
     @Published var bankCode = ""
     @Published var country: String?
-    @Published var identity = ""
     @Published var isValid: Bool = false
     @Published var isVisible: Bool = false
     private var isValidCancellable: AnyCancellable!
@@ -131,7 +129,16 @@ public struct PTAchAccountNumber: View {
     
     public var body: some View {
         TextField(placeholder, text: $account.accountNumber)
+            .onChange(of: account.accountNumber) { newValue in
+                account.accountNumber = formatDigitTextField(newValue, maxLength: 17)
+            }
             .keyboardType(.decimalPad)
+            .onAppear {
+                account.isVisible = true
+            }
+            .onDisappear {
+                account.isVisible = false
+            }
     }
 }
 
@@ -171,12 +178,9 @@ public struct PTAchRoutingNumber: View {
     
     public var body: some View {
         TextField(placeholder, text: $account.bankCode)
+            .onChange(of: account.bankCode) { newValue in
+                account.bankCode = formatDigitTextField(newValue, maxLength: 9)
+            }
             .keyboardType(.decimalPad)
-            .onAppear {
-                account.isVisible = true
-            }
-            .onDisappear {
-                account.isVisible = false
-            }
     }
 }

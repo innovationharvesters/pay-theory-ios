@@ -329,3 +329,11 @@ func insertCreditCardSpaces(_ string: String) -> String {
 func generateUUID() -> String {
     return UUID().uuidString
 }
+
+func formatDigitTextField(_ value: String, maxLength: Int) -> String {
+    // Filter out non-numeric characters
+    let filtered = value.filter { $0.isNumber }
+    
+    // Limit to 4 digits
+    return String(filtered.prefix(maxLength))
+}

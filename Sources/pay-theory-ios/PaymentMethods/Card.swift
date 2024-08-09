@@ -12,7 +12,6 @@ class Card: ObservableObject, Equatable {
     static func == (lhs: Card, rhs: Card) -> Bool {
         if lhs.name == rhs.name &&
             lhs.expirationDate == rhs.expirationDate &&
-            lhs.identity == rhs.identity &&
             lhs.address == rhs.address &&
             lhs.number == rhs.number &&
             lhs.type == rhs.type &&
@@ -25,20 +24,10 @@ class Card: ObservableObject, Equatable {
     private var type = "card"
     @Published var isVisible: Bool = false
     @Published var name: String?
-    @Published var identity = ""
     @Published var address = Address()
     @Published var expirationDate = ""
     @Published var number = ""
-    @Published var securityCode = ""{
-        didSet {
-            let filtered = securityCode.filter { $0.isNumber }
-            if self.securityCode.count > 4 {
-                securityCode = oldValue
-            } else if securityCode != filtered {
-                securityCode = filtered
-            }
-        }
-    }
+    @Published var securityCode = ""
     
     @Published var isValid: Bool = false
     @Published var expirationMonth: String = ""
@@ -176,7 +165,6 @@ class Card: ObservableObject, Equatable {
         self.expirationDate = ""
         self.securityCode = ""
         self.address = Address()
-        self.identity = ""
         self.name = nil
     }
     
@@ -294,6 +282,9 @@ public struct PTCvv: View {
     
     public var body: some View {
         TextField(placeholder, text: $card.securityCode)
+            .onChange(of: card.securityCode) { newValue in
+                card.securityCode = formatDigitTextField(newValue, maxLength: 4)
+            }
             .keyboardType(.decimalPad)
     }
 }
