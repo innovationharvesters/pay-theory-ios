@@ -47,7 +47,6 @@ public class WebSocketSession: NSObject {
             throw NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "WebSocket provider is not initialized"])
         }
         provider.sendMessage(message: .string(messageBody), handler: self.handler!)
-        provider.receive()
     }
     
     func sendMessageAndWaitForResponse(messageBody: String) async throws -> String {

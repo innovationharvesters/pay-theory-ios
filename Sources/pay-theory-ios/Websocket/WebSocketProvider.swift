@@ -54,6 +54,7 @@ public class WebSocketProvider: NSObject {
     func connectionEstablished() {
         status = .connected
         connectionCompletion?(.success(()))
+        self.receive()
     }
 
     func connectionFailed(with error: Error) {
@@ -94,11 +95,7 @@ public class WebSocketProvider: NSObject {
                     }
                     self.stopSocket()
                 }
-                
-                // Continue receiving if no async handler was called
-                if self.asyncResponseHandler == nil {
-                    self.receive()
-                }
+                self.receive()
             }
         }
 
@@ -113,8 +110,6 @@ public class WebSocketProvider: NSObject {
                     case .failure(let error):
                         continuation.resume(throwing: error)
                     }
-                    // Restart the default receive cycle
-                    self.receive()
                 }
             }
         }
