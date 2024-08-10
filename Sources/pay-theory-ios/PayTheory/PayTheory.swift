@@ -20,20 +20,20 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var envAch: ACH
     var envCash: Cash
     var cancellables = Set<AnyCancellable>()
-    @Published public var cashName: CashName
-    @Published public var cashContact: CashContact
-    @Published public var cardNumber: CardNumber
-    @Published public var cvv: CardCvv
-    @Published public var exp: CardExp
-    @Published public var postalCode: CardPostalCode
-    @Published public var accountNumber: ACHAccountNumber
-    @Published public var accountName: ACHAccountName
-    @Published public var routingNumber: ACHRoutingNumber
-    @Published public var valid: ValidFields
-    @Published public var cardServiceFee: Int?
-    @Published public var bankServiceFee: Int?
+    @Published internal(set) public var cashName: CashName
+    @Published internal(set) public var cashContact: CashContact
+    @Published internal(set) public var cardNumber: CardNumber
+    @Published internal(set) public var cvv: CardCvv
+    @Published internal(set) public var exp: CardExp
+    @Published internal(set) public var postalCode: CardPostalCode
+    @Published internal(set) public var accountNumber: ACHAccountNumber
+    @Published internal(set) public var accountName: ACHAccountName
+    @Published internal(set) public var routingNumber: ACHRoutingNumber
+    @Published internal(set) public var valid: ValidFields
+    @Published internal(set) public var cardServiceFee: Int?
+    @Published internal(set) public var bankServiceFee: Int?
     
-    @Published public var isReady: Bool = false
+    @Published internal(set) public var isReady: Bool = false
 
     var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     var isAwaitingResponse: Bool = false
@@ -193,7 +193,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     func handleDisconnect() {
         self.transaction.sessionKey = nil
         self.transaction.publicKey = nil
-        self.isReady = false
+        setReady(false)
         debugPrint("socket disconnected")
     }
 }

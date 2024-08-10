@@ -99,18 +99,18 @@ extension PayTheory {
             useCompletionHandler(.success(.Failure(FailedTransaction(response: parsedBody))))
             resetTransaction()
         } else {
-            isComplete = true
+            setComplete(true)
             useCompletionHandler(.success(.Success(SuccessfulTransaction(response: parsedBody))))
         }
     }
 
     private func handleBarcodeComplete(_ parsedBody: [String: Any]) {
-        isComplete = true
+        setComplete(true)
         useCompletionHandler(.success(.Cash(CashBarcode(response: parsedBody))))
     }
 
     private func handleTokenizeComplete(_ parsedBody: [String: Any]) {
-        isComplete = true
+        setComplete(true)
         useCompletionHandler(.success(.Tokenized(TokenizedPaymentMethod(response: parsedBody))))
     }
 
@@ -166,7 +166,7 @@ extension PayTheory {
             self.transaction.publicKey = convertStringToByte(string: key)
             
             // Set isReady to true
-            self.isReady = true
+            setReady(true)
         } catch {
             throw ConnectionError.hostTokenCallFailed
         }
