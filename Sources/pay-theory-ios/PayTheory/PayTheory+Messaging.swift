@@ -117,10 +117,6 @@ extension PayTheory {
     private func finishProcessing() {
         if isAwaitingResponse {
             isAwaitingResponse = false
-            
-            if UIApplication.shared.applicationState == .background {
-                endBackgroundTask()
-            }
         }
         
         if completion == nil {

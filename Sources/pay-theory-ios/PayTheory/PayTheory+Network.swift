@@ -29,29 +29,9 @@ extension PayTheory {
         }
     }
     
-    // Manages the socket as the app goes behind the
+    // Closes the socket as the app goes behind the
     @objc func appMovedToBackground() {
-        if isAwaitingResponse {
-            startBackgroundTask()
-        } else {
             session.close()
-        }
-    }
-    
-    func startBackgroundTask() {
-        backgroundTask = UIApplication.shared.beginBackgroundTask { [weak self] in
-            self?.endBackgroundTask()
-        }
-    }
-    
-    func endBackgroundTask() {
-        UIApplication.shared.endBackgroundTask(backgroundTask)
-        backgroundTask = .invalid
-        
-        // If we're no longer awaiting a response, close the socket
-        if !isAwaitingResponse {
-            session.close()
-        }
     }
     
     // Requests a Host Token and go through the App Attestation process if needed
