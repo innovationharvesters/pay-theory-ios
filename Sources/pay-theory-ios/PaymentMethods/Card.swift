@@ -46,7 +46,7 @@ class Card: ObservableObject, Equatable, PaymentMethod {
         return $expirationDate
             .map { data in
                 var result = ""
-                if data.count == 7 {
+                if data.count == 5 {
                     result = "20" + String(data.suffix(2))
                 }
                 return result
