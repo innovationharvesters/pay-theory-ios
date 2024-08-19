@@ -228,7 +228,7 @@ public struct PTExp: View {
     /// Initializes a new instance of the view with a placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "MM / YY".
-    public init(placeholder: String = "MM / YY") {
+    public init(placeholder: String = "MM/YY") {
         self.placeholder = placeholder
     }
     
@@ -241,21 +241,28 @@ public struct PTExp: View {
     }
     
     private func formatExpirationDate(_ input: String) -> String {
-            let cleaned = input.filter { $0.isNumber }
-            var formatted = ""
-            
-            if cleaned.count > 4 {
-                formatted = String(cleaned.prefix(4))
+        let cleaned = input.filter { $0.isNumber }
+        var formatted = ""
+        
+        if cleaned.count > 0 {
+            let month = Int(cleaned.prefix(2)) ?? 0
+            if month > 12 {
+                formatted = "0\(cleaned.prefix(1))"
+            } else if month == 0 {
+                formatted = "0"
             } else {
-                formatted = cleaned
+                formatted = month < 10 ? "0\(month)" : "\(month)"
             }
             
-            if formatted.count > 2 {
-                formatted.insert("/", at: formatted.index(formatted.startIndex, offsetBy: 2))
+            if cleaned.count > 2 {
+                formatted += "/"
+                let year = String(cleaned.suffix(cleaned.count - 2).prefix(2))
+                formatted += year
             }
-            
-            return formatted
         }
+        
+        return formatted
+    }
 }
 
 /// TextField that can be used to capture the CVV for a card object to be used in a Pay Theory payment
