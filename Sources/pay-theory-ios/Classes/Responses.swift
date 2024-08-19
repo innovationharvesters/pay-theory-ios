@@ -14,16 +14,16 @@ public enum SuccessfulResponse {
 }
 
 public class SuccessfulTransaction {
-    var transactionId: String
-    var lastFour: String
-    var brand: String
-    var createdAt: String
-    var amount: Double
-    var serviceFee: Double
-    var state: String
-    var metadata: [String: Any]
-    var payorId: String
-    var paymentMethodId: String
+    public var transactionId: String
+    public var lastFour: String
+    public var brand: String
+    public var createdAt: String
+    public var amount: Double
+    public var serviceFee: Double
+    public var state: String
+    public var metadata: [String: Any]
+    public var payorId: String
+    public var paymentMethodId: String
 
     init(response: [String: Any]) {
         self.transactionId = response["receipt_number"] as? String ?? ""
@@ -40,13 +40,13 @@ public class SuccessfulTransaction {
 }
 
 public class TokenizedPaymentMethod {
-    var paymentMethodId: String
-    var payorId: String
-    var lastFour: String
-    var brand: String
-    var expiration: String
-    var paymentType: String
-    var metadata: [String: Any]
+    public var paymentMethodId: String
+    public var payorId: String
+    public var lastFour: String
+    public var brand: String
+    public var expiration: String
+    public var paymentType: String
+    public var metadata: [String: Any]
 
     init(response: [String: Any]) {
         self.paymentMethodId = response["payment_method_id"] as? String ?? ""
@@ -76,13 +76,13 @@ func extractFailureDetails(from response: [String: Any]) -> (errorCode: String, 
 }
 
 public class FailedTransaction {
-    var transactionId: String
-    var lastFour: String
-    var brand: String
-    var state: String
-    var payorId: String
-    var failureCode: String
-    var failureText: String
+    public var transactionId: String
+    public var lastFour: String
+    public var brand: String
+    public var state: String
+    public var payorId: String
+    public var failureCode: String
+    public var failureText: String
 
     init(response: [String: Any]) {
         self.transactionId = response["receipt_number"] as? String ?? ""
@@ -97,9 +97,9 @@ public class FailedTransaction {
 }
 
 public class CashBarcode {
-    var barcodeUrl: String
-    var barcodeId: String
-    var mapUrl = "https://pay.vanilladirect.com/pages/locations"
+    public var barcodeUrl: String
+    public var barcodeId: String
+    public var mapUrl = "https://pay.vanilladirect.com/pages/locations"
 
     init(response: [String: Any]) {
         self.barcodeUrl = response["barcode_url"] as? String ?? ""
