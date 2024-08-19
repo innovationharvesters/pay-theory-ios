@@ -241,21 +241,33 @@ public struct PTExp: View {
     }
     
     private func formatExpirationDate(_ input: String) -> String {
-        let cleaned = input.filter { $0.isNumber }
+        // Remove all non-numeric characters from the input
+        var cleaned = input.filter { $0.isNumber }
         var formatted = ""
         
         if cleaned.count > 0 {
+            // Extract the month from the first two characters (if available)
             let month = Int(cleaned.prefix(2)) ?? 0
+            
             if month > 12 {
+                // If month is greater than 12, take the first digit and prepend a 0
                 formatted = "0\(cleaned.prefix(1))"
+                cleaned = "0\(cleaned)" // Update cleaned string for year formatting
             } else if month == 0 {
+                // If month is 0, set it to "0"
                 formatted = "0"
-            } else {
+            } else if cleaned.count > 1 {
+                // For valid months with more than one digit
                 formatted = month < 10 ? "0\(month)" : "\(month)"
+            } else {
+                // For single digit input, don't add leading zero yet
+                formatted = "\(month)"
             }
             
             if cleaned.count > 2 {
+                // Add slash after month if there's input for year
                 formatted += "/"
+                // Take up to two digits for the year
                 let year = String(cleaned.suffix(cleaned.count - 2).prefix(2))
                 formatted += year
             }
