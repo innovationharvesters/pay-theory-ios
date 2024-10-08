@@ -6,18 +6,31 @@
 //
 
 import Foundation
-/**
- * Responsible for managing websocket session
- * including closing and restarting as appropriate
- */
+
+/// A class responsible for managing WebSocket sessions in the PayTheory system.
+///
+/// `WebSocketSession` handles the lifecycle of a WebSocket connection, including
+/// initialization, opening and closing connections, and sending messages.
 public class WebSocketSession: NSObject {
+    /// The handler for WebSocket events and messages.
     var handler: WebSocketProtocol?
+    
+    /// The listener for WebSocket events.
     private var listener: WebSocketListener?
+    
+    /// The provider responsible for the actual WebSocket implementation.
     var provider: WebSocketProvider?
+    
+    /// The current status of the WebSocket connection.
     var status: WebSocketStatus {
         return provider?.status ?? .notConnected
     }
     
+    /// Prepares the WebSocket session with the necessary components.
+    ///
+    /// - Parameters:
+    ///   - _provider: The WebSocket provider to be used for the connection.
+    ///   - _handler: The handler for WebSocket events and messages.
     func prepare(_provider: WebSocketProvider, _handler: WebSocketProtocol) {
         self.handler = _handler
         self.listener = WebSocketListener()
@@ -26,6 +39,14 @@ public class WebSocketSession: NSObject {
         self.provider?.setDefaultHandler(_handler)
     }
     
+    /// Opens a WebSocket connection.
+    ///
+    /// - Parameters:
+    ///   - ptToken: The PayTheory token for authentication.
+    ///   - environment: The environment to connect to.
+    ///   - stage: The stage of the environment.
+    ///
+    /// - Throws: `ConnectionError.socketConnectionFailed` if the connection fails.
     func open(ptToken: String, environment: String, stage: String) async throws {
         guard let provider = self.provider else {
             throw ConnectionError.socketConnectionFailed
@@ -37,11 +58,16 @@ public class WebSocketSession: NSObject {
         }
     }
 
+    /// Closes the WebSocket connection.
     func close() {
         self.provider!.stopSocket()
     }
 
-    
+    /// Sends a message through the WebSocket connection.
+    ///
+    /// - Parameter messageBody: The message to be sent.
+    ///
+    /// - Throws: An error if the WebSocket provider is not initialized.
     func sendMessage(messageBody: String) throws {
         guard let provider = self.provider else {
             throw NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "WebSocket provider is not initialized"])
@@ -49,6 +75,13 @@ public class WebSocketSession: NSObject {
         provider.sendMessage(message: .string(messageBody), handler: self.handler!)
     }
     
+    /// Sends a message through the WebSocket connection and waits for a response.
+    ///
+    /// - Parameter messageBody: The message to be sent.
+    ///
+    /// - Returns: The response received from the server.
+    ///
+    /// - Throws: An error if the WebSocket provider is not initialized or if sending fails.
     func sendMessageAndWaitForResponse(messageBody: String) async throws -> String {
         guard let provider = self.provider else {
             throw NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "WebSocket provider is not initialized"])

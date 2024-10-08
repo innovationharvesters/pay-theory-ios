@@ -8,458 +8,519 @@ import SwiftUI
 import Foundation
 import Combine
 
-class Card: ObservableObject, Equatable, PaymentMethod {
-    static func == (lhs: Card, rhs: Card) -> Bool {
-        if lhs.name == rhs.name &&
-            lhs.expirationDate == rhs.expirationDate &&
-            lhs.address == rhs.address &&
-            lhs.number == rhs.number &&
-            lhs.type == rhs.type &&
-            lhs.securityCode == rhs.securityCode {
-            return true
-        }
-        return false
-    }
-
-    private var type = "card"
-    @Published var isVisible: Bool = false
-    @Published var name: String?
-    @Published var address = Address()
-    @Published var expirationDate = ""
-    @Published var number = ""
-    @Published var securityCode = ""
+struct CardStruct: Encodable {
+    var name: String = ""
+    var number: String = ""
+    var expirationDate: String = ""
+    var securityCode: String = ""
+    var address: Address = Address()
+    var expirationMonth: String = ""
+    var expirationYear: String = ""
+    let type = "card"
+    var formattedNumber: String = ""
     
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case number
+        case securityCode = "security_code"
+        case address
+        case expirationMonth = "expiration_month"
+        case expirationYear = "expiration_year"
+        case type
+    }
+    
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(name, forKey: .name)
+        try container.encode(number, forKey: .number)
+        try container.encode(securityCode, forKey: .securityCode)
+        try container.encode(address, forKey: .address)
+        try container.encode(expirationMonth, forKey: .expirationMonth)
+        try container.encode(expirationYear, forKey: .expirationYear)
+        try container.encode(type, forKey: .type)
+    }
+    
+    mutating func clear() {
+        self.name = ""
+        self.number = ""
+        self.expirationDate = ""
+        self.securityCode = ""
+        self.address = Address()
+        self.expirationMonth = ""
+        self.expirationYear = ""
+    }
+}
+
+class Card: ObservableObject {
+    @Published var card: CardStruct
     @Published var isValid: Bool = false
-    @Published var expirationMonth: String = ""
-    @Published var expirationYear: String = ""
+    @Published var validCardNumber = false
+    @Published var validExpirationDate = false
+    @Published var validSecurityCode = false
+    @Published var validPostalCode = false
     private var cancellables = Set<AnyCancellable>()
-    
-    var expirationMonthPublisher: AnyPublisher<String,Never> {
-        return $expirationDate
-            .map { data in
-               return String(data.prefix(2))
-            }
-            .eraseToAnyPublisher()
-    }
 
-    var expirationYearPublisher: AnyPublisher<String,Never> {
-        return $expirationDate
-            .map { data in
-                var result = ""
-                if data.count == 5 {
-                    result = "20" + String(data.suffix(2))
-                }
-                return result
-            }
-            .eraseToAnyPublisher()
-    }
     
-    var firstSix: String {
-        return String(spacelessCard.prefix(6))
-    }
-    
-    var lastFour: String {
-        return String(spacelessCard.suffix(4))
-    }
-    
-    var spacelessCard: String {
-        return number.filter { $0.isNumber }
-    }
-    
-    var brand: String {
-        let visa = "^4"
-        let mastercard = """
-                        ^5[1-5][0-9]{5,}|222[1-9][0-9]{3,}|22[3-9]
-                        [0-9]{4,}|2[3-6][0-9]{5,}|27[01][0-9]{4,}|2720[0-9]{3,}$/
-                        """
-        let amex = "^3[47][0-9]{5,}$"
-        let discover = "^6(?:011|5[0-9]{2})[0-9]{3,}$"
-        let jcb = "^35"
-        let dinersClub = "^3(?:0[0-5]|[68][0-9])[0-9]{4,}$"
-        
-        let first7 = String(spacelessCard.prefix(7))
-        
-        if first7.range(of: visa, options: .regularExpression, range: nil, locale: nil) != nil {
-            return "Visa"
-        } else if first7.range(of: mastercard, options: .regularExpression, range: nil, locale: nil) != nil {
-            return "MasterCard"
-        } else  if first7.range(of: amex, options: .regularExpression, range: nil, locale: nil) != nil {
-            return "American Express"
-        } else if first7.range(of: discover, options: .regularExpression, range: nil, locale: nil) != nil {
-            return "Discover"
-        } else if first7.range(of: jcb, options: .regularExpression, range: nil, locale: nil) != nil {
-            return "JCB"
-        } else if first7.range(of: dinersClub, options: .regularExpression, range: nil, locale: nil) != nil {
-            return "Diners Club"
-        }
-        
-        return ""
-    }
-    
-    var validCardNumber: AnyPublisher<Bool,Never> {
-        return $number
-            .map { data in
-                return isValidCardNumber(cardString: data)
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    var validExpirationDate: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest(expirationYearPublisher, expirationMonthPublisher)
-            .map { year, month in
-                return isValidExpDate(month: month, year: year)
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    var validSecurityCode: AnyPublisher<Bool,Never> {
-        return $securityCode
-            .map { input in
-                let num = Int(input)
-                return num != nil && input.length > 2 && input.length < 5
-              }
-            .eraseToAnyPublisher()
-    }
-    
-    var validPostalCode: AnyPublisher<Bool, Never> {
-        return address.$postalCode
-            .map { data in
-                let unwrapped = data ?? ""
-                return isValidPostalCode(value: unwrapped)
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    var isValidPublisher: AnyPublisher<Bool,Never> {
-        return Publishers.CombineLatest4(validCardNumber, validSecurityCode, validExpirationDate, validPostalCode)
-            .map { validNumber, validCode, validDate, validPostal in
-                if validNumber == false || validCode == false || validDate == false || validPostal == false {
-                    return false
-                }
-                return true
-            }
-            .eraseToAnyPublisher()
-    }
-    
-    init() {
-        isValidPublisher.sink { valid in
-            self.isValid = valid
-                }
-        .store(in: &cancellables)
-        expirationMonthPublisher.sink { month in
-            self.expirationMonth = month
-        }
-        .store(in: &cancellables)
-        expirationYearPublisher.sink { year in
-            self.expirationYear = year
-        }
-        .store(in: &cancellables)
+    init(card: CardStruct = CardStruct()) {
+        self.card = card
+        setupValidation()
     }
     
     deinit {
         cancellables.forEach { $0.cancel() }
     }
-    
-    func clear() {
-        self.number = ""
-        self.expirationDate = ""
-        self.securityCode = ""
-        self.address = Address()
-        self.name = nil
+        
+    private func setupValidation() {
+        // Card Number Validation
+        $card.map(\.formattedNumber)
+            .removeDuplicates()
+            .sink { [weak self] number in
+                self?.validCardNumber = isValidCardNumber(cardString: number)
+                self?.card.number = number.replacingOccurrences(of: " ", with: "")
+            }
+            .store(in: &cancellables)
+        
+        // Expiration Date Validation
+        $card.map(\.expirationDate)
+            .removeDuplicates()
+            .sink { [weak self] date in
+                let (month, year) = splitDate(date)
+                self?.validExpirationDate = isValidExpDate(month: month, year: year)
+            }
+            .store(in: &cancellables)
+        
+        // Security Code Validation
+        $card.map(\.securityCode)
+            .removeDuplicates()
+            .sink { [weak self] code in
+                let num = Int(code)
+                self?.validSecurityCode = num != nil && code.length > 2 && code.length < 5
+            }
+            .store(in: &cancellables)
+        
+        // Postal Code Validation
+        $card.map(\.address.postalCode)
+            .removeDuplicates()
+            .sink { [weak self] postalCode in
+                self?.validPostalCode = isValidPostalCode(value: postalCode ?? "")
+            }
+            .store(in: &cancellables)
+        
+        // Overall Card Validation
+        Publishers.CombineLatest4($validCardNumber, $validExpirationDate, $validSecurityCode, $validPostalCode)
+            .map { $0 && $1 && $2 && $3 }
+            .assign(to: &$isValid)
     }
     
+    func clear() {
+        self.isValid = false
+        self.validCardNumber = false
+        self.validExpirationDate = false
+        self.validSecurityCode = false
+        self.validPostalCode = false
+        self.card.clear()
+    }
 }
 
-/// TextField that can be used to capture the Name for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the cardholder's name for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the cardholder's name.
 ///
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCardName(placeholder: "Enter Cardholder Name")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCardName: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    let placeholder: String
     
+    /// The placeholder text displayed in the text field when it's empty.
+    let placeholder: String
+
+    /// Initializes a new instance of `PTCardName` with a custom placeholder text.
+    ///
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "Name on Card".
     public init(placeholder: String = "Name on Card") {
         self.placeholder = placeholder
     }
 
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `name` property of the `Card` environment object.
+    /// The text field is configured to use word-based autocapitalization.
     public var body: some View {
-        TextField(placeholder, text: $card.name ?? "")
-            .autocapitalization(UITextAutocapitalizationType.words)
+        TextField(placeholder, text: $card.card.name)
+            .textInputAutocapitalization(.words)
     }
 }
 
-/// TextField that can be used to capture the Card Number for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the card number for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the card number.
 ///
-///  - Important: This is required to be able to run a transaction.
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+/// - Important: This field is required to be able to run a transaction.
 ///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCardNumber(placeholder: "Enter Card Number")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCardNumber: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTCardNumber` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Card Number".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "Card Number".
     public init(placeholder: String = "Card Number") {
         self.placeholder = placeholder
     }
     
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `formattedNumber` property of the `Card` environment object.
+    /// The text field is configured to use a decimal pad keyboard and automatically formats the input as a credit card number.
     public var body: some View {
-        TextField(placeholder, text: $card.number)
-            .onChange(of: card.number) { newValue in
-                card.number = insertCreditCardSpaces(newValue.filter({$0 .isNumber}))
+        TextField(placeholder, text: $card.card.formattedNumber)
+            .onChange(of: card.card.formattedNumber) { newValue in
+                var strippedNumber = newValue.filter({$0.isNumber})
+                card.card.formattedNumber = insertCreditCardSpaces(strippedNumber)
+                card.card.number = strippedNumber
             }
             .keyboardType(.decimalPad)
-            .trackVisibility(card)
     }
 }
 
-/// TextField that can be used to capture the Expiration Year for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the expiration date for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the expiration date.
 ///
-///  - Important: This is required to be able to run a transaction.
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+/// - Important: This field is required to be able to run a transaction.
 ///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTExp(placeholder: "MM/YY")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTExp: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTExp` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "MM / YY".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "MM/YY".
     public init(placeholder: String = "MM/YY") {
         self.placeholder = placeholder
     }
     
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `expirationDate` property of the `Card` environment object.
+    /// The text field is configured to use a decimal pad keyboard and automatically formats the input as an expiration date.
     public var body: some View {
-        TextField(placeholder, text: $card.expirationDate)
-            .onChange(of: card.expirationDate) { newValue in
-                card.expirationDate = formatExpirationDate(newValue)
+        TextField(placeholder, text: $card.card.expirationDate)
+            .onChange(of: card.card.expirationDate) { newValue in
+                var formattedExp = formatExpirationDate(newValue)
+                card.card.expirationDate = formattedExp
+                let (month, year) = splitDate(formattedExp)
+                card.card.expirationMonth = month
+                card.card.expirationYear = year
             }
             .keyboardType(.decimalPad)
     }
-    
-    private func formatExpirationDate(_ input: String) -> String {
-        // Remove all non-numeric characters from the input
-        var cleaned = input.filter { $0.isNumber }
-        var formatted = ""
-        
-        if cleaned.count > 0 {
-            // Extract the month from the first two characters (if available)
-            let month = Int(cleaned.prefix(2)) ?? 0
-            
-            if month > 12 {
-                // If month is greater than 12, take the first digit and prepend a 0
-                formatted = "0\(cleaned.prefix(1))"
-                cleaned = "0\(cleaned)" // Update cleaned string for year formatting
-            } else if month == 0 {
-                // If month is 0, set it to "0"
-                formatted = "0"
-            } else if cleaned.count > 1 {
-                // For valid months with more than one digit
-                formatted = month < 10 ? "0\(month)" : "\(month)"
-            } else {
-                // For single digit input, don't add leading zero yet
-                formatted = "\(month)"
-            }
-            
-            if cleaned.count > 2 {
-                // Add slash after month if there's input for year
-                formatted += "/"
-                // Take up to two digits for the year
-                let year = String(cleaned.suffix(cleaned.count - 2).prefix(2))
-                formatted += year
-            }
-        }
-        
-        return formatted
-    }
 }
 
-/// TextField that can be used to capture the CVV for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the CVV (Card Verification Value) for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the CVV.
 ///
-///  - Important: This is required to be able to run a transaction.
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+/// - Important: This field is required to be able to run a transaction.
 ///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCvv(placeholder: "Enter CVV")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCvv: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTCvv` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "CVV".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "CVV".
     public init(placeholder: String = "CVV") {
         self.placeholder = placeholder
     }
     
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `securityCode` property of the `Card` environment object.
+    /// The text field is configured to use a decimal pad keyboard and automatically formats the input to a maximum of 4 digits.
     public var body: some View {
-        TextField(placeholder, text: $card.securityCode)
-            .onChange(of: card.securityCode) { newValue in
-                card.securityCode = formatDigitTextField(newValue, maxLength: 4)
+        TextField(placeholder, text: $card.card.securityCode)
+            .onChange(of: card.card.securityCode) { newValue in
+                card.card.securityCode = formatDigitTextField(newValue, maxLength: 4)
             }
             .keyboardType(.decimalPad)
     }
 }
 
-/// TextField that can be used to capture the Address Line 1 for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the first line of the address for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the address line 1.
 ///
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCardLineOne(placeholder: "Street Address")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCardLineOne: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTCardLineOne` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Address Line 1".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "Address Line 1".
     public init(placeholder: String = "Address Line 1") {
         self.placeholder = placeholder
     }
     
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `line1` property of the `Card` environment object's address.
+    /// The text field is configured to use word-based autocapitalization.
     public var body: some View {
-        TextField(placeholder, text: $card.address.line1 ?? "")
+        TextField(placeholder, text: $card.card.address.line1 ?? "")
             .autocapitalization(UITextAutocapitalizationType.words)
     }
 }
 
-/// TextField that can be used to capture the Address Line 2 for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the second line of the address for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the address line 2.
 ///
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCardLineTwo(placeholder: "Apartment, suite, etc.")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCardLineTwo: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTCardLineTwo` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Address Line 2".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "Address Line 2".
     public init(placeholder: String = "Address Line 2") {
         self.placeholder = placeholder
     }
     
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `line2` property of the `Card` environment object's address.
     public var body: some View {
-        TextField(placeholder, text: $card.address.line2 ?? "")
+        TextField(placeholder, text: $card.card.address.line2 ?? "")
     }
 }
 
-/// TextField that can be used to capture the City for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the city for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the city.
 ///
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCardCity(placeholder: "Enter City")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCardCity: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTCardCity` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "City".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "City".
     public init(placeholder: String = "City") {
         self.placeholder = placeholder
     }
     
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `city` property of the `Card` environment object's address.
     public var body: some View {
-        TextField(placeholder, text: $card.address.city ?? "")
+        TextField(placeholder, text: $card.card.address.city ?? "")
     }
 }
 
-/// TextField that can be used to capture the Region for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the region (state/province) for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the region.
 ///
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCardRegion(placeholder: "State/Province")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCardRegion: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTCardRegion` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Region".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "Region".
     public init(placeholder: String = "Region") {
         self.placeholder = placeholder
     }
     
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `region` property of the `Card` environment object's address.
+    /// The text field is configured to use all-caps autocapitalization and disable autocorrection.
     public var body: some View {
-        TextField(placeholder, text: $card.address.region ?? "")
+        TextField(placeholder, text: $card.card.address.region ?? "")
             .autocapitalization(UITextAutocapitalizationType.allCharacters)
             .disableAutocorrection(true)
     }
 }
 
-/// TextField that can be used to capture the Postal Code for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the postal code for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the postal code.
 ///
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCardPostalCode(placeholder: "ZIP/Postal Code")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCardPostalCode: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTCardPostalCode` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Postal Code".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "Postal Code".
     public init(placeholder: String = "Postal Code") {
         self.placeholder = placeholder
     }
     
+    /// The body of the view, defining its content and behavior.
+    ///
+    /// This view presents a `TextField` that is bound to the `postalCode` property of the `Card` environment object's address.
+    /// The text field is configured to use a numbers and punctuation keyboard.
     public var body: some View {
-        TextField(placeholder, text: $card.address.postalCode ?? "")
+        TextField(placeholder, text: $card.card.address.postalCode ?? "")
             .keyboardType(.numbersAndPunctuation)
     }
 }
 
-/// TextField that can be used to capture the Country for a card object to be used in a Pay Theory payment
+/// A SwiftUI view that provides a text field for capturing the country for card payments in Pay Theory.
 ///
-///  - Requires: Ancestor view must be wrapped in a PTForm
+/// This view is designed to be used within a Pay Theory form and requires an ancestor view to be wrapped in a `PTForm`.
+/// It automatically binds to the `Card` environment object to update the country.
 ///
+/// - Note: This view must be used within a view hierarchy that includes a `PTForm` as an ancestor.
+///
+/// Example usage:
+/// ```swift
+/// PTForm {
+///     PTCardCountry(placeholder: "Country")
+///     // Other Pay Theory form fields...
+/// }
+/// ```
 public struct PTCardCountry: View {
+    /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
+    
+    /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
     
-    /// Initializes a new instance of the view with a placeholder text.
+    /// Initializes a new instance of `PTCardCountry` with a custom placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Country".
+    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
+    ///   The default value is "Country".
     public init(placeholder: String = "Country") {
         self.placeholder = placeholder
     }
     
-    public var body: some View {
-        TextField(placeholder, text: $card.address.country ?? "")
-    }
-}
-
-/// TextField that can be used to capture the Country for a card object to be used in a Pay Theory payment
-///
-///  - Requires: Ancestor view must be wrapped in a PTForm
-///
-public struct PTCombinedCard: View {
-    let numberPlaceholder: String
-    let expPlaceholder: String
-    let cvvPlaceholder: String
-    
-    /// Initializes a new instance of the view with placeholder texts for card details.
+    /// The body of the view, defining its content and behavior.
     ///
-    /// - Parameters:
-    ///   - numberPlaceholder: A `String` that represents the placeholder text for the card number field. The default value is "Card Number".
-    ///   - expPlaceholder: A `String` that represents the placeholder text for the expiration date field. The default value is "MM / YY".
-    ///   - cvvPlaceholder: A `String` that represents the placeholder text for the CVV field. The default value is "CVV".
-    public init(numberPlaceholder: String = "Card Number",
-                expPlaceholder: String = "MM / YY",
-                cvvPlaceholder: String = "CVV") {
-        self.numberPlaceholder = numberPlaceholder
-        self.expPlaceholder = expPlaceholder
-        self.cvvPlaceholder = cvvPlaceholder
-    }
-    
+    /// This view presents a `TextField` that is bound to the `country` property of the `Card` environment object's address.
     public var body: some View {
-        HStack() {
-            PTCardNumber(placeholder: numberPlaceholder)
-                .frame(minWidth: 200)
-            Spacer()
-            HStack {
-                PTExp(placeholder: expPlaceholder)
-            Spacer()
-                PTCvv(placeholder: cvvPlaceholder)
-            }
-        }
+        TextField(placeholder, text: $card.card.address.country ?? "")
     }
 }

@@ -6,7 +6,6 @@
 //
 // Extension of the Pay Theory class that contains functions used for initializes and maintaing the websocket as well as making any HTTP calls
 
-import UIKit
 import Foundation
 import CryptoKit
 
@@ -19,10 +18,11 @@ enum ConnectionError: Error {
 
 extension PayTheory {
     
-    @objc func appCameToForeground() {
+    func handleActiveState() {
         Task {
             do {
-                let _ = try await ensureConnected()
+                
+                try await ensureConnected()
             } catch {
                 handleConnectionError(error)
             }
@@ -30,8 +30,14 @@ extension PayTheory {
     }
     
     // Closes the socket as the app goes behind the
-    @objc func appMovedToBackground() {
+    func handleBackgroundState() {
+        do {
+            if session.status != .connected { return }
             session.close()
+        } catch let error as NSError {
+            print("Error during socket close: \(error)")
+            // You could also create a new NSError here with additional context
+        }
     }
     
     // Requests a Host Token and go through the App Attestation process if needed
@@ -67,7 +73,7 @@ extension PayTheory {
         }
     }
     
-    func connectSocket() async throws {
+    func connectSocket(initial_connection: Bool = false) async throws {
         // Fetch the PT Token to pass into socket connection
         do {
             try await fetchToken()
@@ -90,27 +96,39 @@ extension PayTheory {
         }
     }
     
-    func handleConnectionError(_ error: Error) {
+    func handleConnectionError(_ error: Error, sendToErrorHandler: Bool = true) -> PTError {
+        var parsedError: PTError = PTError(code: .socketError, error: "An unknown error occurred")
+        
         switch error {
         case ConnectionError.attestationFailed:
-            self.useCompletionHandler(.failure(PTError(code: .attestationFailed, error: "Failed app attestation")))
+            parsedError = PTError(code: .attestationFailed, error: "Failed app attestation")
         case ConnectionError.socketConnectionFailed:
-            self.useCompletionHandler(.failure(PTError(code: .socketError, error: "Socket failed to connect")))
+            parsedError = PTError(code: .socketError, error: "Socket failed to connect")
         case ConnectionError.hostTokenCallFailed:
-            self.useCompletionHandler(.failure(PTError(code: .tokenFailed, error: "Host token message failed")))
+            parsedError = PTError(code: .tokenFailed, error: "Host token message failed")
         default:
-            self.useCompletionHandler(.failure(PTError(code: .socketError, error: "An unknown error occurred")))
+            // Skip because the error is already set to unknown error
+            debugPrint("Unknown Socket Error")
         }
+        if sendToErrorHandler {
+            self.handleError(error: parsedError)
+        }
+        return parsedError
     }
     
     /// Checks to see if the socket is connected
+    /// Returns true if socket was already connected or false if it had to reconnect
     func ensureConnected() async throws -> Bool {
         // Check if the socket is already connected
         if session.status == .connected {
             return true
         }
-        // If not connected try to reconnect
-        try await connectSocket()
-        return false
+        // If not connected, try to reconnect
+        do {
+            try await connectSocket()
+            return false
+        } catch {
+            throw error
+        }
     }
 }

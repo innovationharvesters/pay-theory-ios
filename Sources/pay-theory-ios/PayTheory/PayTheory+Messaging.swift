@@ -6,18 +6,16 @@
 //
 // Extension of the Pay Theory class that contains functions used for messaging the websocket and also handling messages from the socket
 
-import UIKit
 import Foundation
 import CryptoKit
 
 extension PayTheory {
     
-    func onMessage(response: String) {
+    private func parseResponse(response: String) -> Result<(type: String, body: [String: Any]), PTError> {
         // Attempt to convert the response string to a dictionary
         guard let dictionary = convertStringToDictionary(text: response) else {
             // If conversion fails, handle it as an error and exit
-            handleErrors(["Could not convert the response to a Dictionary"])
-            return
+            return .failure(handleErrors(["Could not convert the response to a Dictionary"]))
         }
 
         // Extract the message type, defaulting to an empty string if not present
@@ -26,106 +24,134 @@ extension PayTheory {
         // Check if the response contains any errors
         if let errors = dictionary["error"] as? [Any] {
             // If errors are present, handle them and exit
-            handleErrors(errors)
-            return
+            return .failure(handleErrors(errors))
         }
 
         // Attempt to extract the body from the response
-        guard var body = dictionary["body"] as? String else {
+        guard var body = dictionary["body"] else {
             // If body is missing, handle it as an error and exit
-            handleErrors(["Missing body in response"])
-            return
+            return .failure(handleErrors(["Missing body in response"]))
         }
-
-        // If the message type requires decryption, decrypt the body
-        if ENCRYPTED_MESSAGES.contains(type) {
-            let publicKey = dictionary["public_key"] as? String ?? ""
-            body = transaction.decryptBody(body: body, publicKey: publicKey)
+        
+        // Check if body is a String or [String: Any]
+        var parsedBody: [String: Any]
+        if var stringBody = body as? String {
+            // If the message type requires decryption, decrypt the body
+            if ENCRYPTED_MESSAGES.contains(type) {
+                let publicKey = dictionary["public_key"] as? String ?? ""
+                stringBody = transaction.decryptBody(body: stringBody, publicKey: publicKey)
+                // Attempt to parse the body string into a dictionary
+                guard let parsed = convertStringToDictionary(text: stringBody) else {
+                    // If parsing fails, handle it as an error and exit
+                    return .failure(handleErrors(["Could not parse body"]))
+                }
+                parsedBody = parsed
+            } else if type == ERROR_TYPE {
+                return .failure(handleErrorType(stringBody))
+            } else {
+                return .failure(handleErrors(["Invalid body type in response"]))
+            }
+        } else if let dictBody = body as? [String: Any] {
+            parsedBody = dictBody
+        } else {
+            // If body is neither String nor [String: Any], handle as error and exit
+            return .failure(handleErrors(["Invalid body type in response"]))
         }
+        
+        return .success((type, parsedBody))
+    }
+    
+    func onMessage(response: String) {
+        let response = parseResponse(response: response)
+        if case .failure(let error) = response {
+            self.errorHandler(error)
+        } else if case .success(let (type, parsedBody)) = response {
+            // Process the message based on its type
+            handleMessageType(type, parsedBody)
 
-        // If the message type indicates an error, handle it separately
-        if type == ERROR_TYPE {
-            handleErrorType(body)
-            return
+            // Perform any necessary cleanup or final processing
+            finishProcessing()
         }
-
-        // Attempt to parse the body string into a dictionary
-        guard let parsedBody = convertStringToDictionary(text: body) else {
-            // If parsing fails, handle it as an error and exit
-            handleErrors(["Could not parse body"])
-            return
-        }
-
-        // Process the message based on its type
-        handleMessageType(type, parsedBody)
-
-        // Perform any necessary cleanup or final processing
-        finishProcessing()
     }
 
-    private func handleErrors(_ errors: [Any]) {
+    private func handleErrors(_ errors: [Any]) -> PTError {
         let errorMessage = errors.compactMap { $0 as? String }.joined()
         let error = errorMessage.isEmpty ? "An unknown socket error occurred" : errorMessage
-        useCompletionHandler(.failure(PTError(code: .socketError, error: error)))
+        let ptError = PTError(code: .socketError, error: error)
         if transaction.hostToken != nil {
             resetTransaction()
         }
+        return ptError
     }
 
-    private func handleErrorType(_ body: String) {
-        useCompletionHandler(.failure(PTError(code: .socketError, error: body)))
+    private func handleErrorType(_ body: String) -> PTError {
         if transaction.hostToken != nil {
             resetTransaction()
         }
+        return PTError(code: .socketError, error: body)
     }
 
     private func handleMessageType(_ type: String, _ parsedBody: [String: Any]) {
         switch type {
-        case TRANSFER_COMPLETE_TYPE:
-            handleTransferComplete(parsedBody)
-        case BARCODE_COMPLETE_TYPE:
-            handleBarcodeComplete(parsedBody)
-        case TOKENIZE_COMPLETE_TYPE:
-            handleTokenizeComplete(parsedBody)
         case CALCULATE_FEE_TYPE:
             handleCalcFeeResponse(parsedBody)
         default:
-            debugPrint("Unknown message type returned")
+            debugPrint("Type not recognized. \(type)")
         }
-    }
-
-    private func handleTransferComplete(_ parsedBody: [String: Any]) {
-        if parsedBody["state"] as? String ?? "" == "FAILURE" {
-            useCompletionHandler(.success(.Failure(FailedTransaction(response: parsedBody))))
-            resetTransaction()
-        } else {
-            setComplete(true)
-            useCompletionHandler(.success(.Success(SuccessfulTransaction(response: parsedBody))))
-        }
-    }
-
-    private func handleBarcodeComplete(_ parsedBody: [String: Any]) {
-        setComplete(true)
-        useCompletionHandler(.success(.Cash(CashBarcode(response: parsedBody))))
-    }
-
-    private func handleTokenizeComplete(_ parsedBody: [String: Any]) {
-        setComplete(true)
-        useCompletionHandler(.success(.Tokenized(TokenizedPaymentMethod(response: parsedBody))))
     }
 
     private func finishProcessing() {
         if isAwaitingResponse {
             isAwaitingResponse = false
         }
-        
-        if completion == nil {
-            debugPrint("There is no completion handler to handle the response")
+    }
+    
+    // Used to parse transaction repsponses to be used in the transact function logic
+    func parseTransactResponse(_ response: String) -> TransactResponse {
+        let response = parseResponse(response: response)
+        if case .failure(let error) = response {
+            return .Error(error)
+        } else if case .success(let (type, parsedBody)) = response {
+            switch type {
+            case TRANSFER_COMPLETE_TYPE:
+                if parsedBody["state"] as? String ?? "" == "FAILURE" {
+                    resetTransaction()
+                    return .Failure(FailedTransaction(response: parsedBody))
+                } else {
+                    setComplete(true)
+                    return .Success(SuccessfulTransaction(response: parsedBody))
+                }
+            case BARCODE_COMPLETE_TYPE:
+                setComplete(true)
+                return .Barcode(CashBarcode(response: parsedBody))
+            default:
+                return .Error(PTError(code: .socketError, error: "Unknown response type: \(type)"))
+            }
         }
+        resetTransaction()
+        return .Error(PTError(code: .socketError, error: "Unknown response type."))
+    }
+    
+    // Used to parse the tokenization responses to be used in the tokenizePaymentMethod function logic
+    func parseTokenizeResponse(_ response: String) -> TokenizePaymentMethodResponse {
+        let response = parseResponse(response: response)
+        if case .failure(let error) = response {
+            return .Error(error)
+        } else if case .success(let (type, parsedBody)) = response {
+            switch type {
+            case TOKENIZE_COMPLETE_TYPE:
+                setComplete(true)
+                return .Success(TokenizedPaymentMethod(response: parsedBody))
+            default:
+                return .Error(PTError(code: .socketError, error: "Unknown response type: \(type)"))
+            }
+        }
+        resetTransaction()
+        return .Error(PTError(code: .socketError, error: "Unknown response type."))
     }
     
     // Create the body needed for fetching a Host Token and send it to the websocket
-    func sendHostTokenMessage() async throws {
+    func sendHostTokenMessage(calc_fees: Bool = true) async throws {
         do {
             var message: [String: Any] = ["action": HOST_TOKEN]
             let hostToken: [String: Any] = [
@@ -161,8 +187,12 @@ extension PayTheory {
             let key = body["publicKey"] as? String ?? ""
             self.transaction.publicKey = convertStringToByte(string: key)
             
-            // Set isReady to true
+            // Set isReady to true, set the timestamp for the host token, and calc fees if needed
             setReady(true)
+            self.hostTokenTimestamp = Date()
+            if calc_fees && (amount != nil) {
+                calcFeesWithAmount()
+            }
         } catch {
             throw ConnectionError.hostTokenCallFailed
         }
@@ -177,6 +207,7 @@ extension PayTheory {
                 handleConnectionError(error)
             }
         }
+        print("Calculating Fees \(card_bin ?? "ACH")")
         if let calcAmount = amount {
             var message: [String: Any] = ["action": CALCULATE_FEE]
             if let bin = card_bin {
@@ -201,7 +232,7 @@ extension PayTheory {
             do {
                 try session.sendMessage(messageBody: stringify(jsonDictionary: message))
             } catch {
-                useCompletionHandler(.failure(PTError(code: .socketError, error: "There was an error sending the socket message")))
+                errorHandler(PTError(code: .socketError, error: "There was an error sending the socket message"))
             }
         }
     }
@@ -212,13 +243,17 @@ extension PayTheory {
                 // Only set the cardServiceFee if it is for the correct current cardBin.
                 // This needs to be here in case someone changes the card number quickly before the response comes through
                 if bank_id == cardBin {
-                    cardServiceFee = fee
+                    DispatchQueue.main.async {
+                        self.cardServiceFee = fee
+                    }
                 }
             } else {
-                bankServiceFee = fee
+                DispatchQueue.main.async {
+                    self.bankServiceFee = fee
+                }
             }
         } else {
-            debugPrint("Fee was not returned succesfully")
+            self.errorHandler(PTError(code: .socketError, error: "There was an error calculating the fees"))
         }
     }
 }

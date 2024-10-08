@@ -22,36 +22,8 @@ extension PayTheory {
                     try await sendHostTokenMessage()
                 }
             } catch {
-                self.useCompletionHandler(.failure(PTError(code: .tokenFailed, error: "Fetching the token failed")))
+                self.errorHandler(PTError(code: .tokenFailed, error: "Fetching the token failed"))
             }
-        }
-    }
-    
-    // Used to send a result to completion handler or log if it is not set yet
-    func useCompletionHandler(_ result: Result<SuccessfulResponse, PTError>) {
-        if let completion = completion {
-            completion(result)
-        } else {
-            switch result {
-            case .success(let response):
-                debugPrint("Success: \(describeSuccessResponse(response))")
-            case .failure(let error):
-                debugPrint("Error: \(error.code) - \(error.error)")
-            }
-            debugPrint("Note: The completion handler is not set on the PayTheory object")
-        }
-    }
-
-    private func describeSuccessResponse(_ response: SuccessfulResponse) -> String {
-        switch response {
-        case .Success(let transaction):
-            return "Successful transaction: \(transaction.transactionId)"
-        case .Failure(let failedTransaction):
-            return "Failed transaction: \(failedTransaction.state) - \(failedTransaction.failureText)"
-        case .Cash(let cashBarcode):
-            return "Cash barcode generated: \(cashBarcode.barcodeUrl)"
-        case .Tokenized(let tokenizedPayment):
-            return "Payment method tokenized: \(tokenizedPayment.paymentMethodId)"
         }
     }
     
@@ -87,15 +59,24 @@ extension PayTheory {
         }
     }
     
-    func canCallAction() -> Bool {
+    func canCallAction() -> PTError? {
         if isComplete == true {
-            useCompletionHandler(.failure(PTError(code: .actionComplete, error: "Pay Theory class has already succesfully tokenized or made a transaction.")))
-            return false
+            return PTError(code: .actionComplete, error: "Pay Theory class has already succesfully tokenized or made a transaction.")
         } else if isInitialized == true {
-            useCompletionHandler(.failure(PTError(code: .inProgress, error: "Transact or Tokenize function is already in progress.")))
-            return false
+            return PTError(code: .inProgress, error: "Transact or Tokenize function is already in progress.")
         }
-        return true
+        return nil
+    }
+        
+    // Checks to see that it has been 14 minutes since we fetched the host token so that it can be used
+    func hostTokenStillValid() -> Bool {
+        let currentTime = Date()
+        if let hostTokenTimestamp = self.hostTokenTimestamp {
+            let timeInterval = currentTime.timeIntervalSince(hostTokenTimestamp)
+            let minutesPassed = timeInterval / 60
+            return minutesPassed <= Double(14)
+        }
+        return false
     }
     
     // Some internal setters for values that need to be set on the main thread

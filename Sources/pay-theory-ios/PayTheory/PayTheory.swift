@@ -9,33 +9,67 @@
 import SwiftUI
 import Foundation
 import Combine
-
 import DeviceCheck
-import CryptoKit
 
+/// A class that manages payment processing through the Pay Theory service.
+///
+/// The `PayTheory` class provides a comprehensive interface for handling various payment methods,
+/// including card payments, ACH transfers, and cash transactions. It manages the state of each
+/// payment method, calculates service fees, and handles communication with the Pay Theory servers.
+///
+/// This class conforms to `ObservableObject`, allowing SwiftUI views to react to changes in its state,
+/// and `WebSocketProtocol` for handling real-time communication with the Pay Theory service.
+///
+/// - Important: Always check the `isReady` property before attempting to process payments to ensure
+///   the instance has completed initialization.
+///
+/// - Note: This class uses combine framework for reactive programming and DeviceCheck for secure device attestation.
 public class PayTheory: ObservableObject, WebSocketProtocol {
-    // State variables to tell when things are valid or empty
+    // Internal State variables to track state with the fields
     var envCard: Card
     var envPayor: Payor
     var envAch: ACH
     var envCash: Cash
     var cancellables = Set<AnyCancellable>()
-    @Published internal(set) public var cashName: CashName
-    @Published internal(set) public var cashContact: CashContact
-    @Published internal(set) public var cardNumber: CardNumber
-    @Published internal(set) public var cvv: CardCvv
-    @Published internal(set) public var exp: CardExp
-    @Published internal(set) public var postalCode: CardPostalCode
-    @Published internal(set) public var accountNumber: ACHAccountNumber
-    @Published internal(set) public var accountName: ACHAccountName
-    @Published internal(set) public var routingNumber: ACHRoutingNumber
-    @Published internal(set) public var valid: ValidFields
-    @Published internal(set) public var cardServiceFee: Int?
-    @Published internal(set) public var bankServiceFee: Int?
     
+    // Public State Variables
+    /// The current state of the card payment method.
+    ///
+    /// This property provides access to the current state of the card payment method,
+    /// including validation status and any entered card details.
+    @Published internal(set) public var card: CardState
+
+    /// The current state of the cash payment method.
+    ///
+    /// This property provides access to the current state of the cash payment method,
+    /// including any relevant details for cash transactions.
+    @Published internal(set) public var cash: CashState
+
+    /// The current state of the ACH (Automated Clearing House) payment method.
+    ///
+    /// This property provides access to the current state of the ACH payment method,
+    /// including validation status and any entered bank account details.
+    @Published internal(set) public var ach: ACHState
+
+    /// The calculated service fee for card transactions, if applicable.
+    ///
+    /// This property holds the service fee amount (in cents) for card transactions.
+    /// It will be `nil` if no fee applies or if the fee hasn't been calculated yet.
+    @Published internal(set) public var cardServiceFee: Int?
+
+    /// The calculated service fee for bank (ACH) transactions, if applicable.
+    ///
+    /// This property holds the service fee amount (in cents) for bank transactions.
+    /// It will be `nil` if no fee applies or if the fee hasn't been calculated yet.
+    @Published internal(set) public var bankServiceFee: Int?
+
+    /// Indicates whether the PayTheory instance is ready for use.
+    ///
+    /// This property becomes `true` when the instance has completed its initialization
+    /// and is ready to process payments. It should be checked before attempting to use
+    /// the instance for payment operations.
     @Published internal(set) public var isReady: Bool = false
 
-    var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     var isAwaitingResponse: Bool = false
     let service = DCAppAttestService.shared
     var amount: Int?
@@ -46,7 +80,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var sessionId = generateUUID()
     @ObservedObject var transaction: Transaction
     var transactionCancellable: AnyCancellable? = nil
-    public var completion: ((Result<SuccessfulResponse, PTError>) -> Void)?
+    var errorHandler: (PTError) -> Void
     
     var appleEnvironment: String
     var devMode = false
@@ -54,6 +88,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var isComplete = false
     var passedPayor: Payor?
     var ptToken: String?
+    var hostTokenTimestamp: Date?
     var session: WebSocketSession
     // Attestation string being set should trigger the connection of our socket or sending of the hostTokenMessage if it is already connected
     var attestationString: String?
@@ -74,21 +109,31 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     /// Initializes a new instance of the PayTheory class.
     ///
-    /// This initializer sets up the PayTheory instance with the provided amount, API key,
-    /// development mode flag, and a completion handler for processing responses.
+    /// This initializer sets up the PayTheory instance with the provided parameters and prepares
+    /// it for payment processing. It configures the network monitor, sets up observers for app
+    /// lifecycle events, and initializes the necessary state for various payment methods.
     ///
     /// - Parameters:
-    ///   - amount: An optional integer representing the transaction amount in cents. This will be used to calculate the fees if you are using the Service Fee fee mode.
+    ///   - amount: An optional integer representing the transaction amount in cents.
+    ///             This will be used to calculate fees if you are using the Service Fee mode.
+    ///             If not provided, fees won't be calculated automatically.
     ///   - apiKey: A string containing the API key for authentication with the Pay Theory service.
+    ///             This should be in the format '{partner}-{paytheorystage}-{UUID}'.
     ///   - devMode: A boolean flag indicating whether to run in development mode. Defaults to `false`.
-    ///   - completion: An optional closure that handles the result of PayTheory operations.
-    ///                 It takes a `Result<SuccessfulResponse, PTError>` parameter.
+    ///              When `true`, it uses the development environment for app attestation.
+    ///   - errorHandler: A closure that handles any errors that might occur during initialization
+    ///                   and other background actions. It takes a `PTError` parameter.
     ///
-    /// - Throws: A fatal error if the API key is not valid.
+    /// - Throws: A fatal error if the provided API key is not in the correct format.
     ///
-    /// - Note: This initializer sets up various state variables, configures the network monitor,
-    ///         sets up observers for app lifecycle events, and stores the completion handler for later use.
-    public init(amount: Int? = nil, apiKey: String, devMode: Bool = false, completion: ((Result<SuccessfulResponse, PTError>) -> Void)? = nil) {
+    /// - Important: The `isReady` property will be set to `true` when the instance has completed
+    ///              initialization and is ready for use. Always check this before proceeding with
+    ///              payment operations.
+    ///
+    /// - Note: This initializer sets up various state variables and configures the instance
+    ///         based on the provided API key. It also sets up Combine publishers to propagate
+    ///         changes in the instance's state.
+    public init(amount: Int? = nil, apiKey: String, devMode: Bool = false, errorHandler: @escaping (PTError) -> Void) {
         // Parse the API key to extract environment and stage information
         var apiParts = apiKey.split {$0 == "-"}.map { String($0) }
         // Validate the the API key is the correct format
@@ -105,24 +150,13 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         self.devMode = devMode
         
         // Store the completion handler
-        self.completion = completion
+        self.errorHandler = errorHandler
         
         // Initialize payment method objects
         envAch = ACH()
         envCard = Card()
         envPayor = Payor()
         envCash = Cash()
-        
-        // Initialize the Observable Objects for different payment method values
-        cashName = CashName(cash: envCash)
-        cashContact = CashContact(cash: envCash)
-        accountName = ACHAccountName(bank: envAch)
-        accountNumber = ACHAccountNumber(bank: envAch)
-        routingNumber = ACHRoutingNumber(bank: envAch)
-        cvv = CardCvv(card: envCard)
-        exp = CardExp(card: envCard)
-        cardNumber = CardNumber(card: envCard)
-        postalCode = CardPostalCode(card: envCard)
         
         // Set up network monitoring
         monitor = NetworkMonitor()
@@ -131,69 +165,67 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         let newTransaction = Transaction(apiKey: apiKey)
         transaction = newTransaction
         
-        // Initialize validation object
-        valid = ValidFields(cash: envCash, card: envCard, ach: envAch, transaction: newTransaction)
+        // Initialize validation objects
+        ach = ACHState(ach: envAch, transaction: newTransaction)
+        card = CardState(card: envCard, transaction: newTransaction)
+        cash = CashState(cash: envCash, transaction: newTransaction)
+        
         
         // Initialize the WebSocketSession we will use for socket communications
         let provider = WebSocketProvider()
         session = WebSocketSession()
         session.prepare(_provider: provider, _handler: self)
-        let notificationCenter = NotificationCenter.default
-        
-        // Initialize the observer for managing the socket connection
-        notificationCenter.addObserver(self, selector: #selector(appMovedToBackground), name: UIApplication.didEnterBackgroundNotification, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(appCameToForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
         
         // Set up Combine publishers to propagate changes
+        envAch.objectWillChange.sink { [weak self] (_) in
+            self?.objectWillChange.send()
+        }.store(in: &cancellables)
         envCard.objectWillChange.sink { [weak self] (_) in
             self?.objectWillChange.send()
         }.store(in: &cancellables)
         envCash.objectWillChange.sink { [weak self] (_) in
             self?.objectWillChange.send()
         }.store(in: &cancellables)
-        envAch.objectWillChange.sink { [weak self] (_) in
-            self?.objectWillChange.send()
-        }.store(in: &cancellables)
-        envPayor.objectWillChange.sink { [weak self] (_) in
-            self?.objectWillChange.send()
-        }.store(in: &cancellables)
         transaction.objectWillChange.sink { [weak self] (_) in
             self?.objectWillChange.send()
         }.store(in: &cancellables)
-        
-        // Set listener on the card number to set the cardBin value for calculating the fee
-        envCard.$number.sink { [weak self] newNumber in
-            self?.cardNumberChanged(newNumber)
+        ach.objectWillChange.sink { [weak self] (_) in
+            self?.objectWillChange.send()
+        }.store(in: &cancellables)
+        card.objectWillChange.sink { [weak self] (_) in
+            self?.objectWillChange.send()
+        }.store(in: &cancellables)
+        cash.objectWillChange.sink { [weak self] (_) in
+            self?.objectWillChange.send()
         }.store(in: &cancellables)
         
-        Task {
-            do {
-                try await connectSocket()
-            } catch {
-                useCompletionHandler(.failure(PTError(code: .socketError, error: "Unable to connect to the socket.")))
+        envCard.$card.map(\.number)
+            .removeDuplicates()
+            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .sink { [weak self] number in
+                self?.cardNumberChanged(number)
             }
-        }
+            .store(in: &cancellables)
     }
     
     deinit {
         cancellables.forEach { $0.cancel() }
     }
     
-    // Functions used to conform to the WebSocketProtocol
+    // MARK: Functions used to conform to the WebSocketProtocol
     func receiveMessage(message: String) {
-        debugPrint("handle receiveMessage")
         onMessage(response: message)
     }
     
     func handleError(error: Error) {
-        useCompletionHandler(.failure(PTError(code: .socketError, error: "An unknown socket error occured")))
-        debugPrint(error)
+        errorHandler(PTError(code: .socketError, error: "An unknown socket error occured"))
     }
     
     func handleDisconnect() {
-        self.transaction.sessionKey = nil
-        self.transaction.publicKey = nil
+        DispatchQueue.main.async {
+            self.transaction.sessionKey = nil
+            self.transaction.publicKey = nil
+        }
         setReady(false)
-        debugPrint("socket disconnected")
     }
 }

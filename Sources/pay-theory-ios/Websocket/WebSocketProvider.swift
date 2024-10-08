@@ -93,9 +93,10 @@ public class WebSocketProvider: NSObject {
                     } else {
                         self.defaultHandler?.handleError(error: error)
                     }
-                    self.stopSocket()
                 }
-                self.receive()
+                if self.status == .connected {
+                    self.receive()
+                }
             }
         }
 
@@ -115,6 +116,10 @@ public class WebSocketProvider: NSObject {
         }
     
     func sendMessage(message:URLSessionWebSocketTask.Message, handler: WebSocketProtocol) {
+        if let asyncHandler = self.asyncResponseHandler {
+            print("Cannot send message while waiting for response")
+            return
+        }
         webSocket?.send(message, completionHandler: { (error) in
             if (error != nil) {
                 self.handler!.handleError(error: error!)
