@@ -116,7 +116,7 @@ public class WebSocketProvider: NSObject {
         }
     
     func sendMessage(message:URLSessionWebSocketTask.Message, handler: WebSocketProtocol) {
-        if let asyncHandler = self.asyncResponseHandler {
+        if self.asyncResponseHandler != nil {
             print("Cannot send message while waiting for response")
             return
         }

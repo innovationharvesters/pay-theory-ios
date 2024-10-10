@@ -28,7 +28,7 @@ extension PayTheory {
         }
 
         // Attempt to extract the body from the response
-        guard var body = dictionary["body"] else {
+        guard let body = dictionary["body"] else {
             // If body is missing, handle it as an error and exit
             return .failure(handleErrors(["Missing body in response"]))
         }
@@ -204,7 +204,7 @@ extension PayTheory {
             do {
                 let _ = try await ensureConnected()
             } catch {
-                handleConnectionError(error)
+                let _ = handleConnectionError(error)
             }
         }
         print("Calculating Fees \(card_bin ?? "ACH")")

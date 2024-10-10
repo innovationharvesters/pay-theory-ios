@@ -125,7 +125,7 @@ struct TokenizePaymentMethodData: Encodable {
 }
 
 struct PaymentData: Codable {
-    let feeMode: FEE_MODE
+    let feeMode: FeeMode
     let currency: String
     let amount: Int
     

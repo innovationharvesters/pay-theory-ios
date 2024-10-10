@@ -21,23 +21,17 @@ extension PayTheory {
     func handleActiveState() {
         Task {
             do {
-                
-                try await ensureConnected()
+                let _ = try await ensureConnected()
             } catch {
-                handleConnectionError(error)
+                let _ = handleConnectionError(error, sendToErrorHandler: true)
             }
         }
     }
     
     // Closes the socket as the app goes behind the
     func handleBackgroundState() {
-        do {
-            if session.status != .connected { return }
-            session.close()
-        } catch let error as NSError {
-            print("Error during socket close: \(error)")
-            // You could also create a new NSError here with additional context
-        }
+        if session.status != .connected { return }
+        session.close()
     }
     
     // Requests a Host Token and go through the App Attestation process if needed

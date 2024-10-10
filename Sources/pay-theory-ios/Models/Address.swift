@@ -83,6 +83,10 @@ public struct Address: Codable, Equatable {
         self.line1 = line1
         self.line2 = line2
         self.postalCode = postalCode
-        self.region = region
+        // Tryin the region to its first two characters if it is too long
+        if let region {
+            let trimmed = region.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.region = trimmed.count > 2 ? String(trimmed.prefix(2)) : trimmed
+        }
     }
 }

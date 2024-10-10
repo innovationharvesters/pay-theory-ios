@@ -10,12 +10,12 @@ import SwiftUI
 
 // MARK: - Public Enums
 
-public enum FEE_MODE: String, Codable {
+public enum FeeMode: String, Codable {
     case MERCHANT_FEE = "merchant_fee"
     case SERVICE_FEE = "service_fee"
 }
 
-public enum PAYMENT_TYPE: String, CaseIterable, Identifiable {
+public enum PaymentType: String, CaseIterable, Identifiable {
     case CARD = "Card"
     case ACH = "ACH"
     case CASH = "Cash"

@@ -37,7 +37,7 @@ class Transaction: ObservableObject {
     var sodium: Sodium
     
     /// The fee mode for the transaction.
-    var feeMode: FEE_MODE = .MERCHANT_FEE
+    var feeMode: FeeMode = .MERCHANT_FEE
     
     /// Additional metadata for the transaction.
     var metadata: [String: String] = [:]

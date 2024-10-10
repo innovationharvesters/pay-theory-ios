@@ -235,7 +235,7 @@ public struct PTAchAccountType: View {
     private var accountTypeBinding: Binding<ACHAccountType> {
         Binding<ACHAccountType>(
             get: {
-                account.ach.accountType ?? .checking
+                account.ach.accountType
             },
             set: { newValue in
                 account.ach.accountType = newValue

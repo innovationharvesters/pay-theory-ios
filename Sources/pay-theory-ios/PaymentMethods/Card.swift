@@ -43,6 +43,7 @@ struct CardStruct: Encodable {
     mutating func clear() {
         self.name = ""
         self.number = ""
+        self.formattedNumber = ""
         self.expirationDate = ""
         self.securityCode = ""
         self.address = Address()
@@ -198,7 +199,7 @@ public struct PTCardNumber: View {
     public var body: some View {
         TextField(placeholder, text: $card.card.formattedNumber)
             .onChange(of: card.card.formattedNumber) { newValue in
-                var strippedNumber = newValue.filter({$0.isNumber})
+                let strippedNumber = newValue.filter({$0.isNumber})
                 card.card.formattedNumber = insertCreditCardSpaces(strippedNumber)
                 card.card.number = strippedNumber
             }
@@ -243,7 +244,7 @@ public struct PTExp: View {
     public var body: some View {
         TextField(placeholder, text: $card.card.expirationDate)
             .onChange(of: card.card.expirationDate) { newValue in
-                var formattedExp = formatExpirationDate(newValue)
+                let formattedExp = formatExpirationDate(newValue)
                 card.card.expirationDate = formattedExp
                 let (month, year) = splitDate(formattedExp)
                 card.card.expirationMonth = month

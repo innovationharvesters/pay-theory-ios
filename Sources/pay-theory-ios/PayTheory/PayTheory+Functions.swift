@@ -26,7 +26,7 @@ extension PayTheory {
     /// - Returns: A TokenizePaymentMethodResponse with all possible responses.
     ///
     /// - Important: This function requires an active WebSocket connection. It will attempt to establish a connection if one doesn't exist.
-    public func tokenizePaymentMethod(paymentMethod: PAYMENT_TYPE,
+    public func tokenizePaymentMethod(paymentMethod: PaymentType,
                                       payor: Payor? = nil,
                                       payorId: String? = nil,
                                       metadata: [String: String]? = nil) async -> TokenizePaymentMethodResponse {
@@ -45,7 +45,7 @@ extension PayTheory {
                 try await sendHostTokenMessage(calc_fees: false)
             }
         } catch {
-            var connectionError = handleConnectionError(error, sendToErrorHandler: false)
+            let connectionError = handleConnectionError(error, sendToErrorHandler: false)
             isInitialized = false
             return .Error(connectionError)
         }
@@ -98,22 +98,18 @@ extension PayTheory {
     ///     the tokenized payment method as a string, and the failure case contains any error that occurred.
     ///
     /// - Important: This function executes asynchronously. The completion handler will be called on an arbitrary thread.
-    public func tokenizePaymentMethod(paymentMethod: PAYMENT_TYPE,
+    public func tokenizePaymentMethod(paymentMethod: PaymentType,
                                       payor: Payor? = nil,
                                       payorId: String? = nil,
                                       metadata: [String: String]? = nil,
                                       completion: @escaping (TokenizePaymentMethodResponse) -> Void) {
         Task {
-            do {
-                let result = try await tokenizePaymentMethod(paymentMethod: paymentMethod,
-                                                             payor: payor,
-                                                             payorId: payorId,
-                                                             metadata: metadata)
-                
-                completion(result)
-            } catch {
-                completion(.Error(PTError(code: .socketError, error: "There was an error tokenizing the payment method.")))
-            }
+            let result = await tokenizePaymentMethod(paymentMethod: paymentMethod,
+                                                     payor: payor,
+                                                     payorId: payorId,
+                                                     metadata: metadata)
+            
+            completion(result)
         }
     }
     
@@ -148,10 +144,10 @@ extension PayTheory {
     ///
     /// - Important: This function requires an active WebSocket connection. It will attempt to establish a connection if one doesn't exist.
     public func transact(amount: Int,
-                         paymentMethod: PAYMENT_TYPE,
+                         paymentMethod: PaymentType,
                          accountCode: String? = nil,
                          fee: Int? = nil,
-                         feeMode: FEE_MODE = .MERCHANT_FEE,
+                         feeMode: FeeMode = .MERCHANT_FEE,
                          healthExpenseType: HealthExpenseType? = nil,
                          invoiceId: String? = nil,
                          level3DataSummary: Level3DataSummary? = nil,
@@ -177,7 +173,7 @@ extension PayTheory {
                 try await sendHostTokenMessage(calc_fees: false)
             }
         } catch {
-            var connectionError = handleConnectionError(error, sendToErrorHandler: false)
+            let connectionError = handleConnectionError(error, sendToErrorHandler: false)
             isInitialized = false
             return .Error(connectionError)
         }
@@ -265,10 +261,10 @@ extension PayTheory {
     ///
     /// - Important: This function executes asynchronously. The completion handler will be called on an arbitrary thread.
     public func transact(amount: Int,
-                         paymentMethod: PAYMENT_TYPE,
+                         paymentMethod: PaymentType,
                          accountCode: String? = nil,
                          fee: Int? = nil,
-                         feeMode: FEE_MODE = .MERCHANT_FEE,
+                         feeMode: FeeMode = .MERCHANT_FEE,
                          healthExpenseType: HealthExpenseType? = nil,
                          invoiceId: String? = nil,
                          level3DataSummary: Level3DataSummary? = nil,
@@ -282,27 +278,23 @@ extension PayTheory {
                          sendReceipt: Bool = false,
                          completion: @escaping (TransactResponse) -> Void) {
         Task {
-            do {
-                let result = try await transact(amount: amount,
-                                                paymentMethod: paymentMethod,
-                                                accountCode: accountCode,
-                                                fee: fee,
-                                                feeMode: feeMode,
-                                                healthExpenseType: healthExpenseType,
-                                                invoiceId: invoiceId,
-                                                level3DataSummary: level3DataSummary,
-                                                metadata: metadata,
-                                                oneTimeUseToken: oneTimeUseToken,
-                                                payor: payor,
-                                                payorId: payorId,
-                                                receiptDescription: receiptDescription,
-                                                recurringId: recurringId,
-                                                reference: reference,
-                                                sendReceipt: sendReceipt)
-                completion(result)
-            } catch {
-                completion(.Error(PTError(code: .socketError, error: "There was an error processing the transaction.")))
-            }
+            let result = await transact(amount: amount,
+                                            paymentMethod: paymentMethod,
+                                            accountCode: accountCode,
+                                            fee: fee,
+                                            feeMode: feeMode,
+                                            healthExpenseType: healthExpenseType,
+                                            invoiceId: invoiceId,
+                                            level3DataSummary: level3DataSummary,
+                                            metadata: metadata,
+                                            oneTimeUseToken: oneTimeUseToken,
+                                            payor: payor,
+                                            payorId: payorId,
+                                            receiptDescription: receiptDescription,
+                                            recurringId: recurringId,
+                                            reference: reference,
+                                            sendReceipt: sendReceipt)
+            completion(result)
         }
     }
     
@@ -333,7 +325,7 @@ extension PayTheory {
                     try await sendHostTokenMessage()
                 }
             } catch {
-                handleConnectionError(error)
+                let _ = handleConnectionError(error)
             }
         }
     }
