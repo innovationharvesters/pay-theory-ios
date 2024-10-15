@@ -55,8 +55,8 @@ public struct SuccessfulTransaction {
         self.lastFour = response["last_four"] as? String ?? ""
         self.brand = response["brand"] as? String ?? ""
         self.createdAt = response["created_at"] as? String ?? ""
-        self.amount = response["amount"] as? Int ?? 0.0
-        self.serviceFee = response["service_fee"] as? Int ?? 0.0
+        self.amount = response["amount"] as? Int ?? 0
+        self.serviceFee = response["service_fee"] as? Int ?? 0
         self.status = response["state"] as? String ?? ""
         self.metadata = response["metadata"] as? [String: Any] ?? [:]
         self.payorId = response["payor_id"] as? String ?? ""
