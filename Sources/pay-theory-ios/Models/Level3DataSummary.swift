@@ -25,7 +25,7 @@ public enum TaxIndicatorType: String, Encodable {
 /// shipping details.
 public struct Level3DataSummary: Encodable {
     /// The tax amount for the transaction.
-    var taxAmt: Double?
+    var taxAmt: Int?
     
     /// The tax indicator type for the transaction.
     var taxInd: TaxIndicatorType?
@@ -37,13 +37,13 @@ public struct Level3DataSummary: Encodable {
     var orderNum: String?
     
     /// The discount amount applied to the transaction.
-    var discntAmt: Double?
+    var discntAmt: Int?
     
     /// The freight amount for the transaction.
-    var frghtAmt: Double?
+    var frghtAmt: Int?
     
     /// The duty amount for the transaction, if applicable.
-    var dutyAmt: Double?
+    var dutyAmt: Int?
     
     /// The destination postal code for the shipment.
     var destPostalCode: String?
@@ -63,13 +63,13 @@ public struct Level3DataSummary: Encodable {
     ///   - dutyAmt: The duty amount for the transaction, if applicable.
     ///   - destPostalCode: The destination postal code for the shipment.
     ///   - prodDesc: An array of product descriptions related to the transaction.
-    public init(taxAmt: Double? = nil,
+    public init(taxAmt: Int? = nil,
                 taxInd: TaxIndicatorType? = nil,
                 purchIdfr: String? = nil,
                 orderNum: String? = nil,
-                discntAmt: Double? = nil,
-                frghtAmt: Double? = nil,
-                dutyAmt: Double? = nil,
+                discntAmt: Int? = nil,
+                frghtAmt: Int? = nil,
+                dutyAmt: Int? = nil,
                 destPostalCode: String? = nil,
                 prodDesc: [String]? = nil) {
         self.taxAmt = taxAmt

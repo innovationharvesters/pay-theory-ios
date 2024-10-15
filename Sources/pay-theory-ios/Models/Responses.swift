@@ -36,9 +36,9 @@ public struct SuccessfulTransaction {
     /// The creation date and time of the transaction.
     public var createdAt: String
     /// The amount of the transaction.
-    public var amount: Double
+    public var amount: Int
     /// The service fee associated with the transaction.
-    public var serviceFee: Double
+    public var serviceFee: Int
     /// The current status of the transaction.
     public var status: String
     /// Additional metadata associated with the transaction.
@@ -55,8 +55,8 @@ public struct SuccessfulTransaction {
         self.lastFour = response["last_four"] as? String ?? ""
         self.brand = response["brand"] as? String ?? ""
         self.createdAt = response["created_at"] as? String ?? ""
-        self.amount = response["amount"] as? Double ?? 0.0
-        self.serviceFee = response["service_fee"] as? Double ?? 0.0
+        self.amount = response["amount"] as? Int ?? 0.0
+        self.serviceFee = response["service_fee"] as? Int ?? 0.0
         self.status = response["state"] as? String ?? ""
         self.metadata = response["metadata"] as? [String: Any] ?? [:]
         self.payorId = response["payor_id"] as? String ?? ""
