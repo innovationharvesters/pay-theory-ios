@@ -8,21 +8,21 @@
 /// Represents the possible responses from a transaction operation.
 public enum TransactResponse {
     /// Represents generation of a successful cash barcode.
-    case Barcode(CashBarcode)
+    case barcode(CashBarcode)
     /// Represents an error in the transaction process.
-    case Error(PTError)
+    case error(PTError)
     /// Represents a failed transaction.
-    case Failure(FailedTransaction)
+    case failure(FailedTransaction)
     /// Represents a successful transaction.
-    case Success(SuccessfulTransaction)
+    case success(SuccessfulTransaction)
 }
 
 /// Represents the possible responses from a tokenize payment method operation.
 public enum TokenizePaymentMethodResponse {
     /// Represents a successfully tokenized payment method.
-    case Success(TokenizedPaymentMethod)
+    case success(TokenizedPaymentMethod)
     /// Represents an error in the tokenization process.
-    case Error(PTError)
+    case error(PTError)
 }
 
 /// Represents a successful transaction in the PayTheory system.
@@ -102,10 +102,9 @@ func extractFailureDetails(from response: [String: Any]) -> (errorCode: String, 
     if let body = response["body"] as? [String: Any],
        let status = body["status"] as? [String: Any],
        let reason = status["reason"] as? [String: Any] {
-        
         let errorCode = reason["error_code"] as? String ?? ""
         let errorText = reason["error_text"] as? String ?? ""
-        
+
         return (errorCode, errorText)
     }
     

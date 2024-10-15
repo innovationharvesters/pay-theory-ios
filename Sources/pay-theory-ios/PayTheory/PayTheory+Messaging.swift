@@ -110,44 +110,44 @@ extension PayTheory {
     func parseTransactResponse(_ response: String) -> TransactResponse {
         let response = parseResponse(response: response)
         if case .failure(let error) = response {
-            return .Error(error)
+            return .error(error)
         } else if case .success(let (type, parsedBody)) = response {
             switch type {
             case transferResponseMessage:
                 if parsedBody["state"] as? String ?? "" == "FAILURE" {
                     resetTransaction()
-                    return .Failure(FailedTransaction(response: parsedBody))
+                    return .failure(FailedTransaction(response: parsedBody))
                 } else {
                     setComplete(true)
-                    return .Success(SuccessfulTransaction(response: parsedBody))
+                    return .success(SuccessfulTransaction(response: parsedBody))
                 }
             case barcodeResponseMessage:
                 setComplete(true)
-                return .Barcode(CashBarcode(response: parsedBody))
+                return .barcode(CashBarcode(response: parsedBody))
             default:
-                return .Error(PTError(code: .socketError, error: "Unknown response type: \(type)"))
+                return .error(PTError(code: .socketError, error: "Unknown response type: \(type)"))
             }
         }
         resetTransaction()
-        return .Error(PTError(code: .socketError, error: "Unknown response type."))
+        return .error(PTError(code: .socketError, error: "Unknown response type."))
     }
     
     // Used to parse the tokenization responses to be used in the tokenizePaymentMethod function logic
     func parseTokenizeResponse(_ response: String) -> TokenizePaymentMethodResponse {
         let response = parseResponse(response: response)
         if case .failure(let error) = response {
-            return .Error(error)
+            return .error(error)
         } else if case .success(let (type, parsedBody)) = response {
             switch type {
             case tokenizeResponseMessage:
                 setComplete(true)
-                return .Success(TokenizedPaymentMethod(response: parsedBody))
+                return .success(TokenizedPaymentMethod(response: parsedBody))
             default:
-                return .Error(PTError(code: .socketError, error: "Unknown response type: \(type)"))
+                return .error(PTError(code: .socketError, error: "Unknown response type: \(type)"))
             }
         }
         resetTransaction()
-        return .Error(PTError(code: .socketError, error: "Unknown response type."))
+        return .error(PTError(code: .socketError, error: "Unknown response type."))
     }
     
     // Create the body needed for fetching a Host Token and send it to the websocket

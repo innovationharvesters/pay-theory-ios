@@ -30,7 +30,7 @@ extension PayTheory {
                                       metadata: [String: String]? = nil) async -> TokenizePaymentMethodResponse {
         // Check if the action can be called
         if let error = canCallAction() {
-            return .Error(error)
+            return .error(error)
         }
         isInitialized = true
         
@@ -45,7 +45,7 @@ extension PayTheory {
         } catch {
             let connectionError = handleConnectionError(error, sendToErrorHandler: false)
             isInitialized = false
-            return .Error(connectionError)
+            return .error(connectionError)
         }
         
         // Set transaction properties
@@ -61,16 +61,16 @@ extension PayTheory {
             body = transaction.createTokenizePaymentMethodBody(instrument: .ach(envAch.ach), payorId: payorId)
         case .cash:
             isInitialized = false
-            return .Error(PTError(code: .noFields,
+            return .error(PTError(code: .noFields,
                                   error: "Cash payment methods are not able to be tokenized"))
         default:
             isInitialized = false
-            return .Error(PTError(code: .notValid,
+            return .error(PTError(code: .notValid,
                                   error: "\(paymentMethod.rawValue) is missing valid details to proceed."))
         }
         
         guard let messageBody = body else {
-            return .Error(PTError(code: .invalidParam, error: "Unable to create message body"))
+            return .error(PTError(code: .invalidParam, error: "Unable to create message body"))
         }
         
         // Send the message and wait for response
@@ -79,7 +79,7 @@ extension PayTheory {
             isInitialized = false
             return parseTokenizeResponse(response)
         } catch {
-            return .Error(PTError(code: .socketError, error: "There was an error sending the message to the server."))
+            return .error(PTError(code: .socketError, error: "There was an error sending the message to the server."))
         }
     }
     
@@ -161,7 +161,7 @@ extension PayTheory {
                          sendReceipt: Bool = false) async -> TransactResponse {
         // Check if the action can be called
         if let error = canCallAction() {
-            return .Error(error)
+            return .error(error)
         }
         isInitialized = true
         
@@ -175,7 +175,7 @@ extension PayTheory {
         } catch {
             let connectionError = handleConnectionError(error, sendToErrorHandler: false)
             isInitialized = false
-            return .Error(connectionError)
+            return .error(connectionError)
         }
         
         // Set transaction properties
@@ -187,7 +187,7 @@ extension PayTheory {
         // Validate fee for SERVICE_FEE mode
         if fee == nil && feeMode == .serviceFee {
             isInitialized = false
-            return .Error(PTError(code: .invalidParam,
+            return .error(PTError(code: .invalidParam,
                                   error: "Fee must be passed in if you are using the Service Fee fee mode"))
         }
         
@@ -217,11 +217,11 @@ extension PayTheory {
             body = transaction.createCashBody(cash: envCash.cash, payTheoryData: payTheoryData)
         default:
             isInitialized = false
-            return .Error(PTError(code: .notValid, error: "\(paymentMethod.rawValue) is missing valid details to proceed."))
+            return .error(PTError(code: .notValid, error: "\(paymentMethod.rawValue) is missing valid details to proceed."))
         }
         
         guard let messageBody = body else {
-            return .Error(PTError(code: .invalidParam, error: "Unable to create message body"))
+            return .error(PTError(code: .invalidParam, error: "Unable to create message body"))
         }
         
         // Send the message and wait for response
@@ -230,7 +230,7 @@ extension PayTheory {
             isInitialized = false
             return parseTransactResponse(response)
         } catch {
-            return .Error(PTError(code: .socketError, error: "There was an error sending the message to the server."))
+            return .error(PTError(code: .socketError, error: "There was an error sending the message to the server."))
         }
     }
     
