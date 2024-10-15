@@ -37,7 +37,7 @@ class Transaction: ObservableObject {
     var sodium: Sodium
     
     /// The fee mode for the transaction.
-    var feeMode: FeeMode = .MERCHANT_FEE
+    var feeMode: FeeMode = .merchantFee
     
     /// Additional metadata for the transaction.
     var metadata: [String: String] = [:]
@@ -111,7 +111,7 @@ class Transaction: ObservableObject {
                 metadata: metadata,
                 payment: cash)
             let bodyString = convertToJSONString(body)
-            return encryptBody(string: bodyString, action: BARCODE)
+            return encryptBody(string: bodyString, action: barcodeMessage)
         } else {
             return nil
         }
@@ -135,7 +135,7 @@ class Transaction: ObservableObject {
                                            paymentData: paymentData,
                                            confirmationNeeded: false)
             let bodyString = convertToJSONString(body)
-            return encryptBody(string: bodyString, action: TRANSFER_PART1)
+            return encryptBody(string: bodyString, action: transferMessage)
         } else {
             return nil
         }
@@ -157,7 +157,7 @@ class Transaction: ObservableObject {
                                                  metadata: metadata,
                                                  paymentMethodData: instrument)
             let bodyString = convertToJSONString(body)
-            return encryptBody(string: bodyString, action: TOKENIZE)
+            return encryptBody(string: bodyString, action: tokenizeMessage)
         } else {
             return nil
         }

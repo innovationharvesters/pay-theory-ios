@@ -11,21 +11,20 @@ import SwiftUI
 // MARK: - Public Enums
 
 public enum FeeMode: String, Codable {
-    case MERCHANT_FEE = "merchant_fee"
-    case SERVICE_FEE = "service_fee"
+    case merchantFee = "merchant_fee"
+    case serviceFee = "service_fee"
 }
 
 public enum PaymentType: String, CaseIterable, Identifiable {
-    case CARD = "Card"
-    case ACH = "ACH"
-    case CASH = "Cash"
-    
+    case card = "Card"
+    case ach = "ACH"
+    case cash = "Cash"
     public var id: Self { self }
 }
 
 public enum HealthExpenseType: String, Encodable {
     case healthcare = "HEALTHCARE"
-    case rx = "RX"
+    case perscription = "RX"
     case vision = "VISION"
     case clinical = "CLINICAL"
     case copay = "COPAY"
@@ -33,26 +32,25 @@ public enum HealthExpenseType: String, Encodable {
     case transit = "TRANSIT"
 }
 
-
 // MARK: - Message names
 //Action Constants
-let HOST_TOKEN = "host:hostToken"
-let TRANSFER_PART1 = "host:transfer_part1"
-let TOKENIZE = "host:tokenize"
-let BARCODE = "host:barcode"
-let CALCULATE_FEE = "host:calculate_fee"
+let hostTokenMessage = "host:hostToken"
+let transferMessage = "host:transfer_part1"
+let tokenizeMessage = "host:tokenize"
+let barcodeMessage = "host:barcode"
+let calculateFeeMessage = "host:calculate_fee"
 
 // Constants for incoming message types
-let HOST_TOKEN_TYPE = "host_token"
-let BARCODE_COMPLETE_TYPE = "barcode_complete"
-let TRANSFER_COMPLETE_TYPE = "transfer_complete"
-let TOKENIZE_COMPLETE_TYPE = "tokenize_complete"
-let ERROR_TYPE = "error"
-let CALCULATE_FEE_TYPE = "calculate_fee_complete"
+let hostTokenResponseMessage = "host_token"
+let barcodeResponseMessage = "barcode_complete"
+let transferResponseMessage = "transfer_complete"
+let tokenizeResponseMessage = "tokenize_complete"
+let errorResponseMessage = "error"
+let calculateFeeResponseMessage = "calculate_fee_complete"
 
-let ENCRYPTED_MESSAGES = [BARCODE_COMPLETE_TYPE, TRANSFER_COMPLETE_TYPE, TOKENIZE_COMPLETE_TYPE]
+let encryptedMessages = [barcodeResponseMessage, transferResponseMessage, tokenizeResponseMessage]
 
-//MARK: - Extensions to swift foundational
+// MARK: - Extensions to swift foundational
 extension Date {
     var millisecondsSince1970: Int64 {
         return Int64((self.timeIntervalSince1970 * 1000.0).rounded())

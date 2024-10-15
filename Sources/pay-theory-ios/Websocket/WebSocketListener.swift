@@ -27,7 +27,7 @@ public class WebSocketListener: NSObject, URLSessionWebSocketDelegate {
     }
     
     public func urlSession(_ session: URLSession, didBecomeInvalidWithError: Error?) {
-        if (didBecomeInvalidWithError != nil) {
+        if didBecomeInvalidWithError != nil {
             self.session?.handler?.handleError(error:didBecomeInvalidWithError!)
         }
         print("errored")

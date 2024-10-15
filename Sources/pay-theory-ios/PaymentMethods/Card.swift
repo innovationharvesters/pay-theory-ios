@@ -27,7 +27,7 @@ struct CardStruct: Encodable {
         case expirationYear = "expiration_year"
         case type
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
@@ -59,7 +59,6 @@ class Card: ObservableObject {
     @Published var validSecurityCode = false
     @Published var validPostalCode = false
     private var cancellables = Set<AnyCancellable>()
-
     
     init(card: CardStruct = CardStruct()) {
         self.card = card

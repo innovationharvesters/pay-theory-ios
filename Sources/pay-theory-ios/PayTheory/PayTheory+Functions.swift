@@ -8,9 +8,7 @@
 
 import Foundation
 
-
 extension PayTheory {
-        
     // MARK: - Tokenize Payment Method
     
     /// Tokenizes a payment method asynchronously.
@@ -38,8 +36,8 @@ extension PayTheory {
         
         // Ensure WebSocket connection
         do {
-            let _ = try await ensureConnected()
-            // If the 
+            _ = try await ensureConnected()
+            // If the
             if self.hostTokenStillValid() == false {
                 try await fetchToken()
                 try await sendHostTokenMessage(calc_fees: false)
@@ -57,16 +55,18 @@ extension PayTheory {
         // Prepare the message body based on the payment method
         let body: String?
         switch paymentMethod {
-        case .CARD where envCard.isValid:
+        case .card where envCard.isValid:
             body = transaction.createTokenizePaymentMethodBody(instrument: .card(envCard.card), payorId: payorId)
-        case .ACH where envAch.isValid:
+        case .ach where envAch.isValid:
             body = transaction.createTokenizePaymentMethodBody(instrument: .ach(envAch.ach), payorId: payorId)
-        case .CASH:
+        case .cash:
             isInitialized = false
-            return .Error(PTError(code: .noFields, error: "Cash payment methods are not able to be tokenized"))
+            return .Error(PTError(code: .noFields,
+                                  error: "Cash payment methods are not able to be tokenized"))
         default:
             isInitialized = false
-            return .Error(PTError(code: .notValid, error: "\(paymentMethod.rawValue) is missing valid details to proceed."))
+            return .Error(PTError(code: .notValid,
+                                  error: "\(paymentMethod.rawValue) is missing valid details to proceed."))
         }
         
         guard let messageBody = body else {
@@ -147,7 +147,7 @@ extension PayTheory {
                          paymentMethod: PaymentType,
                          accountCode: String? = nil,
                          fee: Int? = nil,
-                         feeMode: FeeMode = .MERCHANT_FEE,
+                         feeMode: FeeMode = .merchantFee,
                          healthExpenseType: HealthExpenseType? = nil,
                          invoiceId: String? = nil,
                          level3DataSummary: Level3DataSummary? = nil,
@@ -167,7 +167,7 @@ extension PayTheory {
         
         // Ensure WebSocket connection
         do {
-            let _ = try await ensureConnected()
+            _ = try await ensureConnected()
             if self.hostTokenStillValid() == false {
                 try await fetchToken()
                 try await sendHostTokenMessage(calc_fees: false)
@@ -185,9 +185,10 @@ extension PayTheory {
         self.transaction.metadata = metadata ?? [:]
         
         // Validate fee for SERVICE_FEE mode
-        if fee == nil && feeMode == .SERVICE_FEE {
+        if fee == nil && feeMode == .serviceFee {
             isInitialized = false
-            return .Error(PTError(code: .invalidParam, error: "Fee must be passed in if you are using the Service Fee fee mode"))
+            return .Error(PTError(code: .invalidParam,
+                                  error: "Fee must be passed in if you are using the Service Fee fee mode"))
         }
         
         // Prepare PayTheoryData
@@ -207,11 +208,11 @@ extension PayTheory {
         // Prepare the message body based on the payment method
         let body: String?
         switch paymentMethod {
-        case .CARD where envCard.isValid:
+        case .card where envCard.isValid:
             body = transaction.createTransferPartOneBody(instrument: .card(envCard.card), payTheoryData: payTheoryData)
-        case .ACH where envAch.isValid:
+        case .ach where envAch.isValid:
             body = transaction.createTransferPartOneBody(instrument: .ach(envAch.ach), payTheoryData: payTheoryData)
-        case .CASH where envCash.isValid:
+        case .cash where envCash.isValid:
             envCash.cash.amount = amount
             body = transaction.createCashBody(cash: envCash.cash, payTheoryData: payTheoryData)
         default:
@@ -264,7 +265,7 @@ extension PayTheory {
                          paymentMethod: PaymentType,
                          accountCode: String? = nil,
                          fee: Int? = nil,
-                         feeMode: FeeMode = .MERCHANT_FEE,
+                         feeMode: FeeMode = .merchantFee,
                          healthExpenseType: HealthExpenseType? = nil,
                          invoiceId: String? = nil,
                          level3DataSummary: Level3DataSummary? = nil,
@@ -327,7 +328,7 @@ extension PayTheory {
                     try await sendHostTokenMessage()
                 }
             } catch {
-                let _ = handleConnectionError(error)
+                _ = handleConnectionError(error)
             }
         }
     }

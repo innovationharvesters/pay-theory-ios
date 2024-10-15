@@ -32,7 +32,6 @@ extension Data {
     }
 }
 
-
 func generateUUID() -> String {
     return UUID().uuidString
 }
@@ -42,7 +41,7 @@ func splitDate(_ dateString: String) -> (month: String, year: String) {
     guard !dateString.isEmpty else {
         return ("", "")
     }
-    
+
     // Split the string by "/"
     let components = dateString.split(separator: "/", maxSplits: 1)
     
@@ -249,21 +248,21 @@ func formatDigitTextField(_ value: String, maxLength: Int) -> String {
 // MARK: - Functions used to check if values are valid for Payment Methods
 
 func isValidEmail(value: String) -> Bool {
-            let EMAIL_REGEX = "(?:[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}~-]+(?:\\.[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}" +
+            let emailRegex = "(?:[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}~-]+(?:\\.[\\p{L}0-9!#$%\\&'*+/=?\\^_`{|}" +
                 "~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\" +
                 "x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[\\p{L}0-9](?:[a-" +
                 "z0-9-]*[\\p{L}0-9])?\\.)+[\\p{L}0-9](?:[\\p{L}0-9-]*[\\p{L}0-9])?|\\[(?:(?:25[0-5" +
                 "]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-" +
                 "9][0-9]?|[\\p{L}0-9-]*[\\p{L}0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21" +
                 "-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
-            let emailTest = NSPredicate(format:"SELF MATCHES %@", EMAIL_REGEX)
+            let emailTest = NSPredicate(format: "SELF MATCHES %@", emailRegex)
             let result = emailTest.evaluate(with: value)
             return result
         }
 
 func isValidPhone(value: String) -> Bool {
-            let PHONE_REGEX = "^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$"
-            let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
+            let phoneRegex = "^(\\+\\d{1,2}\\s)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$"
+            let phoneTest = NSPredicate(format: "SELF MATCHES %@", phoneRegex)
             let result = phoneTest.evaluate(with: value)
             return result
         }

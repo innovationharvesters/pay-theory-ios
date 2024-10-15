@@ -17,7 +17,6 @@ public class WebSocketProvider: NSObject {
     private var asyncResponseHandler: ((Result<String, Error>) -> Void)?
     private var connectionCompletion: ((Result<Void, Error>) -> Void)?
 
-    
     override init() {
         super.init()
     }
@@ -28,11 +27,15 @@ public class WebSocketProvider: NSObject {
         
     private(set) var status: WebSocketStatus = .notConnected
     
-    func startSocket(environment: String, stage: String, ptToken: String, listener: WebSocketListener, _handler: WebSocketProtocol) async throws {
+    func startSocket(environment: String,
+                     stage: String,
+                     ptToken: String,
+                     listener: WebSocketListener,
+                     socketHandler: WebSocketProtocol) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             let urlSession = URLSession(configuration: .default, delegate: listener, delegateQueue: OperationQueue())
             let socketUrl = "wss://\(environment).secure.socket.\(stage).com/\(environment)/?pt_token=\(ptToken)"
-            handler = _handler
+            handler = socketHandler
             webSocket = urlSession.webSocketTask(with: URL(string: socketUrl)!)
             status = .connecting
             
@@ -61,7 +64,6 @@ public class WebSocketProvider: NSObject {
         status = .disconnected
         connectionCompletion?(.failure(error))
     }
-    
     
     func receive() {
             webSocket!.receive { result in
@@ -115,13 +117,13 @@ public class WebSocketProvider: NSObject {
             }
         }
     
-    func sendMessage(message:URLSessionWebSocketTask.Message, handler: WebSocketProtocol) {
+    func sendMessage(message: URLSessionWebSocketTask.Message, handler: WebSocketProtocol) {
         if self.asyncResponseHandler != nil {
             print("Cannot send message while waiting for response")
             return
         }
         webSocket?.send(message, completionHandler: { (error) in
-            if (error != nil) {
+            if error != nil {
                 self.handler!.handleError(error: error!)
                 self.stopSocket()
             }

@@ -4,7 +4,8 @@
 //
 //  Created by Austin Zani on 8/7/24.
 //
-// Extension of the Pay Theory class that contains functions used for initializes and maintaing the websocket as well as making any HTTP calls
+// Extension of the Pay Theory class that contains functions
+// used for initializes and maintaing the websocket as well as making any HTTP calls
 
 import Foundation
 import CryptoKit
@@ -17,17 +18,16 @@ enum ConnectionError: Error {
 }
 
 extension PayTheory {
-    
     func handleActiveState() {
         Task {
             do {
-                let _ = try await ensureConnected()
+                _ = try await ensureConnected()
             } catch {
                 var connectionError: ConnectionError = .socketConnectionFailed
                 if let error = error as? ConnectionError {
                     connectionError = error
                 }
-                let _ = handleConnectionError(connectionError, sendToErrorHandler: true)
+                _ = handleConnectionError(connectionError, sendToErrorHandler: true)
             }
         }
     }
@@ -41,7 +41,10 @@ extension PayTheory {
     // Requests a Host Token and go through the App Attestation process if needed
     func fetchToken() async throws {
         // Fetch token and set the ptToken variable from the response
-        let tokenData = try await getToken(apiKey: apiKey, environment: environment, stage: stage, sessionKey: sessionId)
+        let tokenData = try await getToken(apiKey: apiKey,
+                                           environment: environment,
+                                           stage: stage,
+                                           sessionKey: sessionId)
         ptToken = tokenData["pt-token"] as? String ?? ""
         if devMode {
             // Skip attestation if it is in devMode for testing in the simulator
@@ -55,15 +58,14 @@ extension PayTheory {
                     let hash = Data(SHA256.hash(data: encodedChallengeData))
                     let attestation = try await service.attestKey(key, clientDataHash: hash)
                     self.attestationString = attestation.base64EncodedString()
-                }
-                catch {
-                    if (session.status == .connected) {
+                } catch {
+                    if session.status == .connected {
                         session.close()
                     }
                     throw ConnectionError.attestationFailed
                 }
             } else {
-                if (session.status == .connected) {
+                if session.status == .connected {
                     session.close()
                 }
                 throw ConnectionError.tokenFetchFailed
@@ -71,7 +73,7 @@ extension PayTheory {
         }
     }
     
-    func connectSocket(initial_connection: Bool = false) async throws  {
+    func connectSocket() async throws  {
         // Fetch the PT Token to pass into socket connection
         do {
             try await fetchToken()

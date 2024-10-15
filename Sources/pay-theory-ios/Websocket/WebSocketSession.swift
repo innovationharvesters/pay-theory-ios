@@ -52,7 +52,11 @@ public class WebSocketSession: NSObject {
             throw ConnectionError.socketConnectionFailed
         }
         do {
-            try await provider.startSocket(environment: environment, stage: stage, ptToken: ptToken, listener: self.listener!, _handler: self.handler!)
+            try await provider.startSocket(environment: environment,
+                                           stage: stage,
+                                           ptToken: ptToken,
+                                           listener: self.listener!,
+                                           socketHandler: self.handler!)
         } catch {
             throw ConnectionError.socketConnectionFailed
         }
