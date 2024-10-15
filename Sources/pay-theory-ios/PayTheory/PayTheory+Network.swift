@@ -23,7 +23,11 @@ extension PayTheory {
             do {
                 let _ = try await ensureConnected()
             } catch {
-                let _ = handleConnectionError(error, sendToErrorHandler: true)
+                var connectionError: ConnectionError = .socketConnectionFailed
+                if let error = error as? ConnectionError {
+                    connectionError = error
+                }
+                let _ = handleConnectionError(connectionError, sendToErrorHandler: true)
             }
         }
     }
@@ -67,7 +71,7 @@ extension PayTheory {
         }
     }
     
-    func connectSocket(initial_connection: Bool = false) async throws {
+    func connectSocket(initial_connection: Bool = false) async throws  {
         // Fetch the PT Token to pass into socket connection
         do {
             try await fetchToken()
@@ -86,13 +90,13 @@ extension PayTheory {
         do {
             try await sendHostTokenMessage()
         } catch {
-            throw ConnectionError.hostTokenCallFailed
+            print("Error sending host token message: \(error)")
+            throw error
         }
     }
     
     func handleConnectionError(_ error: Error, sendToErrorHandler: Bool = true) -> PTError {
-        var parsedError: PTError = PTError(code: .socketError, error: "An unknown error occurred")
-        
+        let parsedError: PTError
         switch error {
         case ConnectionError.attestationFailed:
             parsedError = PTError(code: .attestationFailed, error: "Failed app attestation")
@@ -100,12 +104,13 @@ extension PayTheory {
             parsedError = PTError(code: .socketError, error: "Socket failed to connect")
         case ConnectionError.hostTokenCallFailed:
             parsedError = PTError(code: .tokenFailed, error: "Host token message failed")
+        case ConnectionError.tokenFetchFailed:
+            parsedError = PTError(code: .tokenFailed, error: "There was an error fetching the token")
         default:
-            // Skip because the error is already set to unknown error
-            debugPrint("Unknown Socket Error")
+            parsedError = PTError(code: .socketError, error: "An unknown error occurred")
         }
         if sendToErrorHandler {
-            self.handleError(error: parsedError)
+            self.errorHandler(parsedError)
         }
         return parsedError
     }

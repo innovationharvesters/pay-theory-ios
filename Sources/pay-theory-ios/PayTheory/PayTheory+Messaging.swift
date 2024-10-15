@@ -159,7 +159,8 @@ extension PayTheory {
                 "origin": "apple",
                 "attestation": attestationString ?? "",
                 "timing": Date().millisecondsSince1970,
-                "appleEnvironment": appleEnvironment
+                "appleEnvironment": appleEnvironment,
+                "require_attestation": self.stage == "paytheory" ? true : !devMode
             ]
 
             guard let encodedData = stringify(jsonDictionary: hostToken).data(using: .utf8) else {
@@ -168,14 +169,21 @@ extension PayTheory {
             message["encoded"] = encodedData.base64EncodedString()
             
             let response = try await session.sendMessageAndWaitForResponse(messageBody: stringify(jsonDictionary: message))
-            
             // Parse response
             guard let dictionary = convertStringToDictionary(text: response) else {
                 throw ConnectionError.hostTokenCallFailed
             }
             
-            guard let type = dictionary["type"] as? String, type == HOST_TOKEN_TYPE else {
+            guard let type = dictionary["type"] as? String else {
                 throw ConnectionError.hostTokenCallFailed
+            }
+            
+            if type == ERROR_TYPE, let body = dictionary["body"] as? String {
+                if body.lowercased().contains("attestation") {
+                    throw ConnectionError.attestationFailed
+                } else {
+                    throw ConnectionError.hostTokenCallFailed
+                }
             }
             
             // Set the values from the response on the class variables they associate with
@@ -194,7 +202,11 @@ extension PayTheory {
                 calcFeesWithAmount()
             }
         } catch {
-            throw ConnectionError.hostTokenCallFailed
+            if let error = error as? ConnectionError {
+                throw error
+            } else {
+                throw ConnectionError.hostTokenCallFailed
+            }
         }
     }
 
@@ -207,7 +219,6 @@ extension PayTheory {
                 let _ = handleConnectionError(error)
             }
         }
-        print("Calculating Fees \(card_bin ?? "ACH")")
         if let calcAmount = amount {
             var message: [String: Any] = ["action": CALCULATE_FEE]
             if let bin = card_bin {
@@ -216,7 +227,8 @@ extension PayTheory {
                     "amount": calcAmount,
                     "is_ach": false,
                     "bank_id": bin,
-                    "timing": Date().millisecondsSince1970
+                    "timing": Date().millisecondsSince1970,
+                    "sessionKey": self.sessionId
                 ]
                 message["encoded"] = stringify(jsonDictionary: calcFeeBody).data(using: .utf8)!.base64EncodedString()
             } else {
@@ -225,7 +237,8 @@ extension PayTheory {
                     "amount": calcAmount,
                     "is_ach": true,
                     "bank_id": NSNull(),
-                    "timing": Date().millisecondsSince1970
+                    "timing": Date().millisecondsSince1970,
+                    "sessionKey": self.sessionId
                 ]
                 message["encoded"] = stringify(jsonDictionary: calcFeeBody).data(using: .utf8)!.base64EncodedString()
             }

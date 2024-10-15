@@ -146,7 +146,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         self.apiKey = apiKey
         environment = apiParts[0]
         stage = apiParts[1]
-        appleEnvironment = devMode ? "appattestdevelop" : "appattest"
+        appleEnvironment = stage == "paytheory" ? "appattest" : "appattestdevelop"
         self.devMode = devMode
         
         // Store the completion handler
@@ -212,7 +212,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         cancellables.forEach { $0.cancel() }
     }
     
-    // MARK: Functions used to conform to the WebSocketProtocol
+    // MARK: - Functions used to conform to the WebSocketProtocol
     func receiveMessage(message: String) {
         onMessage(response: message)
     }
