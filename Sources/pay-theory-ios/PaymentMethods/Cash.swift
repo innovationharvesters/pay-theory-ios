@@ -106,7 +106,7 @@ public struct PTCashName: View {
     
     /// Initializes a new instance of the view with a placeholder text.
     ///
-    /// - Parameter placeholder: A `String` that represents the placeholder text for the text field. The default value is "Full Name".
+    /// - Parameter placeholder: A `String` for the placeholder text of the text field. Default is "Full Name".
     public init(placeholder: String = "Full Name") {
         self.placeholder = placeholder
     }
