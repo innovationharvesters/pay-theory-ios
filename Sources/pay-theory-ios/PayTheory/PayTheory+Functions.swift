@@ -317,6 +317,8 @@ extension PayTheory {
         self.envCash.clear()
         self.transaction.resetTransaction()
         self.sessionId = generateUUID()
+        self.isComplete = false
+        self.isInitialized = false
         Task {
             do {
                 let connected = try await ensureConnected()
