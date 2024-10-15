@@ -40,7 +40,7 @@ extension PayTheory {
             // If the
             if self.hostTokenStillValid() == false {
                 try await fetchToken()
-                try await sendHostTokenMessage(calc_fees: false)
+                try await sendHostTokenMessage(calcFees: false)
             }
         } catch {
             let connectionError = handleConnectionError(error, sendToErrorHandler: false)
@@ -170,7 +170,7 @@ extension PayTheory {
             _ = try await ensureConnected()
             if self.hostTokenStillValid() == false {
                 try await fetchToken()
-                try await sendHostTokenMessage(calc_fees: false)
+                try await sendHostTokenMessage(calcFees: false)
             }
         } catch {
             let connectionError = handleConnectionError(error, sendToErrorHandler: false)

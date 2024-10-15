@@ -99,7 +99,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             // If there is a cardBin then try and send the amount message if the amount is sent
             if let cardBin = cardBin {
                 if let _ = amount {
-                    sendCalcFeeMessage(card_bin: cardBin)
+                    sendCalcFeeMessage(cardBin: cardBin)
                 }
             } else { // If cardBin is set to nil then set the cardServiceFee to nil
                 self.cardServiceFee = nil

@@ -132,8 +132,8 @@ func convertToJSONString<T: Encodable>(_ object: T) -> String {
 
 func convertBytesToString(bytes: Bytes) -> String {
     let data = NSData(bytes: bytes, length: bytes.count)
-    let base64Data = data.base64EncodedData(options: NSData.Base64EncodingOptions.endLineWithLineFeed)
-    let newData = NSData(base64Encoded: base64Data, options: NSData.Base64DecodingOptions.ignoreUnknownCharacters) ?? NSData()
+    let base64Data = data.base64EncodedData(options: .endLineWithLineFeed)
+    let newData = NSData(base64Encoded: base64Data, options: .ignoreUnknownCharacters) ?? NSData()
     return newData.base64EncodedString()
 }
 

@@ -32,7 +32,7 @@ extension PayTheory {
             // Send calc fee for Bank Fee
             sendCalcFeeMessage()
             if let cardBin = cardBin {
-                sendCalcFeeMessage(card_bin: cardBin)
+                sendCalcFeeMessage(cardBin: cardBin)
             }
         }
     }
