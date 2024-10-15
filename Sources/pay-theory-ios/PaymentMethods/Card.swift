@@ -18,7 +18,6 @@ struct CardStruct: Encodable {
     var expirationYear: String = ""
     let type = "card"
     var formattedNumber: String = ""
-    
     private enum CodingKeys: String, CodingKey {
         case name
         case number
