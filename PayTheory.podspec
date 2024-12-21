@@ -18,9 +18,9 @@ Pod::Spec.new do |s|
     :branch => "machone-paytheorylab"
   }
 
-  s.platform     = :ios, "15.0"
-  s.swift_versions = "5.3"
-  s.swift_version  = "5.3"
+  s.platform     = :ios, "16.0"
+  s.swift_versions = "5.7"
+  s.swift_version  = "5.7"
 
   s.source_files  = "Sources/pay-theory-ios/**/*"
 
