@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
     :branch => "machone-paytheorylab"
   }
 
-  s.platform     = :ios, "16.0"
+  s.platform     = :ios, "15.1"
   s.swift_versions = "5.7"
   s.swift_version  = "5.7"
 
