@@ -22,7 +22,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "PayTheory",
-            dependencies: [.product(name: "Sodium", package: "swift-sodium"), .product(name: "Clibsodium", package: "swift-sodium")],
+            dependencies: [.product(name: "Sodium", package: "swift-sodium")],
             path: "Sources/pay-theory-ios",
             swiftSettings: [
                     .define("iOS", .when(platforms: [.iOS]))
