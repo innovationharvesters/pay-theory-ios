@@ -188,10 +188,10 @@ extension PayTheory {
             
             // Set the values from the response on the class variables they associate with
             let body = dictionary["body"] as? [String: AnyObject] ?? [:]
-            DispatchQueue.main.async {
-                self.transaction.hostToken = body["hostToken"] as? String ?? ""
-            }
-            transaction.sessionKey = body["sessionKey"] as? String ?? ""
+            
+            self.transaction.hostToken = body["hostToken"] as? String ?? ""
+            self.transaction.sessionKey = body["sessionKey"] as? String ?? ""
+            
             let key = body["publicKey"] as? String ?? ""
             self.transaction.publicKey = convertStringToByte(string: key)
             
@@ -256,14 +256,10 @@ extension PayTheory {
                 // Only set the cardServiceFee if it is for the correct current cardBin.
                 // This needs to be here in case someone changes the card number quickly before the response comes through
                 if bankId == cardBin {
-                    DispatchQueue.main.async {
-                        self.cardServiceFee = fee
-                    }
+                    self.cardServiceFee = fee
                 }
             } else {
-                DispatchQueue.main.async {
-                    self.bankServiceFee = fee
-                }
+                self.bankServiceFee = fee
             }
         } else {
             self.errorHandler(PTError(code: .socketError, error: "There was an error calculating the fees"))

@@ -81,14 +81,10 @@ extension PayTheory {
     
     // Some internal setters for values that need to be set on the main thread
     func setReady(_ newValue: Bool) {
-        DispatchQueue.main.async {
-            self.isReady = newValue
-        }
+        self.isReady = newValue
     }
     
     func setComplete(_ newValue: Bool) {
-        DispatchQueue.main.async {
-            self.isComplete = newValue
-        }
+        self.isComplete = newValue
     }
 }

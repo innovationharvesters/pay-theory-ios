@@ -26,9 +26,7 @@ class NetworkMonitor: ObservableObject {
             let connectionTypes: [NWInterface.InterfaceType] = [.cellular, .wifi, .wiredEthernet]
             self.connectionType = connectionTypes.first(where: path.usesInterfaceType) ?? .other
 
-            DispatchQueue.main.async {
-                self.objectWillChange.send()
-            }
+            self.objectWillChange.send()
         }
 
         monitor.start(queue: queue)

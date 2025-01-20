@@ -167,11 +167,9 @@ class Transaction: ObservableObject {
     ///
     /// This method clears all transaction-related data, preparing the instance for a new transaction.
     func resetTransaction() {
-        DispatchQueue.main.async {
-            self.hostToken = nil
-        }
-        sessionKey = ""
-        ptInstrument = nil
-        amount = 0
+        self.hostToken = nil
+        self.sessionKey = ""
+        self.ptInstrument = nil
+        self.amount = 0
     }
 }
