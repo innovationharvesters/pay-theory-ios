@@ -18,7 +18,7 @@ enum ConnectionError: Error {
 }
 
 extension PayTheory {
-    func handleActiveState() {
+    public func handleActiveState() {
         Task {
             do {
                 _ = try await ensureConnected()
@@ -33,7 +33,7 @@ extension PayTheory {
     }
     
     // Closes the socket as the app goes behind the
-    func handleBackgroundState() {
+    public func handleBackgroundState() {
         if session.status != .connected { return }
         session.close()
     }
