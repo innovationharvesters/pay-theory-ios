@@ -35,8 +35,20 @@ public class WebSocketProvider: NSObject {
         return try await withCheckedThrowingContinuation { continuation in
             let urlSession = URLSession(configuration: .default, delegate: listener, delegateQueue: OperationQueue())
             let socketUrl = "wss://\(environment).secure.socket.\(stage).com/\(environment)/?pt_token=\(ptToken)"
+            
+            guard let url = URL(string: socketUrl) else {
+                continuation.resume(throwing: NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"]))
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            // Add required headers
+            request.addValue("websocket", forHTTPHeaderField: "Upgrade")
+            request.addValue("Upgrade", forHTTPHeaderField: "Connection")
+            request.addValue("13", forHTTPHeaderField: "Sec-WebSocket-Version")
+            
             handler = socketHandler
-            webSocket = urlSession.webSocketTask(with: URL(string: socketUrl)!)
+            webSocket = urlSession.webSocketTask(with: request)
             status = .connecting
             
             connectionCompletion = { result in
