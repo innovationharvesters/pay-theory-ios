@@ -312,14 +312,30 @@ extension PayTheory {
     ///
     /// - Important: This function should be called when you want to start a fresh payment process and clear all data in the hosted fields.
     public func resetPT() {
+        // Clear environment objects
         self.envAch.clear()
         self.envCard.clear()
         self.envPayor.clear()
         self.envCash.clear()
+        
+        // Reset transaction and session state
         self.transaction.resetTransaction()
         self.sessionId = generateUUID()
+        
+        // Clear state flags
         self.isComplete = false
         self.isInitialized = false
+        
+        // Clear sensitive data
+        self.ptToken = nil
+        self.attestationString = nil
+        self.hostTokenTimestamp = nil
+        
+        // Clear fee information
+        self.cardServiceFee = nil
+        self.bankServiceFee = nil
+        self.cardBin = nil
+        
         Task {
             do {
                 let connected = try await ensureConnected()

@@ -78,28 +78,38 @@ public class WebSocketProvider: NSObject {
     }
     
     func receive() {
-            webSocket!.receive { result in
-                switch result {
-                case .success(let message):
-                    self.status = .connected
-                    switch message {
-                    case .string(let text):
-                        if let asyncHandler = self.asyncResponseHandler {
-                            asyncHandler(.success(text))
-                            self.asyncResponseHandler = nil
-                        } else {
-                            self.defaultHandler?.receiveMessage(message: text)
-                        }
-                    default:
-                        let error = NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "Received unknown response type"])
-                        if let asyncHandler = self.asyncResponseHandler {
-                            asyncHandler(.failure(error))
-                            self.asyncResponseHandler = nil
-                        } else {
-                            self.defaultHandler?.handleError(error: error)
-                        }
+        // Don't start receiving if we're already disconnected
+        guard status != .disconnected else { return }
+        
+        webSocket!.receive { [weak self] result in
+            guard let self = self else { return }
+            
+            // Don't process messages if we're disconnected
+            guard self.status != .disconnected else { return }
+            
+            switch result {
+            case .success(let message):
+                self.status = .connected
+                switch message {
+                case .string(let text):
+                    if let asyncHandler = self.asyncResponseHandler {
+                        asyncHandler(.success(text))
+                        self.asyncResponseHandler = nil
+                    } else {
+                        self.defaultHandler?.receiveMessage(message: text)
                     }
-                case .failure(let error):
+                default:
+                    let error = NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "Received unknown response type"])
+                    if let asyncHandler = self.asyncResponseHandler {
+                        asyncHandler(.failure(error))
+                        self.asyncResponseHandler = nil
+                    } else {
+                        self.defaultHandler?.handleError(error: error)
+                    }
+                }
+            case .failure(let error):
+                // Only handle error if it's not a cancellation error
+                if (error as NSError).code != URLError.cancelled.rawValue {
                     self.status = .disconnected
                     if let asyncHandler = self.asyncResponseHandler {
                         asyncHandler(.failure(error))
@@ -108,26 +118,29 @@ public class WebSocketProvider: NSObject {
                         self.defaultHandler?.handleError(error: error)
                     }
                 }
-                if self.status == .connected {
-                    self.receive()
+            }
+            
+            // Only continue receiving if we're still connected
+            if self.status == .connected {
+                self.receive()
+            }
+        }
+    }
+
+    func sendMessageAndWaitForResponse(message: URLSessionWebSocketTask.Message) async throws -> String {
+        return try await withCheckedThrowingContinuation { continuation in
+            sendMessage(message: message, handler: defaultHandler!)
+
+            self.asyncResponseHandler = { result in
+                switch result {
+                case .success(let text):
+                    continuation.resume(returning: text)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
                 }
             }
         }
-
-        func sendMessageAndWaitForResponse(message: URLSessionWebSocketTask.Message) async throws -> String {
-            return try await withCheckedThrowingContinuation { continuation in
-                sendMessage(message: message, handler: defaultHandler!)
-
-                self.asyncResponseHandler = { result in
-                    switch result {
-                    case .success(let text):
-                        continuation.resume(returning: text)
-                    case .failure(let error):
-                        continuation.resume(throwing: error)
-                    }
-                }
-            }
-        }
+    }
     
     func sendMessage(message: URLSessionWebSocketTask.Message, handler: WebSocketProtocol) {
         if self.asyncResponseHandler != nil {
@@ -143,8 +156,20 @@ public class WebSocketProvider: NSObject {
     }
     
     func stopSocket() {
+        // Set status to disconnected first to prevent new receive calls
         status = .disconnected
+        
+        // Clear any pending async handlers
+        if let asyncHandler = asyncResponseHandler {
+            asyncHandler(.failure(NSError(domain: "WebSocket", 
+                                       code: URLError.cancelled.rawValue, 
+                                       userInfo: [NSLocalizedDescriptionKey: "WebSocket connection closed"])))
+            asyncResponseHandler = nil
+        }
+        
+        // Close the socket
         webSocket?.cancel(with: .normalClosure, reason: webSocket?.closeReason)
+        webSocket = nil
     }
 }
     

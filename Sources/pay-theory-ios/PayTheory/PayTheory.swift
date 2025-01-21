@@ -223,9 +223,19 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     func handleDisconnect() {
         DispatchQueue.main.async {
+            // Clear transaction-related data
             self.transaction.sessionKey = nil
             self.transaction.publicKey = nil
+            
+            // Clear sensitive data
+            self.ptToken = nil
+            self.attestationString = nil
+            self.hostTokenTimestamp = nil
+            
+            // Reset state
+            self.setReady(false)
+            self.cardServiceFee = nil
+            self.bankServiceFee = nil
         }
-        setReady(false)
     }
 }

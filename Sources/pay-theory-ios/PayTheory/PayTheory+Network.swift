@@ -32,10 +32,19 @@ extension PayTheory {
         }
     }
     
-    // Closes the socket as the app goes behind the
+    // Closes the socket and cleans up sensitive data as the app goes to background
     public func handleBackgroundState() {
         if session.status != .connected { return }
+        
+        // Close the socket connection
         session.close()
+        
+        // Clear sensitive data
+        ptToken = nil
+        attestationString = nil
+        
+        // Reset any pending operations or state
+        sessionId = UUID().uuidString
     }
     
     // Requests a Host Token and go through the App Attestation process if needed
@@ -45,7 +54,9 @@ extension PayTheory {
                                            environment: environment,
                                            stage: stage,
                                            sessionKey: sessionId)
+        
         ptToken = tokenData["pt-token"] as? String ?? ""
+        
         if devMode {
             // Skip attestation if it is in devMode for testing in the simulator
             self.attestationString = ""

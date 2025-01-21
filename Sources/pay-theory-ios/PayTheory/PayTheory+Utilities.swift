@@ -13,7 +13,13 @@ extension PayTheory {
     // Used to reset when a transaction fails or an error is returned. Also used by cancel function.
     func resetTransaction() {
         isInitialized = false
+        isComplete = false
         transaction.resetTransaction()
+        
+        // Clear sensitive data
+        ptToken = nil
+        attestationString = nil
+        
         Task {
             do {
                 let connected = try await ensureConnected()
