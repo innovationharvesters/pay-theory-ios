@@ -22,6 +22,7 @@ public class WebSocketProvider: NSObject {
     }
     
     func setDefaultHandler(_ handler: WebSocketProtocol) {
+        log.info("WebSocketProvider::setDefaultHandler")
         self.defaultHandler = handler
     }
         
@@ -32,6 +33,8 @@ public class WebSocketProvider: NSObject {
                      ptToken: String,
                      listener: WebSocketListener,
                      socketHandler: WebSocketProtocol) async throws {
+        log.info("WebSocketProvider::startSocket")
+
         return try await withCheckedThrowingContinuation { continuation in
             let urlSession = URLSession(configuration: .default, delegate: listener, delegateQueue: OperationQueue())
             let socketUrl = "wss://\(environment).secure.socket.\(stage).com/\(environment)/?pt_token=\(ptToken)"
@@ -62,17 +65,19 @@ public class WebSocketProvider: NSObject {
             }
             
             self.webSocket!.resume()
-            print("Socket connecting...")
+            log.info("WebSocketProvider::Socket connecting...")
         }
     }
     
     func connectionEstablished() {
+        log.info("WebSocketProvider::connectionEstablished")
         status = .connected
         connectionCompletion?(.success(()))
         self.receive()
     }
 
     func connectionFailed(with error: Error) {
+        log.info("WebSocketProvider::connectionFailed")
         status = .disconnected
         connectionCompletion?(.failure(error))
     }
@@ -143,8 +148,10 @@ public class WebSocketProvider: NSObject {
     }
     
     func sendMessage(message: URLSessionWebSocketTask.Message, handler: WebSocketProtocol) {
+        log.info("WebSocketProvider::sendMessage")
+
         if self.asyncResponseHandler != nil {
-            print("Cannot send message while waiting for response")
+            log.error("WebSocketProvider::Cannot send message while waiting for response")
             return
         }
         webSocket?.send(message, completionHandler: { (error) in
@@ -156,6 +163,8 @@ public class WebSocketProvider: NSObject {
     }
     
     func stopSocket() {
+        log.info("WebSocketProvider::stopSocket")
+
         // Set status to disconnected first to prevent new receive calls
         status = .disconnected
         

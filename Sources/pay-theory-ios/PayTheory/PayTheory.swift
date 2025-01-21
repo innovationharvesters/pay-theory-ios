@@ -134,6 +134,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     ///         based on the provided API key. It also sets up Combine publishers to propagate
     ///         changes in the instance's state.
     public init(amount: Int? = nil, apiKey: String, devMode: Bool = false, errorHandler: @escaping (PTError) -> Void) {
+        log.info("PayTheory::init")
         // Parse the API key to extract environment and stage information
         var apiParts = apiKey.split {$0 == "-"}.map { String($0) }
         // Validate the the API key is the correct format
@@ -214,14 +215,17 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     
     // MARK: - Functions used to conform to the WebSocketProtocol
     func receiveMessage(message: String) {
+        log.info("PayTheory::receiveMessage")
         onMessage(response: message)
     }
     
     func handleError(error: Error) {
+        log.error("PayTheory::handleError")
         errorHandler(PTError(code: .socketError, error: "An unknown socket error occured"))
     }
     
     func handleDisconnect() {
+        log.info("PayTheory::handleDisconnect")
         DispatchQueue.main.async {
             // Clear transaction-related data
             self.transaction.sessionKey = nil

@@ -12,6 +12,7 @@ extension PayTheory {
     
     // Used to reset when a transaction fails or an error is returned. Also used by cancel function.
     func resetTransaction() {
+        log.info("PayTheory::resetTransaction")
         isInitialized = false
         isComplete = false
         transaction.resetTransaction()
@@ -34,6 +35,7 @@ extension PayTheory {
     }
     
     func calcFeesWithAmount () {
+        log.info("PayTheory::calcFeesWithAmount")
         if let _ = amount {
             // Send calc fee for Bank Fee
             sendCalcFeeMessage()
@@ -49,6 +51,7 @@ extension PayTheory {
     ///
     /// If the new value is less than 6 characters then we should set the cardBin to nil
     func cardNumberChanged(_ newNumber: String) {
+        log.info("PayTheory::cardNumberChanged")
         // Strip non-numerical characters
         let numericString = newNumber.filter { $0.isNumber }
         
@@ -66,6 +69,7 @@ extension PayTheory {
     }
     
     func canCallAction() -> PTError? {
+        log.info("PayTheory::canCallAction")
         if isComplete == true {
             return PTError(code: .actionComplete, error: "Pay Theory class has already succesfully tokenized or made a transaction.")
         } else if isInitialized == true {
@@ -76,6 +80,7 @@ extension PayTheory {
         
     // Checks to see that it has been 14 minutes since we fetched the host token so that it can be used
     func hostTokenStillValid() -> Bool {
+        log.info("PayTheory::hostTokenStillValid")
         let currentTime = Date()
         if let hostTokenTimestamp = self.hostTokenTimestamp {
             let timeInterval = currentTime.timeIntervalSince(hostTokenTimestamp)
@@ -87,10 +92,12 @@ extension PayTheory {
     
     // Some internal setters for values that need to be set on the main thread
     func setReady(_ newValue: Bool) {
+        log.info("PayTheory::setReady")
         self.isReady = newValue
     }
     
     func setComplete(_ newValue: Bool) {
+        log.info("PayTheory::setComplete")
         self.isComplete = newValue
     }
 }

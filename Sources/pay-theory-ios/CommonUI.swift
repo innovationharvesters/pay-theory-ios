@@ -29,6 +29,7 @@ public struct PTForm<Content>: View where Content: View {
 
 
     public init(@ViewBuilder content: @escaping () -> Content) {
+        log.info("PTForm::init")
         self.content = content
     }
 

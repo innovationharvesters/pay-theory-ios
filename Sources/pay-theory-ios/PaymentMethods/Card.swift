@@ -483,7 +483,7 @@ public struct PTCardPostalCode: View {
     /// The text field is configured to use a numbers and punctuation keyboard.
     public var body: some View {
         TextField(placeholder, text: $card.card.address.postalCode ?? "")
-            .keyboardType(.numbersAndPunctuation)
+            .keyboardType(.decimalPad)
     }
 }
 

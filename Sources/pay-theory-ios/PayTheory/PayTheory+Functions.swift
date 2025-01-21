@@ -28,6 +28,7 @@ extension PayTheory {
                                       payor: Payor? = nil,
                                       payorId: String? = nil,
                                       metadata: [String: String]? = nil) async -> TokenizePaymentMethodResponse {
+        log.info("PayTheory::tokenizePaymentMethod")
         // Check if the action can be called
         if let error = canCallAction() {
             return .error(error)
@@ -103,6 +104,7 @@ extension PayTheory {
                                       payorId: String? = nil,
                                       metadata: [String: String]? = nil,
                                       completion: @escaping (TokenizePaymentMethodResponse) -> Void) {
+        log.info("PayTheory::tokenizePaymentMethod")
         Task {
             let result = await tokenizePaymentMethod(paymentMethod: paymentMethod,
                                                      payor: payor,
@@ -159,6 +161,7 @@ extension PayTheory {
                          recurringId: String? = nil,
                          reference: String? = nil,
                          sendReceipt: Bool = false) async -> TransactResponse {
+        log.info("PayTheory::transact")
         // Check if the action can be called
         if let error = canCallAction() {
             return .error(error)
@@ -278,6 +281,7 @@ extension PayTheory {
                          reference: String? = nil,
                          sendReceipt: Bool = false,
                          completion: @escaping (TransactResponse) -> Void) {
+        log.info("PayTheory::transact")
         Task {
             let result = await transact(amount: amount,
                                             paymentMethod: paymentMethod,
@@ -312,6 +316,7 @@ extension PayTheory {
     ///
     /// - Important: This function should be called when you want to start a fresh payment process and clear all data in the hosted fields.
     public func resetPT() {
+        log.info("PayTheory::resetPT")
         // Clear environment objects
         self.envAch.clear()
         self.envCard.clear()
@@ -359,6 +364,7 @@ extension PayTheory {
     ///
     /// - Note: This function will only update the amount and recalculate fees if `newAmount` is different from the current `amount`.
     public func updateAmount(newAmount: Int) {
+        log.info("PayTheory::updateAmount")
         // Only set the amount if it is different than what is stored
         // We don't want to recalc the fees for the same amount
         if amount != newAmount {

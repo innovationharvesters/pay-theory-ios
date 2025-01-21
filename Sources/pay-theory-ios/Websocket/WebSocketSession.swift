@@ -48,6 +48,7 @@ public class WebSocketSession: NSObject {
     ///
     /// - Throws: `ConnectionError.socketConnectionFailed` if the connection fails.
     func open(ptToken: String, environment: String, stage: String) async throws {
+        log.info("WebSocketSession::open")
         guard let provider = self.provider else {
             throw ConnectionError.socketConnectionFailed
         }
@@ -64,6 +65,7 @@ public class WebSocketSession: NSObject {
 
     /// Closes the WebSocket connection.
     func close() {
+        log.info("WebSocketSession::close")
         self.provider!.stopSocket()
     }
 
@@ -73,6 +75,7 @@ public class WebSocketSession: NSObject {
     ///
     /// - Throws: An error if the WebSocket provider is not initialized.
     func sendMessage(messageBody: String) throws {
+        log.info("WebSocketSession::sendMessage")
         guard let provider = self.provider else {
             throw NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "WebSocket provider is not initialized"])
         }
@@ -87,6 +90,7 @@ public class WebSocketSession: NSObject {
     ///
     /// - Throws: An error if the WebSocket provider is not initialized or if sending fails.
     func sendMessageAndWaitForResponse(messageBody: String) async throws -> String {
+        log.info("WebSocketSession::sendMessageAndWaitForResponse")
         guard let provider = self.provider else {
             throw NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "WebSocket provider is not initialized"])
         }

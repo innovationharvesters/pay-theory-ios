@@ -19,6 +19,7 @@ enum ConnectionError: Error {
 
 extension PayTheory {
     public func handleActiveState() {
+        log.info("PayTheory::handleActiveState")
         Task {
             do {
                 _ = try await ensureConnected()
@@ -34,6 +35,7 @@ extension PayTheory {
     
     // Closes the socket and cleans up sensitive data as the app goes to background
     public func handleBackgroundState() {
+        log.info("PayTheory::handleBackgroundState")
         if session.status != .connected { return }
         
         // Close the socket connection
@@ -49,6 +51,7 @@ extension PayTheory {
     
     // Requests a Host Token and go through the App Attestation process if needed
     func fetchToken() async throws {
+        log.info("PayTheory::fetchToken")
         // Fetch token and set the ptToken variable from the response
         let tokenData = try await getToken(apiKey: apiKey,
                                            environment: environment,
@@ -85,6 +88,7 @@ extension PayTheory {
     }
     
     func connectSocket() async throws  {
+        log.info("PayTheory::connectSocket")
         // Fetch the PT Token to pass into socket connection
         do {
             try await fetchToken()
@@ -103,7 +107,7 @@ extension PayTheory {
         do {
             try await sendHostTokenMessage()
         } catch {
-            print("Error sending host token message: \(error)")
+            log.error("PayTheory::connectSocket::Error sending host token message: \(error)")
             throw error
         }
     }
@@ -131,6 +135,7 @@ extension PayTheory {
     /// Checks to see if the socket is connected
     /// Returns true if socket was already connected or false if it had to reconnect
     func ensureConnected() async throws -> Bool {
+        log.info("PayTheory::ensureConnected")
         // Check if the socket is already connected
         if session.status == .connected {
             return true
@@ -140,6 +145,7 @@ extension PayTheory {
             try await connectSocket()
             return false
         } catch {
+            log.error("PayTheory::ensureConnected::Error connecting to socket: \(error)")
             throw error
         }
     }

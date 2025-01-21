@@ -17,12 +17,12 @@ public class WebSocketListener: NSObject, URLSessionWebSocketDelegate {
     }
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didOpenWithProtocol protocol: String?) {
-        print("WebSocket connected")
+        log.info("WebSocketListener::WebSocket connected")
         self.session?.provider?.connectionEstablished()
     }
     
     public func urlSession(_ session: URLSession, webSocketTask: URLSessionWebSocketTask, didCloseWith closeCode: URLSessionWebSocketTask.CloseCode, reason: Data?) {
-        print("disconnected")
+        log.info("WebSocketListener::disconnected")
         self.session?.handler?.handleDisconnect()
     }
     
@@ -30,13 +30,13 @@ public class WebSocketListener: NSObject, URLSessionWebSocketDelegate {
         if didBecomeInvalidWithError != nil {
             self.session?.handler?.handleError(error:didBecomeInvalidWithError!)
         }
-        print("errored")
+        log.info("WebSocketListener::errored")
         self.session?.close()
     }
     
     public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let error = error {
-            print("WebSocket encountered an error: \(error.localizedDescription)")
+            log.error("WebSocketListener::WebSocket encountered an error: \(error.localizedDescription)")
             self.session?.provider?.connectionFailed(with: error)
         }
     }

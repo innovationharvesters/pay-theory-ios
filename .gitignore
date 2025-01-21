@@ -41,3 +41,4 @@ Pods/
 Example/Pods/
 cobertura.xml
 get.sh
+.build
