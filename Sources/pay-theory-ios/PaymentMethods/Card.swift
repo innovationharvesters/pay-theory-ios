@@ -1,3 +1,5 @@
+import Combine
+import Foundation
 //
 //  CardFields.swift
 //  PayTheory
@@ -5,8 +7,6 @@
 //  Created by Austin Zani on 3/15/21.
 //
 import SwiftUI
-import Foundation
-import Combine
 
 struct CardStruct: Encodable {
     var name: String = ""
@@ -38,7 +38,7 @@ struct CardStruct: Encodable {
         try container.encode(expirationYear, forKey: .expirationYear)
         try container.encode(type, forKey: .type)
     }
-    
+
     mutating func clear() {
         self.name = ""
         self.number = ""
@@ -59,58 +59,65 @@ class Card: ObservableObject {
     @Published var validSecurityCode = false
     @Published var validPostalCode = false
     private var cancellables = Set<AnyCancellable>()
-    
+
     init(card: CardStruct = CardStruct()) {
         self.card = card
         setupValidation()
     }
-    
+
     deinit {
         cancellables.forEach { $0.cancel() }
     }
-        
+
     private func setupValidation() {
         // Card Number Validation
         $card.map(\.formattedNumber)
             .removeDuplicates()
             .sink { [weak self] number in
                 self?.validCardNumber = isValidCardNumber(cardString: number)
-                self?.card.number = number.replacingOccurrences(of: " ", with: "")
+                self?.card.number = number.replacingOccurrences(
+                    of: " ", with: "")
             }
             .store(in: &cancellables)
-        
+
         // Expiration Date Validation
         $card.map(\.expirationDate)
             .removeDuplicates()
             .sink { [weak self] date in
                 let (month, year) = splitDate(date)
-                self?.validExpirationDate = isValidExpDate(month: month, year: year)
+                self?.validExpirationDate = isValidExpDate(
+                    month: month, year: year)
             }
             .store(in: &cancellables)
-        
+
         // Security Code Validation
         $card.map(\.securityCode)
             .removeDuplicates()
             .sink { [weak self] code in
                 let num = Int(code)
-                self?.validSecurityCode = num != nil && code.length > 2 && code.length < 5
+                self?.validSecurityCode =
+                    num != nil && code.length > 2 && code.length < 5
             }
             .store(in: &cancellables)
-        
+
         // Postal Code Validation
         $card.map(\.address.postalCode)
             .removeDuplicates()
             .sink { [weak self] postalCode in
-                self?.validPostalCode = isValidPostalCode(value: postalCode ?? "")
+                self?.validPostalCode = isValidPostalCode(
+                    value: postalCode ?? "")
             }
             .store(in: &cancellables)
-        
+
         // Overall Card Validation
-        Publishers.CombineLatest4($validCardNumber, $validExpirationDate, $validSecurityCode, $validPostalCode)
-            .map { $0 && $1 && $2 && $3 }
-            .assign(to: &$isValid)
+        Publishers.CombineLatest4(
+            $validCardNumber, $validExpirationDate, $validSecurityCode,
+            $validPostalCode
+        )
+        .map { $0 && $1 && $2 && $3 }
+        .assign(to: &$isValid)
     }
-    
+
     func clear() {
         self.isValid = false
         self.validCardNumber = false
@@ -138,7 +145,7 @@ class Card: ObservableObject {
 public struct PTCardName: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
 
@@ -178,10 +185,10 @@ public struct PTCardName: View {
 public struct PTCardNumber: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTCardNumber` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -189,7 +196,7 @@ public struct PTCardNumber: View {
     public init(placeholder: String = "Card Number") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `formattedNumber` property of the `Card` environment object.
@@ -197,8 +204,9 @@ public struct PTCardNumber: View {
     public var body: some View {
         TextField(placeholder, text: $card.card.formattedNumber)
             .onChange(of: card.card.formattedNumber) { newValue in
-                let strippedNumber = newValue.filter({$0.isNumber})
-                card.card.formattedNumber = insertCreditCardSpaces(strippedNumber)
+                let strippedNumber = newValue.filter({ $0.isNumber })
+                card.card.formattedNumber = insertCreditCardSpaces(
+                    strippedNumber)
                 card.card.number = strippedNumber
             }
             .keyboardType(.decimalPad)
@@ -223,10 +231,10 @@ public struct PTCardNumber: View {
 public struct PTExp: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTExp` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -234,7 +242,7 @@ public struct PTExp: View {
     public init(placeholder: String = "MM/YY") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `expirationDate` property of the `Card` environment object.
@@ -270,10 +278,10 @@ public struct PTExp: View {
 public struct PTCvv: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTCvv` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -281,7 +289,7 @@ public struct PTCvv: View {
     public init(placeholder: String = "CVV") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `securityCode` property of the `Card` environment object.
@@ -289,7 +297,8 @@ public struct PTCvv: View {
     public var body: some View {
         TextField(placeholder, text: $card.card.securityCode)
             .onChange(of: card.card.securityCode) { newValue in
-                card.card.securityCode = formatDigitTextField(newValue, maxLength: 4)
+                card.card.securityCode = formatDigitTextField(
+                    newValue, maxLength: 4)
             }
             .keyboardType(.decimalPad)
     }
@@ -312,10 +321,10 @@ public struct PTCvv: View {
 public struct PTCardLineOne: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTCardLineOne` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -323,7 +332,7 @@ public struct PTCardLineOne: View {
     public init(placeholder: String = "Address Line 1") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `line1` property of the `Card` environment object's address.
@@ -351,10 +360,10 @@ public struct PTCardLineOne: View {
 public struct PTCardLineTwo: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTCardLineTwo` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -362,7 +371,7 @@ public struct PTCardLineTwo: View {
     public init(placeholder: String = "Address Line 2") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `line2` property of the `Card` environment object's address.
@@ -388,10 +397,10 @@ public struct PTCardLineTwo: View {
 public struct PTCardCity: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTCardCity` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -399,7 +408,7 @@ public struct PTCardCity: View {
     public init(placeholder: String = "City") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `city` property of the `Card` environment object's address.
@@ -425,10 +434,10 @@ public struct PTCardCity: View {
 public struct PTCardRegion: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTCardRegion` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -436,7 +445,7 @@ public struct PTCardRegion: View {
     public init(placeholder: String = "Region") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `region` property of the `Card` environment object's address.
@@ -465,10 +474,10 @@ public struct PTCardRegion: View {
 public struct PTCardPostalCode: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTCardPostalCode` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -476,7 +485,7 @@ public struct PTCardPostalCode: View {
     public init(placeholder: String = "Postal Code") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `postalCode` property of the `Card` environment object's address.
@@ -504,10 +513,10 @@ public struct PTCardPostalCode: View {
 public struct PTCardCountry: View {
     /// The environment object that holds the card payment details.
     @EnvironmentObject var card: Card
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTCardCountry` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -515,7 +524,7 @@ public struct PTCardCountry: View {
     public init(placeholder: String = "Country") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `country` property of the `Card` environment object's address.

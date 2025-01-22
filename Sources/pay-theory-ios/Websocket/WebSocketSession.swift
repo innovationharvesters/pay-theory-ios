@@ -14,18 +14,18 @@ import Foundation
 public class WebSocketSession: NSObject {
     /// The handler for WebSocket events and messages.
     var handler: WebSocketProtocol?
-    
+
     /// The listener for WebSocket events.
     private var listener: WebSocketListener?
-    
+
     /// The provider responsible for the actual WebSocket implementation.
     var provider: WebSocketProvider?
-    
+
     /// The current status of the WebSocket connection.
     var status: WebSocketStatus {
         return provider?.status ?? .notConnected
     }
-    
+
     /// Prepares the WebSocket session with the necessary components.
     ///
     /// - Parameters:
@@ -38,7 +38,7 @@ public class WebSocketSession: NSObject {
         self.listener?.prepare(_session: self)
         self.provider?.setDefaultHandler(_handler)
     }
-    
+
     /// Opens a WebSocket connection.
     ///
     /// - Parameters:
@@ -47,17 +47,19 @@ public class WebSocketSession: NSObject {
     ///   - stage: The stage of the environment.
     ///
     /// - Throws: `ConnectionError.socketConnectionFailed` if the connection fails.
-    func open(ptToken: String, environment: String, stage: String) async throws {
+    func open(ptToken: String, environment: String, stage: String) async throws
+    {
         log.info("WebSocketSession::open")
         guard let provider = self.provider else {
             throw ConnectionError.socketConnectionFailed
         }
         do {
-            try await provider.startSocket(environment: environment,
-                                           stage: stage,
-                                           ptToken: ptToken,
-                                           listener: self.listener!,
-                                           socketHandler: self.handler!)
+            try await provider.startSocket(
+                environment: environment,
+                stage: stage,
+                ptToken: ptToken,
+                listener: self.listener!,
+                socketHandler: self.handler!)
         } catch {
             throw ConnectionError.socketConnectionFailed
         }
@@ -77,11 +79,17 @@ public class WebSocketSession: NSObject {
     func sendMessage(messageBody: String) throws {
         log.info("WebSocketSession::sendMessage")
         guard let provider = self.provider else {
-            throw NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "WebSocket provider is not initialized"])
+            throw NSError(
+                domain: "WebSocket", code: 0,
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "WebSocket provider is not initialized"
+                ])
         }
-        provider.sendMessage(message: .string(messageBody), handler: self.handler!)
+        provider.sendMessage(
+            message: .string(messageBody), handler: self.handler!)
     }
-    
+
     /// Sends a message through the WebSocket connection and waits for a response.
     ///
     /// - Parameter messageBody: The message to be sent.
@@ -89,13 +97,21 @@ public class WebSocketSession: NSObject {
     /// - Returns: The response received from the server.
     ///
     /// - Throws: An error if the WebSocket provider is not initialized or if sending fails.
-    func sendMessageAndWaitForResponse(messageBody: String) async throws -> String {
+    func sendMessageAndWaitForResponse(messageBody: String) async throws
+        -> String
+    {
         log.info("WebSocketSession::sendMessageAndWaitForResponse")
         guard let provider = self.provider else {
-            throw NSError(domain: "WebSocket", code: 0, userInfo: [NSLocalizedDescriptionKey: "WebSocket provider is not initialized"])
+            throw NSError(
+                domain: "WebSocket", code: 0,
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        "WebSocket provider is not initialized"
+                ])
         }
-        
+
         let message = URLSessionWebSocketTask.Message.string(messageBody)
-        return try await provider.sendMessageAndWaitForResponse(message: message)
+        return try await provider.sendMessageAndWaitForResponse(
+            message: message)
     }
 }

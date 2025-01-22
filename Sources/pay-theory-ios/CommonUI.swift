@@ -11,22 +11,18 @@ import SwiftUI
 ///
 /// - Requires: Needs to have the PayTheory Object that was initialized with the API Key passed as an EnvironmentObject
 ///
-/**
-  ````
- let pt = PayTheory(apiKey: 'your-api-key')
-
- PTForm{
-     AncestorView()
- }.EnvironmentObject(pt)
-  ````
- */
+///  ````
+/// let pt = PayTheory(apiKey: 'your-api-key')
+///
+/// PTForm{
+///     AncestorView()
+/// }.EnvironmentObject(pt)
+///  ````
 public struct PTForm<Content>: View where Content: View {
 
     let content: () -> Content
     @EnvironmentObject var payTheory: PayTheory
     @Environment(\.scenePhase) var scenePhase
-    
-
 
     public init(@ViewBuilder content: @escaping () -> Content) {
         log.info("PTForm::init")
@@ -34,24 +30,24 @@ public struct PTForm<Content>: View where Content: View {
     }
 
     public var body: some View {
-            Group {
-                content()
-            }
-            .environmentObject(payTheory.envCard)
-            .environmentObject(payTheory.envAch)
-            .environmentObject(payTheory.envCash)
-        
-            .onChange(of: scenePhase) { newPhase in
-                switch newPhase {
-                case .active:
-                    payTheory.handleActiveState()
-                case .background:
-                    payTheory.handleBackgroundState()
-                case .inactive:
-                    break
-                @unknown default:
-                    break
-                }
+        Group {
+            content()
+        }
+        .environmentObject(payTheory.envCard)
+        .environmentObject(payTheory.envAch)
+        .environmentObject(payTheory.envCash)
+
+        .onChange(of: scenePhase) { newPhase in
+            switch newPhase {
+            case .active:
+                payTheory.handleActiveState()
+            case .background:
+                payTheory.handleBackgroundState()
+            case .inactive:
+                break
+            @unknown default:
+                break
             }
         }
+    }
 }

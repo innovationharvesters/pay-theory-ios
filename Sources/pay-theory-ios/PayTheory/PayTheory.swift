@@ -6,10 +6,10 @@
 //
 // Base of the Pay Theory class that contains all attributes, the initializer, and the functions needed to make it conform to the WebSocketProtocol
 
-import SwiftUI
-import Foundation
 import Combine
 import DeviceCheck
+import Foundation
+import SwiftUI
 
 /// A class that manages payment processing through the Pay Theory service.
 ///
@@ -31,7 +31,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var envAch: ACH
     var envCash: Cash
     var cancellables = Set<AnyCancellable>()
-    
+
     // Public State Variables
     /// The current state of the card payment method.
     ///
@@ -81,7 +81,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     @ObservedObject var transaction: Transaction
     var transactionCancellable: AnyCancellable? = nil
     var errorHandler: (PTError) -> Void
-    
+
     var appleEnvironment: String
     var devMode = false
     var isInitialized = false
@@ -92,21 +92,21 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var session: WebSocketSession
     // Attestation string being set should trigger the connection of our socket or sending of the hostTokenMessage if it is already connected
     var attestationString: String?
-    
+
     // Setting of the cardBin should trigger the potential calculation of fees if an amount is set
     var cardBin: String? {
         didSet {
             // If there is a cardBin then try and send the amount message if the amount is sent
             if let cardBin = cardBin {
-                if let _ = amount {
+                if amount != nil {
                     sendCalcFeeMessage(cardBin: cardBin)
                 }
-            } else { // If cardBin is set to nil then set the cardServiceFee to nil
+            } else {  // If cardBin is set to nil then set the cardServiceFee to nil
                 self.cardServiceFee = nil
             }
         }
     }
-    
+
     /// Initializes a new instance of the PayTheory class.
     ///
     /// This initializer sets up the PayTheory instance with the provided parameters and prepares
@@ -133,50 +133,55 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     /// - Note: This initializer sets up various state variables and configures the instance
     ///         based on the provided API key. It also sets up Combine publishers to propagate
     ///         changes in the instance's state.
-    public init(amount: Int? = nil, apiKey: String, devMode: Bool = false, errorHandler: @escaping (PTError) -> Void) {
+    public init(
+        amount: Int? = nil, apiKey: String, devMode: Bool = false,
+        errorHandler: @escaping (PTError) -> Void
+    ) {
         log.info("PayTheory::init")
         // Parse the API key to extract environment and stage information
-        var apiParts = apiKey.split {$0 == "-"}.map { String($0) }
+        var apiParts = apiKey.split { $0 == "-" }.map { String($0) }
         // Validate the the API key is the correct format
         if apiParts.count != 3 {
-            debugPrint("This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'")
+            debugPrint(
+                "This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'"
+            )
             apiParts = ["", ""]
         }
-        
+
         self.amount = amount
         self.apiKey = apiKey
         environment = apiParts[0]
         stage = apiParts[1]
-        appleEnvironment = stage == "paytheory" ? "appattest" : "appattestdevelop"
+        appleEnvironment =
+            stage == "paytheory" ? "appattest" : "appattestdevelop"
         self.devMode = devMode
-        
+
         // Store the completion handler
         self.errorHandler = errorHandler
-        
+
         // Initialize payment method objects
         envAch = ACH()
         envCard = Card()
         envPayor = Payor()
         envCash = Cash()
-        
+
         // Set up network monitoring
         monitor = NetworkMonitor()
-        
+
         // Initialize transaction object
         let newTransaction = Transaction(apiKey: apiKey)
         transaction = newTransaction
-        
+
         // Initialize validation objects
         ach = ACHState(ach: envAch, transaction: newTransaction)
         card = CardState(card: envCard, transaction: newTransaction)
         cash = CashState(cash: envCash, transaction: newTransaction)
-        
-        
+
         // Initialize the WebSocketSession we will use for socket communications
         let provider = WebSocketProvider()
         session = WebSocketSession()
         session.prepare(_provider: provider, _handler: self)
-        
+
         // Set up Combine publishers to propagate changes
         envAch.objectWillChange.sink { [weak self] (_) in
             self?.objectWillChange.send()
@@ -199,7 +204,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         cash.objectWillChange.sink { [weak self] (_) in
             self?.objectWillChange.send()
         }.store(in: &cancellables)
-        
+
         envCard.$card.map(\.number)
             .removeDuplicates()
             .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
@@ -208,34 +213,36 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
             }
             .store(in: &cancellables)
     }
-    
+
     deinit {
         cancellables.forEach { $0.cancel() }
     }
-    
+
     // MARK: - Functions used to conform to the WebSocketProtocol
     func receiveMessage(message: String) {
         log.info("PayTheory::receiveMessage")
         onMessage(response: message)
     }
-    
+
     func handleError(error: Error) {
         log.error("PayTheory::handleError")
-        errorHandler(PTError(code: .socketError, error: "An unknown socket error occured"))
+        errorHandler(
+            PTError(
+                code: .socketError, error: "An unknown socket error occured"))
     }
-    
+
     func handleDisconnect() {
         log.info("PayTheory::handleDisconnect")
         DispatchQueue.main.async {
             // Clear transaction-related data
             self.transaction.sessionKey = nil
             self.transaction.publicKey = nil
-            
+
             // Clear sensitive data
             self.ptToken = nil
             self.attestationString = nil
             self.hostTokenTimestamp = nil
-            
+
             // Reset state
             self.setReady(false)
             self.cardServiceFee = nil

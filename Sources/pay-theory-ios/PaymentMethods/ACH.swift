@@ -1,3 +1,5 @@
+import Combine
+import Foundation
 //
 //  ACHFields.swift
 //  PayTheory
@@ -5,13 +7,11 @@
 //  Created by Austin Zani on 3/15/21.
 //
 import SwiftUI
-import Foundation
-import Combine
 
 enum ACHAccountType: String, CaseIterable, Encodable {
     case checking = "CHECKING"
     case savings = "SAVINGS"
-    
+
     var displayName: String {
         switch self {
         case .checking: return "Checking"
@@ -27,7 +27,7 @@ struct ACHStruct: Encodable {
     var name = ""
     let issuingCountryCode = "USA"
     let type = "ach"
-    
+
     private enum CodingKeys: String, CodingKey {
         case accountNumber = "account_number"
         case accountType = "account_type"
@@ -36,7 +36,7 @@ struct ACHStruct: Encodable {
         case issuingCountryCode = "issuing_country_code"
         case type
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(accountNumber, forKey: .accountNumber)
@@ -46,7 +46,7 @@ struct ACHStruct: Encodable {
         try container.encode(issuingCountryCode, forKey: .issuingCountryCode)
         try container.encode(type, forKey: .type)
     }
-    
+
     mutating func clear() {
         self.accountNumber = ""
         self.accountType = .checking
@@ -62,25 +62,26 @@ class ACH: ObservableObject {
     @Published var validAccountNumber: Bool = false
     @Published var validAccountName: Bool = false
     private var cancellables = Set<AnyCancellable>()
-    
-    init(ach: ACHStruct  = ACHStruct()) {
+
+    init(ach: ACHStruct = ACHStruct()) {
         self.ach = ach
         setupValidation()
     }
-    
+
     deinit {
         cancellables.forEach { $0.cancel() }
     }
-        
+
     private func setupValidation() {
         // Account Number Validation
         $ach.map(\.accountNumber)
             .removeDuplicates()
             .sink { [weak self] number in
-                self?.validAccountNumber = Int(number) != nil && number.count > 3 && number.count < 18
+                self?.validAccountNumber =
+                    Int(number) != nil && number.count > 3 && number.count < 18
             }
             .store(in: &cancellables)
-        
+
         // Bank Code Validation Validation
         $ach.map(\.bankCode)
             .removeDuplicates()
@@ -88,7 +89,7 @@ class ACH: ObservableObject {
                 self?.validBankCode = isValidRoutingNumber(code: bankCode)
             }
             .store(in: &cancellables)
-        
+
         // Account Name Validation
         $ach.map(\.name)
             .removeDuplicates()
@@ -96,13 +97,15 @@ class ACH: ObservableObject {
                 self?.validAccountName = name.isEmpty == false
             }
             .store(in: &cancellables)
-        
+
         // Overall ACH Validation
-        Publishers.CombineLatest3($validBankCode, $validAccountName, $validAccountNumber)
-            .map { $0 && $1 && $2 }
-            .assign(to: &$isValid)
+        Publishers.CombineLatest3(
+            $validBankCode, $validAccountName, $validAccountNumber
+        )
+        .map { $0 && $1 && $2 }
+        .assign(to: &$isValid)
     }
-    
+
     func clear() {
         self.isValid = false
         self.validAccountName = false
@@ -110,7 +113,7 @@ class ACH: ObservableObject {
         self.validAccountNumber = false
         self.ach.clear()
     }
-    
+
 }
 
 /// A SwiftUI view that provides a text field for capturing the account name for ACH transactions in Pay Theory payments.
@@ -130,10 +133,10 @@ class ACH: ObservableObject {
 public struct PTAchAccountName: View {
     /// The environment object that holds the ACH transaction details.
     @EnvironmentObject var account: ACH
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTAchAccountName` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -141,7 +144,7 @@ public struct PTAchAccountName: View {
     public init(placeholder: String = "Name on Account") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `name` property of the `ACH` environment object.
@@ -169,10 +172,10 @@ public struct PTAchAccountName: View {
 public struct PTAchAccountNumber: View {
     /// The environment object that holds the ACH transaction details.
     @EnvironmentObject var account: ACH
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTAchAccountNumber` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -180,7 +183,7 @@ public struct PTAchAccountNumber: View {
     public init(placeholder: String = "Account Number") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `accountNumber` property of the `ACH` environment object.
@@ -188,7 +191,8 @@ public struct PTAchAccountNumber: View {
     public var body: some View {
         TextField(placeholder, text: $account.ach.accountNumber)
             .onChange(of: account.ach.accountNumber) { newValue in
-                account.ach.accountNumber = formatDigitTextField(newValue, maxLength: 17)
+                account.ach.accountNumber = formatDigitTextField(
+                    newValue, maxLength: 17)
             }
             .keyboardType(.decimalPad)
     }
@@ -211,10 +215,10 @@ public struct PTAchAccountNumber: View {
 public struct PTAchAccountType: View {
     /// The environment object that holds the ACH transaction details.
     @EnvironmentObject var account: ACH
-    
+
     /// Initializes a new instance of `PTAchAccountType`.
     public init() {}
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a segmented picker that allows selection between different ACH account types.
@@ -227,7 +231,7 @@ public struct PTAchAccountType: View {
         }
         .pickerStyle(SegmentedPickerStyle())
     }
-    
+
     /// A custom binding for the account type.
     ///
     /// This binding ensures that the `accountType` property of the `ACH` environment object
@@ -261,10 +265,10 @@ public struct PTAchAccountType: View {
 public struct PTAchRoutingNumber: View {
     /// The environment object that holds the ACH transaction details.
     @EnvironmentObject var account: ACH
-    
+
     /// The placeholder text displayed in the text field when it's empty.
     let placeholder: String
-    
+
     /// Initializes a new instance of `PTAchRoutingNumber` with a custom placeholder text.
     ///
     /// - Parameter placeholder: A `String` that represents the placeholder text for the text field.
@@ -272,7 +276,7 @@ public struct PTAchRoutingNumber: View {
     public init(placeholder: String = "Routing Number") {
         self.placeholder = placeholder
     }
-    
+
     /// The body of the view, defining its content and behavior.
     ///
     /// This view presents a `TextField` that is bound to the `bankCode` property of the `ACH` environment object.
@@ -280,7 +284,8 @@ public struct PTAchRoutingNumber: View {
     public var body: some View {
         TextField(placeholder, text: $account.ach.bankCode)
             .onChange(of: account.ach.bankCode) { newValue in
-                account.ach.bankCode = formatDigitTextField(newValue, maxLength: 9)
+                account.ach.bankCode = formatDigitTextField(
+                    newValue, maxLength: 9)
             }
             .keyboardType(.decimalPad)
     }

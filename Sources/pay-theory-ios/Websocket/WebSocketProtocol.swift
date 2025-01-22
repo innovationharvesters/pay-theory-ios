@@ -6,21 +6,20 @@
 //
 
 import Foundation
-/**
- * Protocol for reacting to websocket events
- */
+
+/// Protocol for reacting to websocket events
 protocol WebSocketProtocol {
 
     /**
      process incoming messages
      */
-    func receiveMessage(message:String)
-    
+    func receiveMessage(message: String)
+
     /**
      react to an error
      */
-    func handleError(error:Error)
-    
+    func handleError(error: Error)
+
     /**
      reconnect if transaction not initiated
      report failure if transaction already began
