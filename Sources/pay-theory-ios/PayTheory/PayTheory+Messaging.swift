@@ -12,7 +12,7 @@ import CryptoKit
 
 extension PayTheory {
     private func parseResponse(response: String) -> Result<(type: String, body: [String: Any]), PTError> {
-        log.info("PayTheory::parseResponse")
+        log.info("PayTheory(\(instanceId)::parseResponse")
         // Attempt to convert the response string to a dictionary
         guard let dictionary = convertStringToDictionary(text: response) else {
             // If conversion fails, handle it as an error and exit
@@ -63,7 +63,7 @@ extension PayTheory {
     }
     
     func onMessage(response: String) {
-        log.info("PayTheory::onMessage")
+        log.info("PayTheory(\(instanceId)::onMessage")
         let response = parseResponse(response: response)
         if case .failure(let error) = response {
             self.errorHandler(error)
@@ -77,7 +77,7 @@ extension PayTheory {
     }
 
     private func handleErrors(_ errors: [Any]) -> PTError {
-        log.info("PayTheory::handleErrors")
+        log.info("PayTheory(\(instanceId)::handleErrors")
         let errorMessage = errors.compactMap { $0 as? String }.joined()
         let error = errorMessage.isEmpty ? "An unknown socket error occurred" : errorMessage
         let ptError = PTError(code: .socketError, error: error)
@@ -88,7 +88,7 @@ extension PayTheory {
     }
 
     private func handleErrorType(_ body: String) -> PTError {
-        log.info("PayTheory::handleErrorType")
+        log.info("PayTheory(\(instanceId)::handleErrorType")
         if transaction.hostToken != nil {
             resetTransaction()
         }
@@ -96,7 +96,7 @@ extension PayTheory {
     }
 
     private func handleMessageType(_ type: String, _ parsedBody: [String: Any]) {
-        log.info("PayTheory::handleMessageType")
+        log.info("PayTheory(\(instanceId)::handleMessageType")
         switch type {
         case calculateFeeResponseMessage:
             handleCalcFeeResponse(parsedBody)
@@ -106,7 +106,7 @@ extension PayTheory {
     }
 
     private func finishProcessing() {
-        log.info("PayTheory::finishProcessing")
+        log.info("PayTheory(\(instanceId)::finishProcessing")
         if isAwaitingResponse {
             isAwaitingResponse = false
         }
@@ -114,7 +114,7 @@ extension PayTheory {
     
     // Used to parse transaction repsponses to be used in the transact function logic
     func parseTransactResponse(_ response: String) -> TransactResponse {
-        log.info("PayTheory::parseTransactResponse")
+        log.info("PayTheory(\(instanceId)::parseTransactResponse")
         let response = parseResponse(response: response)
         if case .failure(let error) = response {
             return .error(error)
@@ -141,7 +141,7 @@ extension PayTheory {
     
     // Used to parse the tokenization responses to be used in the tokenizePaymentMethod function logic
     func parseTokenizeResponse(_ response: String) -> TokenizePaymentMethodResponse {
-        log.info("PayTheory::parseTokenizeResponse")
+        log.info("PayTheory(\(instanceId)::parseTokenizeResponse")
         let response = parseResponse(response: response)
         if case .failure(let error) = response {
             return .error(error)
@@ -160,7 +160,7 @@ extension PayTheory {
     
     // Create the body needed for fetching a Host Token and send it to the websocket
     func sendHostTokenMessage(calcFees: Bool = true) async throws {
-        log.info("PayTheory::sendHostTokenMessage")
+        log.info("PayTheory(\(instanceId)::sendHostTokenMessage")
         
         do {
             var message: [String: Any] = ["action": hostTokenMessage]
@@ -173,12 +173,12 @@ extension PayTheory {
                 "require_attestation": self.stage == "paytheory" ? true : !devMode
             ]
             
-            log.info("PayTheory::sendHostTokenMessage - ptToken: \(String(describing: ptToken))")
-            log.info("PayTheory::sendHostTokenMessage - attestation: \(String(describing: attestationString))")
-            log.info("PayTheory::sendHostTokenMessage - require_attestation: \(String(describing: hostToken["require_attestation"]))")
+            log.info("PayTheory(\(instanceId)::sendHostTokenMessage - ptToken: \(String(describing: ptToken))")
+            log.info("PayTheory(\(instanceId)::sendHostTokenMessage - attestation: \(String(describing: attestationString))")
+            log.info("PayTheory(\(instanceId)::sendHostTokenMessage - require_attestation: \(String(describing: hostToken["require_attestation"]))")
 
             guard let encodedData = stringify(jsonDictionary: hostToken).data(using: .utf8) else {
-                log.error("PayTheory::sendHostTokenMessage::stringify(jsonDictionary: hostToken).data(using: .utf8)")
+                log.error("PayTheory(\(instanceId)::sendHostTokenMessage::stringify(jsonDictionary: hostToken).data(using: .utf8)")
                 throw ConnectionError.hostTokenCallFailed
             }
             message["encoded"] = encodedData.base64EncodedString()
@@ -186,17 +186,17 @@ extension PayTheory {
             let response = try await session.sendMessageAndWaitForResponse(messageBody: stringify(jsonDictionary: message))
             // Parse response
             guard let dictionary = convertStringToDictionary(text: response) else {
-                log.error("PayTheory::sendHostTokenMessage::convertStringToDictionary(text: response)")
+                log.error("PayTheory(\(instanceId)::sendHostTokenMessage::convertStringToDictionary(text: response)")
                 throw ConnectionError.hostTokenCallFailed
             }
             
             guard let type = dictionary["type"] as? String else {
-                log.error("PayTheory::sendHostTokenMessage::dictionary[\"type\"] as? String")
+                log.error("PayTheory(\(instanceId)::sendHostTokenMessage::dictionary[\"type\"] as? String")
                 throw ConnectionError.hostTokenCallFailed
             }
             
             if type == errorResponseMessage, let body = dictionary["body"] as? String {
-                log.info("PayTheory::sendHostTokenMessage - body: \(body)")
+                log.info("PayTheory(\(instanceId)::sendHostTokenMessage - body: \(body)")
 
                 if body.lowercased().contains("attestation") {
                     throw ConnectionError.attestationFailed
@@ -211,7 +211,7 @@ extension PayTheory {
             self.transaction.hostToken = body["hostToken"] as? String ?? ""
             self.transaction.sessionKey = body["sessionKey"] as? String ?? ""
             
-            log.info("PayTheory::sendHostTokenMessage - hostToken: \(String(describing: self.transaction.hostToken))")
+            log.info("PayTheory(\(instanceId)::sendHostTokenMessage - hostToken: \(String(describing: self.transaction.hostToken))")
             
             let key = body["publicKey"] as? String ?? ""
             self.transaction.publicKey = convertStringToByte(string: key)
@@ -233,7 +233,7 @@ extension PayTheory {
 
     // Create the body for calculating the fee and messaging the websocket to calc the fee.
     func sendCalcFeeMessage(cardBin: String? = nil) {
-        log.info("PayTheory::sendCalcFeeMessage")
+        log.info("PayTheory(\(instanceId)::sendCalcFeeMessage")
         Task {
             do {
                 _ = try await ensureConnected()
@@ -273,7 +273,7 @@ extension PayTheory {
     }
     
     func handleCalcFeeResponse(_ response: [String: Any]) {
-        log.info("PayTheory::handleCalcFeeResponse")
+        log.info("PayTheory(\(instanceId)::handleCalcFeeResponse")
         if let fee = response["fee"] as? Int {
             if let bankId = response["bank_id"] as? String {
                 // Only set the cardServiceFee if it is for the correct current cardBin.

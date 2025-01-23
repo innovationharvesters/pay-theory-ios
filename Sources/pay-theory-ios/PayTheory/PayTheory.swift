@@ -92,6 +92,8 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
     var session: WebSocketSession
     // Attestation string being set should trigger the connection of our socket or sending of the hostTokenMessage if it is already connected
     var attestationString: String?
+    
+    var instanceId: String = UUID().uuidString
 
     // Setting of the cardBin should trigger the potential calculation of fees if an amount is set
     var cardBin: String? {
@@ -137,13 +139,14 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         amount: Int? = nil, apiKey: String, devMode: Bool = false,
         errorHandler: @escaping (PTError) -> Void
     ) {
-        log.info("PayTheory::init - apiKey \(apiKey), devMode \(devMode)")
+        log.info("PayTheory(\(instanceId)::init - apiKey \(apiKey), devMode \(devMode)")
+        
         // Parse the API key to extract environment and stage information
         var apiParts = apiKey.split { $0 == "-" }.map { String($0) }
         
         // Validate the the API key is the correct format
         if apiParts.count != 3 {
-            log.debug("PayTheory::init - This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'")
+            log.debug("PayTheory(\(instanceId)::init - This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'")
             
             debugPrint(
                 "This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'"
@@ -224,19 +227,19 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
 
     // MARK: - Functions used to conform to the WebSocketProtocol
     func receiveMessage(message: String) {
-        log.info("PayTheory::receiveMessage")
+        log.info("PayTheory(\(instanceId)::receiveMessage")
         onMessage(response: message)
     }
 
     func handleError(error: Error) {
-        log.error("PayTheory::handleError")
+        log.error("PayTheory(\(instanceId)::handleError")
         errorHandler(
             PTError(
                 code: .socketError, error: "An unknown socket error occured"))
     }
 
     func handleDisconnect() {
-        log.info("PayTheory::handleDisconnect")
+        log.info("PayTheory(\(instanceId)::handleDisconnect")
         
         DispatchQueue.main.async {
             // Clear transaction-related data
