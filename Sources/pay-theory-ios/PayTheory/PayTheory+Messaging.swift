@@ -164,6 +164,7 @@ extension PayTheory {
         
         do {
             var message: [String: Any] = ["action": hostTokenMessage]
+            
             let hostToken: [String: Any] = [
                 "ptToken": ptToken ?? "",
                 "origin": "apple",
@@ -218,7 +219,9 @@ extension PayTheory {
             
             // Set isReady to true, set the timestamp for the host token, and calc fees if needed
             setReady(true)
+            
             self.hostTokenTimestamp = Date()
+            
             if calcFees && (amount != nil) {
                 calcFeesWithAmount()
             }

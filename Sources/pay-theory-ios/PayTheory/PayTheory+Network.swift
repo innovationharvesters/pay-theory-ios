@@ -62,6 +62,11 @@ extension PayTheory {
         
         log.debug("PayTheory(\(instanceId)::fetchToken - ptToken is \(String(describing: ptToken))")
         
+        log.debug("PayTheory(\(instanceId)::fetchToken - devMode is \(devMode)")
+        
+        log.debug("PayTheory(\(instanceId)::fetchToken - attestationString is \(String(describing: attestationString))")
+
+        
         if devMode {
             // Skip attestation if it is in devMode for testing in the simulator
             self.attestationString = ""
@@ -89,9 +94,15 @@ extension PayTheory {
                     throw ConnectionError.attestationFailed
                 }
             } else {
+                
+                log.debug("PayTheory(\(instanceId)::fetchToken - in the else of the fetchToken block)")
+                
                 if session.status == .connected {
+                    log.debug("PayTheory(\(instanceId)::fetchToken - closing the connection)")
+
                     session.close()
                 }
+                
                 throw ConnectionError.tokenFetchFailed
             }
         }
@@ -103,12 +114,15 @@ extension PayTheory {
         do {
             try await fetchToken()
         } catch ConnectionError.attestationFailed {
+            log.error("PayTheory(\(instanceId)::connectSocket - attestationFailed caught")
             throw ConnectionError.attestationFailed
         } catch {
+            log.error("PayTheory(\(instanceId)::connectSocket - error caught \(error)")
             throw ConnectionError.tokenFetchFailed
         }
         // Open the websocket
         do {
+            
             try await session.open(ptToken: ptToken!, environment: environment, stage: stage)
         } catch {
             log.error("PayTheory(\(instanceId)::connectSocket::Error opening socket: \(error)")
