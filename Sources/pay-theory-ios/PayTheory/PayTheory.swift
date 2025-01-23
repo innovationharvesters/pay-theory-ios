@@ -146,7 +146,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         
         // Validate the the API key is the correct format
         if apiParts.count != 3 {
-            log.debug("PayTheory(\(instanceId)::init - This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'")
+            log.info("PayTheory(\(instanceId)::init - This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'")
             
             debugPrint(
                 "This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'"

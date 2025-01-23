@@ -60,11 +60,11 @@ extension PayTheory {
         
         ptToken = tokenData["pt-token"] as? String ?? ""
         
-        log.debug("PayTheory(\(instanceId)::fetchToken - ptToken is \(String(describing: ptToken))")
+        log.info("PayTheory(\(instanceId)::fetchToken - ptToken is \(String(describing: ptToken))")
         
-        log.debug("PayTheory(\(instanceId)::fetchToken - devMode is \(devMode)")
+        log.info("PayTheory(\(instanceId)::fetchToken - devMode is \(devMode)")
         
-        log.debug("PayTheory(\(instanceId)::fetchToken - attestationString is \(String(describing: attestationString))")
+        log.info("PayTheory(\(instanceId)::fetchToken - attestationString is \(String(describing: attestationString))")
 
         
         if devMode {
@@ -75,17 +75,17 @@ extension PayTheory {
             if let challenge = tokenData["challengeOptions"]?["challenge"] as? String {
                 do {
                     let key = try await service.generateKey()
-                    log.debug("PayTheory::fetchToken - key is \(key)")
+                    log.info("PayTheory::fetchToken - key is \(key)")
                     
                     let encodedChallengeData = challenge.data(using: .utf8)!
-                    log.debug("PayTheory::fetchToken - encodedChallengeData is \(encodedChallengeData)")
+                    log.info("PayTheory::fetchToken - encodedChallengeData is \(encodedChallengeData)")
                     
                     let hash = Data(SHA256.hash(data: encodedChallengeData))
                     
                     let attestation = try await service.attestKey(key, clientDataHash: hash)
                     
                     self.attestationString = attestation.base64EncodedString()
-                    log.debug("PayTheory::fetchToken - attestationString is \(String(describing: attestationString))")
+                    log.info("PayTheory::fetchToken - attestationString is \(String(describing: attestationString))")
                 } catch {
                     log.error("PayTheory::fetchToken::Error attesting key: \(error)")
                     if session.status == .connected {
@@ -95,10 +95,10 @@ extension PayTheory {
                 }
             } else {
                 
-                log.debug("PayTheory(\(instanceId)::fetchToken - in the else of the fetchToken block)")
+                log.info("PayTheory(\(instanceId)::fetchToken - in the else of the fetchToken block)")
                 
                 if session.status == .connected {
-                    log.debug("PayTheory(\(instanceId)::fetchToken - closing the connection)")
+                    log.info("PayTheory(\(instanceId)::fetchToken - closing the connection)")
 
                     session.close()
                 }
