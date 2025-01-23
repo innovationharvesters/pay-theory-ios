@@ -59,10 +59,14 @@ func makeRequest(request: URLRequest) async throws -> [String: AnyObject] {
     let (data, response) = try await session.data(for: request)
 
     if let response = response as? HTTPURLResponse, !(200...299).contains(response.statusCode) {
+        log.error("NetworkMonitor::makeRequest - response from session data is: \(response.statusCode), throwing nework error")
+        
         throw NetworkError.serverError(statusCode: response.statusCode)
     }
 
     do {
+        log.info("NetworkMonitor::makeRequest - data from session is: \(data)")
+        
         let json = try JSONSerialization.jsonObject(with: data) as? [String: AnyObject]
         return json!
     } catch {

@@ -60,7 +60,7 @@ extension PayTheory {
         
         ptToken = tokenData["pt-token"] as? String ?? ""
         
-        log.debug("PayTheory::fetchToken - ptToken is \(ptToken)")
+        log.debug("PayTheory::fetchToken - ptToken is \(String(describing: ptToken))")
         
         if devMode {
             // Skip attestation if it is in devMode for testing in the simulator
@@ -80,7 +80,7 @@ extension PayTheory {
                     let attestation = try await service.attestKey(key, clientDataHash: hash)
                     
                     self.attestationString = attestation.base64EncodedString()
-                    log.debug("PayTheory::fetchToken - attestationString is \(attestationString)")
+                    log.debug("PayTheory::fetchToken - attestationString is \(String(describing: attestationString))")
                 } catch {
                     log.error("PayTheory::fetchToken::Error attesting key: \(error)")
                     if session.status == .connected {

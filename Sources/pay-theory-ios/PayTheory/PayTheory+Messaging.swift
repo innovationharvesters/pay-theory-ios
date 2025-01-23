@@ -161,6 +161,7 @@ extension PayTheory {
     // Create the body needed for fetching a Host Token and send it to the websocket
     func sendHostTokenMessage(calcFees: Bool = true) async throws {
         log.info("PayTheory::sendHostTokenMessage")
+        
         do {
             var message: [String: Any] = ["action": hostTokenMessage]
             let hostToken: [String: Any] = [
@@ -171,6 +172,10 @@ extension PayTheory {
                 "appleEnvironment": appleEnvironment,
                 "require_attestation": self.stage == "paytheory" ? true : !devMode
             ]
+            
+            log.info("PayTheory::sendHostTokenMessage - ptToken: \(String(describing: ptToken))")
+            log.info("PayTheory::sendHostTokenMessage - attestation: \(String(describing: attestationString))")
+            log.info("PayTheory::sendHostTokenMessage - require_attestation: \(String(describing: hostToken["require_attestation"]))")
 
             guard let encodedData = stringify(jsonDictionary: hostToken).data(using: .utf8) else {
                 log.error("PayTheory::sendHostTokenMessage::stringify(jsonDictionary: hostToken).data(using: .utf8)")
@@ -191,6 +196,8 @@ extension PayTheory {
             }
             
             if type == errorResponseMessage, let body = dictionary["body"] as? String {
+                log.info("PayTheory::sendHostTokenMessage - body: \(body)")
+
                 if body.lowercased().contains("attestation") {
                     throw ConnectionError.attestationFailed
                 } else {
@@ -203,6 +210,8 @@ extension PayTheory {
             
             self.transaction.hostToken = body["hostToken"] as? String ?? ""
             self.transaction.sessionKey = body["sessionKey"] as? String ?? ""
+            
+            log.info("PayTheory::sendHostTokenMessage - hostToken: \(String(describing: self.transaction.hostToken))")
             
             let key = body["publicKey"] as? String ?? ""
             self.transaction.publicKey = convertStringToByte(string: key)
