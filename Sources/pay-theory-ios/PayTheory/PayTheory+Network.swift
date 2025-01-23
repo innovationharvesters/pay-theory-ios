@@ -60,6 +60,8 @@ extension PayTheory {
         
         ptToken = tokenData["pt-token"] as? String ?? ""
         
+        log.debug("PayTheory::fetchToken - ptToken is \(ptToken)")
+        
         if devMode {
             // Skip attestation if it is in devMode for testing in the simulator
             self.attestationString = ""
@@ -68,11 +70,19 @@ extension PayTheory {
             if let challenge = tokenData["challengeOptions"]?["challenge"] as? String {
                 do {
                     let key = try await service.generateKey()
+                    log.debug("PayTheory::fetchToken - key is \(key)")
+                    
                     let encodedChallengeData = challenge.data(using: .utf8)!
+                    log.debug("PayTheory::fetchToken - encodedChallengeData is \(encodedChallengeData)")
+                    
                     let hash = Data(SHA256.hash(data: encodedChallengeData))
+                    
                     let attestation = try await service.attestKey(key, clientDataHash: hash)
+                    
                     self.attestationString = attestation.base64EncodedString()
+                    log.debug("PayTheory::fetchToken - attestationString is \(attestationString)")
                 } catch {
+                    log.error("PayTheory::fetchToken::Error attesting key: \(error)")
                     if session.status == .connected {
                         session.close()
                     }
@@ -101,6 +111,7 @@ extension PayTheory {
         do {
             try await session.open(ptToken: ptToken!, environment: environment, stage: stage)
         } catch {
+            log.error("PayTheory::connectSocket::Error opening socket: \(error)")
             throw ConnectionError.socketConnectionFailed
         }
         //Send the host token message

@@ -18,6 +18,8 @@ class NetworkMonitor: ObservableObject {
     var connectionType = NWInterface.InterfaceType.other
     
     init() {
+        log.info("NetworkMonitor::init")
+        
         monitor.pathUpdateHandler = { path in
             self.isActive = path.status == .satisfied
             self.isExpensive = path.isExpensive
@@ -43,7 +45,10 @@ enum NetworkError: Error {
 }
 
 func makeRequest(request: URLRequest) async throws -> [String: AnyObject] {
+    log.info("NetworkMonitor::makeRequest")
+    
     let config = URLSessionConfiguration.default
+    
     config.allowsExpensiveNetworkAccess = false
     config.allowsConstrainedNetworkAccess = false
     config.waitsForConnectivity = true
@@ -66,10 +71,16 @@ func makeRequest(request: URLRequest) async throws -> [String: AnyObject] {
 }
 
 func getToken(apiKey: String, environment: String, stage: String, sessionKey: String) async throws -> [String: AnyObject] {
+    log.info("NetworkMonitor::getToken")
+    
     guard let url = URL(string: "https://\(environment).\(stage).com/pt-token-service/") else {
+        log.error("NetworkMonitor::getToken - Url for host token cannot be decided")
+        
         debugPrint("Url for host token cannot be decided")
         throw ConnectionError.hostTokenCallFailed
     }
+    
+    log.info("NetworkMonitor::getToken - url is \(url)")
 
     var request = URLRequest(url: url)
     request.httpMethod = "GET"
