@@ -137,14 +137,18 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
         amount: Int? = nil, apiKey: String, devMode: Bool = false,
         errorHandler: @escaping (PTError) -> Void
     ) {
-        log.info("PayTheory::init")
+        log.info("PayTheory::init - apiKey \(apiKey), devMode \(devMode)")
         // Parse the API key to extract environment and stage information
         var apiParts = apiKey.split { $0 == "-" }.map { String($0) }
+        
         // Validate the the API key is the correct format
         if apiParts.count != 3 {
+            log.debug("PayTheory::init - This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'")
+            
             debugPrint(
                 "This is not a valid API Key. API Key should be formatted '{partner}-{paytheorystage}-{UUID}'"
             )
+            
             apiParts = ["", ""]
         }
 
@@ -233,6 +237,7 @@ public class PayTheory: ObservableObject, WebSocketProtocol {
 
     func handleDisconnect() {
         log.info("PayTheory::handleDisconnect")
+        
         DispatchQueue.main.async {
             // Clear transaction-related data
             self.transaction.sessionKey = nil
